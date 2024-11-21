@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IncidentResponseAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using IncidentResponseAPI.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace IncidentResponseAPI.Controllers
 {
-    public class SensorsController : Controller
+    [ApiController]
+    [Route("[controller]")]
+    public class SensorsController : ControllerBase
     {
         private readonly IncidentResponseContext _context;
 
@@ -18,134 +16,86 @@ namespace IncidentResponseAPI.Controllers
             _context = context;
         }
 
-        // GET: Sensors
-        public async Task<IActionResult> Index()
+        // GET: api/Sensors
+        [HttpGet]
+        [SwaggerOperation(Summary = "Gets a list of sensors")]
+        public async Task<ActionResult<IEnumerable<SensorsModel>>> GetSensors()
         {
-            return View(await _context.Sensors.ToListAsync());
+            return await _context.Sensors.ToListAsync();
         }
 
-        // GET: Sensors/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/Sensors/5
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Gets a sensor by ID")]
+        public async Task<ActionResult<SensorsModel>> GetSensor(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var sensorsModel = await _context.Sensors
-                .FirstOrDefaultAsync(m => m.SensorId == id);
-            if (sensorsModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(sensorsModel);
-        }
-
-        // GET: Sensors/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Sensors/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SensorId,SensorName,Type,ConfigurationJson,isEnabled,CreatedAd,LastRunAt")] SensorsModel sensorsModel)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(sensorsModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(sensorsModel);
-        }
-
-        // GET: Sensors/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var sensorsModel = await _context.Sensors.FindAsync(id);
+
             if (sensorsModel == null)
             {
                 return NotFound();
             }
-            return View(sensorsModel);
+
+            return sensorsModel;
         }
 
-        // POST: Sensors/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: api/Sensors
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("SensorId,SensorName,Type,ConfigurationJson,isEnabled,CreatedAd,LastRunAt")] SensorsModel sensorsModel)
+        [SwaggerOperation(Summary = "Creates a new sensor")]
+        public async Task<ActionResult<SensorsModel>> PostSensor(SensorsModel sensorsModel)
+        {
+            _context.Sensors.Add(sensorsModel);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetSensor), new { id = sensorsModel.SensorId }, sensorsModel);
+        }
+
+        // PUT: api/Sensors/5
+        [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Updates an existing sensor")]
+        public async Task<IActionResult> PutSensor(int id, SensorsModel sensorsModel)
         {
             if (id != sensorsModel.SensorId)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(sensorsModel).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(sensorsModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SensorsModelExists(sensorsModel.SensorId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            return View(sensorsModel);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!SensorsModelExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: Sensors/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // DELETE: api/Sensors/5
+        [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Deletes a sensor by ID")]
+        public async Task<IActionResult> DeleteSensor(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var sensorsModel = await _context.Sensors
-                .FirstOrDefaultAsync(m => m.SensorId == id);
+            var sensorsModel = await _context.Sensors.FindAsync(id);
             if (sensorsModel == null)
             {
                 return NotFound();
             }
 
-            return View(sensorsModel);
-        }
-
-        // POST: Sensors/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var sensorsModel = await _context.Sensors.FindAsync(id);
-            if (sensorsModel != null)
-            {
-                _context.Sensors.Remove(sensorsModel);
-            }
-
+            _context.Sensors.Remove(sensorsModel);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return NoContent();
         }
 
         private bool SensorsModelExists(int id)

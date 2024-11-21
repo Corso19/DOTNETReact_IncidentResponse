@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using IncidentResponseAPI.Models;
 
 namespace IncidentResponseAPI.Models
 {
@@ -39,5 +40,6 @@ namespace IncidentResponseAPI.Models
             //    new IncidentEventModel { IncidentId = 1, EventId = 1 }
             //);
         }
+        public DbSet<IncidentResponseAPI.Models.RecommendationsModel> RecommendationsModel { get; set; } = default!;
     }
 }
