@@ -6,7 +6,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace IncidentResponseAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class SensorsController : ControllerBase
     {
         private readonly IncidentResponseContext _context;

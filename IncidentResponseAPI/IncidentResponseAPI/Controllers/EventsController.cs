@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IncidentResponseAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using IncidentResponseAPI.Models;
 
 namespace IncidentResponseAPI.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class EventsController : Controller
     {
         private readonly IncidentResponseContext _context;
@@ -19,6 +17,7 @@ namespace IncidentResponseAPI.Controllers
         }
 
         // GET: Events
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var incidentResponseContext = _context.Events.Include(e => e.Sensor);
@@ -26,6 +25,7 @@ namespace IncidentResponseAPI.Controllers
         }
 
         // GET: Events/Details/5
+        [HttpGet("{id}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -45,6 +45,7 @@ namespace IncidentResponseAPI.Controllers
         }
 
         // GET: Events/Create
+        [HttpPost]
         public IActionResult Create()
         {
             ViewData["SensorId"] = new SelectList(_context.Sensors, "SensorId", "SensorId");
@@ -69,6 +70,7 @@ namespace IncidentResponseAPI.Controllers
         }
 
         // GET: Events/Edit/5
+        [HttpGet("{id}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -122,6 +124,7 @@ namespace IncidentResponseAPI.Controllers
         }
 
         // GET: Events/Delete/5
+        [HttpGet("{id}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

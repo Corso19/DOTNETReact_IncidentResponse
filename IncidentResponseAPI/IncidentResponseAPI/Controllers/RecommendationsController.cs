@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IncidentResponseAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using IncidentResponseAPI.Models;
 
 namespace IncidentResponseAPI.Controllers
 {
-    public class RecommendationsController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class RecommendationsController : ControllerBase
     {
         private readonly IncidentResponseContext _context;
 
@@ -18,141 +15,83 @@ namespace IncidentResponseAPI.Controllers
             _context = context;
         }
 
-        // GET: Recommendations
-        public async Task<IActionResult> Index()
+        // GET: api/Recommendations
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<RecommendationsModel>>> GetRecommendations()
         {
-            var incidentResponseContext = _context.RecommendationsModel.Include(r => r.Incident);
-            return View(await incidentResponseContext.ToListAsync());
+            return await _context.RecommendationsModel.Include(r => r.Incident).ToListAsync();
         }
 
-        // GET: Recommendations/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/Recommendations/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RecommendationsModel>> GetRecommendation(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var recommendationsModel = await _context.RecommendationsModel
                 .Include(r => r.Incident)
                 .FirstOrDefaultAsync(m => m.RecommendationId == id);
+
             if (recommendationsModel == null)
             {
                 return NotFound();
             }
 
-            return View(recommendationsModel);
+            return recommendationsModel;
         }
 
-        // GET: Recommendations/Create
-        public IActionResult Create()
-        {
-            ViewData["IncidentId"] = new SelectList(_context.Incidents, "IncidentId", "IncidentId");
-            return View();
-        }
-
-        // POST: Recommendations/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: api/Recommendations
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("RecommendationId,IncidentId,Recommendation,isCompleted")] RecommendationsModel recommendationsModel)
+        public async Task<ActionResult<RecommendationsModel>> PostRecommendation(RecommendationsModel recommendationsModel)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(recommendationsModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["IncidentId"] = new SelectList(_context.Incidents, "IncidentId", "IncidentId", recommendationsModel.IncidentId);
-            return View(recommendationsModel);
+            _context.RecommendationsModel.Add(recommendationsModel);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetRecommendation), new { id = recommendationsModel.RecommendationId }, recommendationsModel);
         }
 
-        // GET: Recommendations/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var recommendationsModel = await _context.RecommendationsModel.FindAsync(id);
-            if (recommendationsModel == null)
-            {
-                return NotFound();
-            }
-            ViewData["IncidentId"] = new SelectList(_context.Incidents, "IncidentId", "IncidentId", recommendationsModel.IncidentId);
-            return View(recommendationsModel);
-        }
-
-        // POST: Recommendations/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("RecommendationId,IncidentId,Recommendation,isCompleted")] RecommendationsModel recommendationsModel)
+        // PUT: api/Recommendations/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutRecommendation(int id, RecommendationsModel recommendationsModel)
         {
             if (id != recommendationsModel.RecommendationId)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(recommendationsModel).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(recommendationsModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!RecommendationsModelExists(recommendationsModel.RecommendationId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            ViewData["IncidentId"] = new SelectList(_context.Incidents, "IncidentId", "IncidentId", recommendationsModel.IncidentId);
-            return View(recommendationsModel);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!RecommendationsModelExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: Recommendations/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // DELETE: api/Recommendations/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRecommendation(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var recommendationsModel = await _context.RecommendationsModel
-                .Include(r => r.Incident)
-                .FirstOrDefaultAsync(m => m.RecommendationId == id);
+            var recommendationsModel = await _context.RecommendationsModel.FindAsync(id);
             if (recommendationsModel == null)
             {
                 return NotFound();
             }
 
-            return View(recommendationsModel);
-        }
-
-        // POST: Recommendations/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var recommendationsModel = await _context.RecommendationsModel.FindAsync(id);
-            if (recommendationsModel != null)
-            {
-                _context.RecommendationsModel.Remove(recommendationsModel);
-            }
-
+            _context.RecommendationsModel.Remove(recommendationsModel);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return NoContent();
         }
 
         private bool RecommendationsModelExists(int id)
@@ -161,3 +100,4 @@ namespace IncidentResponseAPI.Controllers
         }
     }
 }
+
