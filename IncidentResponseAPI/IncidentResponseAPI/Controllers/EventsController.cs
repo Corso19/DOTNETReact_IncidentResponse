@@ -1,13 +1,13 @@
 ﻿using IncidentResponseAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace IncidentResponseAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class EventsController : Controller
+    public class EventsController : ControllerBase
     {
         private readonly IncidentResponseContext _context;
 
@@ -16,146 +16,88 @@ namespace IncidentResponseAPI.Controllers
             _context = context;
         }
 
-        // GET: Events
+        // GET: api/Events
         [HttpGet]
-        public async Task<IActionResult> Index()
+        [SwaggerOperation(Summary = "Gets a list of events")]
+        public async Task<ActionResult<IEnumerable<EventsModel>>> GetEvents()
         {
-            var incidentResponseContext = _context.Events.Include(e => e.Sensor);
-            return View(await incidentResponseContext.ToListAsync());
+            return await _context.Events.Include(e => e.Sensor).ToListAsync();
         }
 
-        // GET: Events/Details/5
+        // GET: api/Events/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Details(int? id)
+        [SwaggerOperation(Summary = "Gets an event by ID")]
+        public async Task<ActionResult<EventsModel>> GetEvent(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var eventsModel = await _context.Events
                 .Include(e => e.Sensor)
                 .FirstOrDefaultAsync(m => m.EventId == id);
+
             if (eventsModel == null)
             {
                 return NotFound();
             }
 
-            return View(eventsModel);
+            return eventsModel;
         }
 
-        // GET: Events/Create
+        // POST: api/Events
         [HttpPost]
-        public IActionResult Create()
+        [SwaggerOperation(Summary = "Creates a new event")]
+        public async Task<ActionResult<EventsModel>> PostEvent(EventsModel eventsModel)
         {
-            ViewData["SensorId"] = new SelectList(_context.Sensors, "SensorId", "SensorId");
-            return View();
+            _context.Events.Add(eventsModel);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetEvent), new { id = eventsModel.EventId }, eventsModel);
         }
 
-        // POST: Events/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EventId,SensorId,EventDataJson,Timestamp,isProcessed")] EventsModel eventsModel)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(eventsModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["SensorId"] = new SelectList(_context.Sensors, "SensorId", "SensorId", eventsModel.SensorId);
-            return View(eventsModel);
-        }
-
-        // GET: Events/Edit/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var eventsModel = await _context.Events.FindAsync(id);
-            if (eventsModel == null)
-            {
-                return NotFound();
-            }
-            ViewData["SensorId"] = new SelectList(_context.Sensors, "SensorId", "SensorId", eventsModel.SensorId);
-            return View(eventsModel);
-        }
-
-        // POST: Events/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("EventId,SensorId,EventDataJson,Timestamp,isProcessed")] EventsModel eventsModel)
+        // PUT: api/Events/5
+        [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Updates an existing event")]
+        public async Task<IActionResult> PutEvent(int id, EventsModel eventsModel)
         {
             if (id != eventsModel.EventId)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(eventsModel).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(eventsModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EventsModelExists(eventsModel.EventId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            ViewData["SensorId"] = new SelectList(_context.Sensors, "SensorId", "SensorId", eventsModel.SensorId);
-            return View(eventsModel);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!EventsModelExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: Events/Delete/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Delete(int? id)
+        // DELETE: api/Events/5
+        [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Deletes an event by ID")]
+        public async Task<IActionResult> DeleteEvent(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var eventsModel = await _context.Events
-                .Include(e => e.Sensor)
-                .FirstOrDefaultAsync(m => m.EventId == id);
+            var eventsModel = await _context.Events.FindAsync(id);
             if (eventsModel == null)
             {
                 return NotFound();
             }
 
-            return View(eventsModel);
-        }
-
-        // POST: Events/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var eventsModel = await _context.Events.FindAsync(id);
-            if (eventsModel != null)
-            {
-                _context.Events.Remove(eventsModel);
-            }
-
+            _context.Events.Remove(eventsModel);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return NoContent();
         }
 
         private bool EventsModelExists(int id)
@@ -164,3 +106,5 @@ namespace IncidentResponseAPI.Controllers
         }
     }
 }
+
+
