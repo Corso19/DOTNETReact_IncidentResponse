@@ -1,0 +1,65 @@
+﻿@model IEnumerable<IncidentResponseAPI.Models.SensorsModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.SensorName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ConfigurationJson)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.isEnabled)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedAd)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastRunAt)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SensorName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Type)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ConfigurationJson)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.isEnabled)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedAd)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastRunAt)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.SensorId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.SensorId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.SensorId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
