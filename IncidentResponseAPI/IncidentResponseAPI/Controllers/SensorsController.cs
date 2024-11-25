@@ -1,6 +1,6 @@
-﻿using IncidentResponseAPI.Models;
+﻿using IncidentResponseAPI.Dtos;
+using IncidentResponseAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace IncidentResponseAPI.Controllers
@@ -9,75 +9,51 @@ namespace IncidentResponseAPI.Controllers
     [Route("api/[controller]")]
     public class SensorsController : ControllerBase
     {
-        private readonly IncidentResponseContext _context;
+        private readonly ISensorsService _sensorsService;
 
-        public SensorsController(IncidentResponseContext context)
+        public SensorsController(ISensorsService sensorsService)
         {
-            _context = context;
+            _sensorsService = sensorsService;
         }
 
         // GET: api/Sensors
         [HttpGet]
         [SwaggerOperation(Summary = "Gets a list of sensors")]
-        public async Task<ActionResult<IEnumerable<SensorsModel>>> GetSensors()
+        public async Task<ActionResult<IEnumerable<SensorsDto>>> GetSensors()
         {
-            return await _context.Sensors.ToListAsync();
+            return Ok(await _sensorsService.GetAllAsync());
         }
 
         // GET: api/Sensors/5
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Gets a sensor by ID")]
-        public async Task<ActionResult<SensorsModel>> GetSensor(int id)
+        public async Task<ActionResult<SensorsDto>> GetSensor(int id)
         {
-            var sensorsModel = await _context.Sensors.FindAsync(id);
+            var sensorDto = await _sensorsService.GetByIdAsync(id);
 
-            if (sensorsModel == null)
+            if (sensorDto == null)
             {
                 return NotFound();
             }
 
-            return sensorsModel;
+            return sensorDto;
         }
 
         // POST: api/Sensors
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new sensor")]
-        public async Task<ActionResult<SensorsModel>> PostSensor(SensorsModel sensorsModel)
+        public async Task<ActionResult<SensorsDto>> PostSensor(SensorsDto sensorsDto)
         {
-            _context.Sensors.Add(sensorsModel);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetSensor), new { id = sensorsModel.SensorId }, sensorsModel);
+            await _sensorsService.AddAsync(sensorsDto);
+            return CreatedAtAction(nameof(GetSensor), new { id = sensorsDto.SensorId }, sensorsDto);
         }
 
         // PUT: api/Sensors/5
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Updates an existing sensor")]
-        public async Task<IActionResult> PutSensor(int id, SensorsModel sensorsModel)
+        public async Task<IActionResult> PutSensor(int id, SensorsDto sensorsDto)
         {
-            if (id != sensorsModel.SensorId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(sensorsModel).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SensorsModelExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _sensorsService.UpdateAsync(id, sensorsDto);
             return NoContent();
         }
 
@@ -86,21 +62,9 @@ namespace IncidentResponseAPI.Controllers
         [SwaggerOperation(Summary = "Deletes a sensor by ID")]
         public async Task<IActionResult> DeleteSensor(int id)
         {
-            var sensorsModel = await _context.Sensors.FindAsync(id);
-            if (sensorsModel == null)
-            {
-                return NotFound();
-            }
-
-            _context.Sensors.Remove(sensorsModel);
-            await _context.SaveChangesAsync();
-
+            await _sensorsService.DeleteAsync(id);
             return NoContent();
-        }
-
-        private bool SensorsModelExists(int id)
-        {
-            return _context.Sensors.Any(e => e.SensorId == id);
         }
     }
 }
+
