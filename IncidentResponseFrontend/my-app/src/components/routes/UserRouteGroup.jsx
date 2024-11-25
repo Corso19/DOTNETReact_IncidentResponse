@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import UserNavbar from "../navbars/UserNavbar";
 import Home from "../../home/Home";
-import Sensors from "../../sensors/Sensors";
+import Sensors from "../../sensors/SensorsTable";
 const UserRouteGroup = () => {
     return (
         <BrowserRouter basename="/">
