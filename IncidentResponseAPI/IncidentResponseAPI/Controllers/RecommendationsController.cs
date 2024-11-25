@@ -1,6 +1,7 @@
-﻿using IncidentResponseAPI.Models;
+﻿using IncidentResponseAPI.Dtos;
+using IncidentResponseAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace IncidentResponseAPI.Controllers
 {
@@ -8,96 +9,61 @@ namespace IncidentResponseAPI.Controllers
     [Route("api/[controller]")]
     public class RecommendationsController : ControllerBase
     {
-        private readonly IncidentResponseContext _context;
+        private readonly IRecommendationsService _recommendationsService;
 
-        public RecommendationsController(IncidentResponseContext context)
+        public RecommendationsController(IRecommendationsService recommendationsService)
         {
-            _context = context;
+            _recommendationsService = recommendationsService;
         }
 
         // GET: api/Recommendations
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RecommendationsModel>>> GetRecommendations()
+        [SwaggerOperation(Summary = "Gets a list of recommendations")]
+        public async Task<ActionResult<IEnumerable<RecommendationsDto>>> GetRecommendations()
         {
-            return await _context.RecommendationsModel.Include(r => r.Incident).ToListAsync();
+            return Ok(await _recommendationsService.GetAllAsync());
         }
 
         // GET: api/Recommendations/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<RecommendationsModel>> GetRecommendation(int id)
+        [SwaggerOperation(Summary = "Gets a recommendation by ID")]
+        public async Task<ActionResult<RecommendationsDto>> GetRecommendation(int id)
         {
-            var recommendationsModel = await _context.RecommendationsModel
-                .Include(r => r.Incident)
-                .FirstOrDefaultAsync(m => m.RecommendationId == id);
+            var recommendationDto = await _recommendationsService.GetByIdAsync(id);
 
-            if (recommendationsModel == null)
+            if (recommendationDto == null)
             {
                 return NotFound();
             }
 
-            return recommendationsModel;
+            return recommendationDto;
         }
 
         // POST: api/Recommendations
         [HttpPost]
-        public async Task<ActionResult<RecommendationsModel>> PostRecommendation(RecommendationsModel recommendationsModel)
+        [SwaggerOperation(Summary = "Creates a new recommendation")]
+        public async Task<ActionResult<RecommendationsDto>> PostRecommendation(RecommendationsDto recommendationsDto)
         {
-            _context.RecommendationsModel.Add(recommendationsModel);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetRecommendation), new { id = recommendationsModel.RecommendationId }, recommendationsModel);
+            await _recommendationsService.AddAsync(recommendationsDto);
+            return CreatedAtAction(nameof(GetRecommendation), new { id = recommendationsDto.RecommendationId }, recommendationsDto);
         }
 
         // PUT: api/Recommendations/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRecommendation(int id, RecommendationsModel recommendationsModel)
+        [SwaggerOperation(Summary = "Updates an existing recommendation")]
+        public async Task<IActionResult> PutRecommendation(int id, RecommendationsDto recommendationsDto)
         {
-            if (id != recommendationsModel.RecommendationId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(recommendationsModel).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RecommendationsModelExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _recommendationsService.UpdateAsync(id, recommendationsDto);
             return NoContent();
         }
 
         // DELETE: api/Recommendations/5
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Deletes a recommendation by ID")]
         public async Task<IActionResult> DeleteRecommendation(int id)
         {
-            var recommendationsModel = await _context.RecommendationsModel.FindAsync(id);
-            if (recommendationsModel == null)
-            {
-                return NotFound();
-            }
-
-            _context.RecommendationsModel.Remove(recommendationsModel);
-            await _context.SaveChangesAsync();
-
+            await _recommendationsService.DeleteAsync(id);
             return NoContent();
-        }
-
-        private bool RecommendationsModelExists(int id)
-        {
-            return _context.RecommendationsModel.Any(e => e.RecommendationId == id);
         }
     }
 }
-

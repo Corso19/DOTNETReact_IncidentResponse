@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IncidentResponseAPI.Repositories
 {
-    public class EventsRepository : IEventsRepository
+    public class EventsRepository : IEventsInterface
     {
         private readonly IncidentResponseContext _context;
 
