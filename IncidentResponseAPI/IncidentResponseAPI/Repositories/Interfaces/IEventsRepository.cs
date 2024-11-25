@@ -2,7 +2,7 @@
 
 namespace IncidentResponseAPI.Repositories
 {
-    public interface IEventsInterface
+    public interface IEventsRepository
     {
         Task<IEnumerable<EventsModel>> GetAllAsync();
         Task<EventsModel> GetByIdAsync(int id);
