@@ -13,7 +13,7 @@ const SensorsTable = () => {
     useEffect(() => {
         setSensorsLoading(true);
         // get sensors
-        CrudService.list("sensors").then((response) => {
+        CrudService.list("Sensors").then((response) => {
             console.log("Response: ", response);
             if (response.data.success) {
                 setSensors(response.data.data);

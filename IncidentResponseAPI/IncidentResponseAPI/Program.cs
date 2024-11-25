@@ -39,13 +39,13 @@ builder.Services.AddDbContext<IncidentResponseContext>(options =>
     options.UseSqlServer(connectionString));
 
 // Add CORS services
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowSpecificOrigin",
-//        builder => builder.WithOrigins("http://localhost:4200")
-//                          .AllowAnyHeader()
-//                          .AllowAnyMethod());
-//});
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+});
 
 // Add Swagger services
 builder.Services.AddEndpointsApiExplorer();

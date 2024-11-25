@@ -1,5 +1,5 @@
 const API_KEYS = {
-    API_URL: "http://localhost:8080/api",
+    API_URL: "https://localhost:7142/api",
     WEBSITE_URL: "http://myxdr.ro"
 };
 
