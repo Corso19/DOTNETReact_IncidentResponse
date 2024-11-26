@@ -14,7 +14,7 @@ Env.Load();
 // Debug logging to verify environment variable loading
 Console.WriteLine("Loading environment variables...");
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
-Console.WriteLine($"Connection String: {connectionString}");
+
 
 // Add services to the container.
 builder.Services.AddControllers();

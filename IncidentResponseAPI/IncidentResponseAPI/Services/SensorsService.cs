@@ -21,7 +21,9 @@ namespace IncidentResponseAPI.Services
                 SensorId = s.SensorId,
                 SensorName = s.SensorName,
                 Type = s.Type,
-                ConfigurationJson = s.ConfigurationJson,
+                TenantId = s.TenantId,
+                ApplicationId = s.ApplicationId,
+                ClientSecret = s.ClientSecret,
                 isEnabled = s.isEnabled,
                 CreatedAd = s.CreatedAd,
                 LastRunAt = s.LastRunAt
@@ -38,7 +40,9 @@ namespace IncidentResponseAPI.Services
                 SensorId = s.SensorId,
                 SensorName = s.SensorName,
                 Type = s.Type,
-                ConfigurationJson = s.ConfigurationJson,
+                TenantId = s.TenantId,
+                ApplicationId = s.ApplicationId,
+                ClientSecret = s.ClientSecret,
                 isEnabled = s.isEnabled,
                 CreatedAd = s.CreatedAd,
                 LastRunAt = s.LastRunAt
@@ -51,7 +55,9 @@ namespace IncidentResponseAPI.Services
             {
                 SensorName = sensorsDto.SensorName,
                 Type = sensorsDto.Type,
-                ConfigurationJson = sensorsDto.ConfigurationJson,
+                TenantId = sensorsDto.TenantId,
+                ApplicationId = sensorsDto.ApplicationId,
+                ClientSecret = sensorsDto.ClientSecret,
                 isEnabled = sensorsDto.isEnabled,
                 CreatedAd = sensorsDto.CreatedAd,
                 LastRunAt = sensorsDto.LastRunAt
@@ -67,7 +73,9 @@ namespace IncidentResponseAPI.Services
                 SensorId = id,
                 SensorName = sensorsDto.SensorName,
                 Type = sensorsDto.Type,
-                ConfigurationJson = sensorsDto.ConfigurationJson,
+                TenantId = sensorsDto.TenantId,
+                ApplicationId = sensorsDto.ApplicationId,
+                ClientSecret = sensorsDto.ClientSecret,
                 isEnabled = sensorsDto.isEnabled,
                 CreatedAd = sensorsDto.CreatedAd,
                 LastRunAt = sensorsDto.LastRunAt

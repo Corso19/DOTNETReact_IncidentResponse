@@ -20,7 +20,8 @@ namespace IncidentResponseAPI.Services
             {
                 EventId = e.EventId,
                 SensorId = e.SensorId,
-                EventDataJson = e.EventDataJson,
+                TypeName = e.TypeName,
+                Details = e.Details,
                 Timestamp = e.Timestamp,
                 isProcessed = e.isProcessed
             }).ToList();
@@ -35,7 +36,8 @@ namespace IncidentResponseAPI.Services
             {
                 EventId = e.EventId,
                 SensorId = e.SensorId,
-                EventDataJson = e.EventDataJson,
+                TypeName = e.TypeName,
+                Details = e.Details,
                 Timestamp = e.Timestamp,
                 isProcessed = e.isProcessed
             };
@@ -46,7 +48,8 @@ namespace IncidentResponseAPI.Services
             var eventsModel = new EventsModel
             {
                 SensorId = eventDto.SensorId,
-                EventDataJson = eventDto.EventDataJson,
+                TypeName = eventDto.TypeName,
+                Details = eventDto.Details,
                 Timestamp = eventDto.Timestamp,
                 isProcessed = eventDto.isProcessed
             };
@@ -60,7 +63,8 @@ namespace IncidentResponseAPI.Services
             {
                 EventId = id,
                 SensorId = eventDto.SensorId,
-                EventDataJson = eventDto.EventDataJson,
+                TypeName = eventDto.TypeName,
+                Details = eventDto.Details,
                 Timestamp = eventDto.Timestamp,
                 isProcessed = eventDto.isProcessed
             };
@@ -74,7 +78,6 @@ namespace IncidentResponseAPI.Services
         }
     }
 }
-
 
 
 

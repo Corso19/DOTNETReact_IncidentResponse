@@ -8,7 +8,11 @@ namespace IncidentResponseAPI.Models
         public int SensorId { get; set; }
         public string SensorName { get; set; }
         public string Type { get; set; }
-        public string ConfigurationJson { get; set; }
+        //TODO - Change EventDataJson to separate fields <strings>: tenantId, applicationId, clientSecret
+        /*public string ConfigurationJson { get; set; }*/
+        public string TenantId { get; set; }
+        public string ApplicationId { get; set; }
+        public string ClientSecret { get; set; }
         public bool isEnabled { get; set; }
         public DateTime CreatedAd { get; set; } = DateTime.Now;
         public DateTime? LastRunAt { get; set; }

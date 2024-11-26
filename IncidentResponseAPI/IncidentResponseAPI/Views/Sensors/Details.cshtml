@@ -10,40 +10,52 @@
     <h4>SensorsModel</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.SensorName)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.SensorName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Type)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Type)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ConfigurationJson)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TenantId)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ConfigurationJson)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TenantId)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ApplicationId)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ApplicationId)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ClientSecret)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ClientSecret)
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.isEnabled)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.isEnabled)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.CreatedAd)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.CreatedAd)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.LastRunAt)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.LastRunAt)
         </dd>
     </dl>
@@ -52,3 +64,5 @@
     <a asp-action="Edit" asp-route-id="@Model?.SensorId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+

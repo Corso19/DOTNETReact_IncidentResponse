@@ -5,6 +5,8 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace IncidentResponseAPI.Controllers
 {
+    //TODO -  Add relations in the database for understanding better how to move objects around ->
+    //OR - simplify the code and the models to have only fields instead of nesting objects
     [ApiController]
     [Route("api/[controller]")]
     public class EventsController : ControllerBase
