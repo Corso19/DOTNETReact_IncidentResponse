@@ -16,7 +16,10 @@
                 @Html.DisplayNameFor(model => model.Sensor)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EventDataJson)
+                @Html.DisplayNameFor(model => model.TypeName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Details)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Timestamp)
@@ -28,26 +31,34 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Sensor.SensorId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EventDataJson)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Timestamp)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.isProcessed)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.EventId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.EventId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.EventId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Sensor.SensorId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TypeName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Details)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Timestamp)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.isProcessed)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.EventId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.EventId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.EventId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+
+
+

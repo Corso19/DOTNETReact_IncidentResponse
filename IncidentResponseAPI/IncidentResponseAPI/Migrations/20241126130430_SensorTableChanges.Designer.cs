@@ -4,6 +4,7 @@ using IncidentResponseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IncidentResponseAPI.Migrations
 {
     [DbContext(typeof(IncidentResponseContext))]
-    partial class IncidentResponseContextModelSnapshot : ModelSnapshot
+    [Migration("20241126130430_SensorTableChanges")]
+    partial class SensorTableChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,7 +33,7 @@ namespace IncidentResponseAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"));
 
-                    b.Property<string>("Details")
+                    b.Property<string>("EventDataJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -39,10 +42,6 @@ namespace IncidentResponseAPI.Migrations
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("TypeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("isProcessed")
                         .HasColumnType("bit");

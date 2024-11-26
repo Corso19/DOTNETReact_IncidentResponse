@@ -19,7 +19,13 @@
                 @Html.DisplayNameFor(model => model.Type)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ConfigurationJson)
+                @Html.DisplayNameFor(model => model.TenantId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ApplicationId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ClientSecret)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.isEnabled)
@@ -34,32 +40,41 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.SensorName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Type)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ConfigurationJson)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.isEnabled)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAd)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastRunAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.SensorId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.SensorId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.SensorId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SensorName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TenantId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ApplicationId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ClientSecret)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.isEnabled)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedAd)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastRunAt)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.SensorId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.SensorId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.SensorId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+
