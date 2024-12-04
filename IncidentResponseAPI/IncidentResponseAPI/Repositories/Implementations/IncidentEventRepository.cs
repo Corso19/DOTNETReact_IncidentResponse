@@ -1,7 +1,7 @@
 ﻿using IncidentResponseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace IncidentResponseAPI.Repositories
+namespace IncidentResponseAPI.Repositories.Implementations
 {
     public class IncidentEventRepository : IIncidentEventRepository
     {

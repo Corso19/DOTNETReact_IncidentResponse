@@ -2,7 +2,7 @@
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories;
 
-namespace IncidentResponseAPI.Services
+namespace IncidentResponseAPI.Services.Implementations
 {
     public class IncidentEventService : IIncidentEventService
     {
