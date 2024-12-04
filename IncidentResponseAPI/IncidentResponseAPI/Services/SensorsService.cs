@@ -89,26 +89,6 @@ namespace IncidentResponseAPI.Services
             await _sensorsRepository.DeleteAsync(id);
         }
 
-        // public async Task EnableAsync(int id)
-        // {
-        //     var sensor = await _sensorsRepository.GetByIdAsync(id);
-        //     if (sensor != null)
-        //     {
-        //         sensor.isEnabled = true;
-        //         await _sensorsRepository.UpdateAsync(sensor);
-        //     }
-        // }
-        //
-        // public async Task DisableAsync(int id)
-        // {
-        //     var sensor = await _sensorsRepository.GetByIdAsync(id);
-        //     if (sensor != null)
-        //     {
-        //         sensor.isEnabled = false;
-        //         await _sensorsRepository.UpdateAsync(sensor);
-        //     }
-        // }
-
         public async Task SetEnabledAsync(int id, bool isEnabled)
         {
             var sensor = await _sensorsRepository.GetByIdAsync(id);
