@@ -16,5 +16,7 @@ namespace IncidentResponseAPI.Models
         public bool isEnabled { get; set; }
         public DateTime CreatedAd { get; set; } = DateTime.Now;
         public DateTime? LastRunAt { get; set; }
+
+        public int RetrievalInterval { get; set; }
     }
 }
