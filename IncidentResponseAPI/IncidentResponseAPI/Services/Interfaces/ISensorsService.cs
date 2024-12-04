@@ -1,14 +1,17 @@
 ﻿using IncidentResponseAPI.Dtos;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace IncidentResponseAPI.Services
+public interface ISensorsService
 {
-    public interface ISensorsService
-    {
-        Task<IEnumerable<SensorsDto>> GetAllAsync();
-        Task<SensorsDto> GetByIdAsync(int id);
-        Task AddAsync(SensorsDto sensorsDto);
-        Task UpdateAsync(int id, SensorsDto sensorsDto);
-        Task DeleteAsync(int id);
-    }
+    Task<IEnumerable<SensorsDto>> GetAllAsync();
+    Task<SensorsDto> GetByIdAsync(int id);
+    Task AddAsync(SensorsDto sensorsDto);
+    Task UpdateAsync(int id, SensorsDto sensorsDto);
+    Task DeleteAsync(int id);
+    // Task EnableAsync(int id);
+    // Task DisableAsync(int id);
+    
+    Task SetEnabledAsync(int id, bool isEnabled);
+    
 }
-
