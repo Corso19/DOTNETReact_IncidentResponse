@@ -5,7 +5,7 @@ DOTNETReact_IncidentResponse is an Incident Response application built with ASP.
 ## Features
 
 - **Dashboard**: Overview of system health and recent incidents.
-- **Sensors Configuration": Configure sensors to enable and disable their activity
+- **Sensors Configuration**: Configure sensors to enable and disable their activity
 - **Incident Management**: Create, view, and update incident reports.
 - **Audit Logs**: Track user activities and changes within the system.
 
