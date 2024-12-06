@@ -3,7 +3,7 @@ using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories;
 using IncidentResponseAPI.Services.Interfaces;
 
-namespace IncidentResponseAPI.Services
+namespace IncidentResponseAPI.Services.Implementations
 {
     public class IncidentsService : IIncidentsService
     {

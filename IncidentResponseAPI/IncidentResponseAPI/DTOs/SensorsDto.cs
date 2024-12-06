@@ -12,6 +12,7 @@
         public bool isEnabled { get; set; }
         public DateTime CreatedAd { get; set; }
         public DateTime? LastRunAt { get; set; }
+        public int RetrievalInterval { get; set; }
     }
 }
 

@@ -2,7 +2,7 @@
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories;
 
-namespace IncidentResponseAPI.Services
+namespace IncidentResponseAPI.Services.Implementations
 {
     public class SensorsService : ISensorsService
     {
@@ -88,6 +88,15 @@ namespace IncidentResponseAPI.Services
         {
             await _sensorsRepository.DeleteAsync(id);
         }
+
+        public async Task SetEnabledAsync(int id, bool isEnabled)
+        {
+            var sensor = await _sensorsRepository.GetByIdAsync(id);
+            if (sensor != null)
+            {
+                sensor.isEnabled = isEnabled;
+                await _sensorsRepository.UpdateAsync(sensor);
+            }
+        }
     }
 }
-

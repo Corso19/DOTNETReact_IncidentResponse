@@ -1,7 +1,9 @@
 using DotNetEnv;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories;
+using IncidentResponseAPI.Repositories.Implementations;
 using IncidentResponseAPI.Services;
+using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;

@@ -65,6 +65,14 @@ namespace IncidentResponseAPI.Controllers
             await _sensorsService.DeleteAsync(id);
             return NoContent();
         }
+        
+        //PUT: api/Sensors/5/setEnabled
+        [HttpPut("{id}/set-enabled")]
+        [SwaggerOperation(Summary = "Sets a sensor's enabled status by ID")]
+        public async Task<IActionResult> SetEnabled(int id, bool isEnabled)
+        {
+            await _sensorsService.SetEnabledAsync(id, isEnabled);
+            return NoContent();
+        }
     }
 }
-
