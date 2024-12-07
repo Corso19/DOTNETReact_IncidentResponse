@@ -7,16 +7,33 @@ using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.Graph;
+using Microsoft.Identity.Client;
+using System.Threading.Tasks;
+using Azure.Identity;
+using Azure.Identity;
+using Microsoft.Graph;
+using Microsoft.Identity.Web;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load environment variables from .env file
 Env.Load();
 
-// Debug logging to verify environment variable loading
-Console.WriteLine("Loading environment variables...");
-var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+var graphTest = new GraphTest();
+await graphTest.TestGraphConnection();
 
+// Debug logging to verify environment variable loading
+// Console.WriteLine("Loading environment variables...");
+var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID");
+var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
+var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -57,6 +74,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
