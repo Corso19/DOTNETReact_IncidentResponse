@@ -1,10 +1,5 @@
 ﻿using Azure.Identity;
 using Microsoft.Graph;
-using Microsoft.Identity.Web;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace IncidentResponseAPI.Services
 {

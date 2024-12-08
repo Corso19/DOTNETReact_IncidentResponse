@@ -7,17 +7,6 @@ using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using System.Threading.Tasks;
-using Azure.Identity;
-using Azure.Identity;
-using Microsoft.Graph;
-using Microsoft.Identity.Web;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,10 +19,14 @@ await graphTest.TestGraphConnection();
 
 // Debug logging to verify environment variable loading
 // Console.WriteLine("Loading environment variables...");
-var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
-var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID");
-var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
-var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
+var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
+    ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
+var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID")
+    ?? throw new InvalidOperationException("The ApplicationId property has not been initialized.");
+var tenantId = Environment.GetEnvironmentVariable("TENANT_ID")
+    ?? throw new InvalidOperationException("The TenantId property has not been initialized.");
+var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET")
+    ?? throw new InvalidOperationException("The ClientSecret property has not been initialized.");
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -47,13 +40,7 @@ builder.Services.AddScoped<IIncidentsRepository, IncidentsRepository>();
 builder.Services.AddScoped<IIncidentsService, IncidentsService>();
 builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
 builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
-
-// Read connection string from environment variable
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new InvalidOperationException("The ConnectionString property has not been initialized.");
-}
-
+//Adding database context
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -74,8 +61,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

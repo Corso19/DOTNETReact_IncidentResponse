@@ -9,7 +9,6 @@ namespace IncidentResponseAPI.Models
         public int SensorId { get; set; }
         public SensorsModel Sensor { get; set; }
         //TODO - Change EventDataJson to separate fields <strings>
-        //public string EventDataJson { get; set; }
         public string TypeName { get; set; }
         public string Details { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
