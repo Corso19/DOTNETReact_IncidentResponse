@@ -8,7 +8,6 @@ namespace IncidentResponseAPI.Models
         public int EventId { get; set; } // This will be recognized as the primary key
         public int SensorId { get; set; }
         public SensorsModel Sensor { get; set; }
-        //TODO - Change EventDataJson to separate fields <strings>
         public string TypeName { get; set; }
         public string Details { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;

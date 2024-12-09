@@ -14,8 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Load environment variables from .env file
 Env.Load();
 
-var graphTest = new GraphTest();
-await graphTest.TestGraphConnection();
+
 
 // Debug logging to verify environment variable loading
 // Console.WriteLine("Loading environment variables...");
@@ -43,6 +42,25 @@ builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
 //Adding database context
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
     options.UseSqlServer(connectionString));
+
+
+Console.WriteLine("Starting GraphTest...");
+
+var graphTest = new GraphTest();
+
+Console.WriteLine("Testing Fetch Users...");
+await graphTest.TestFetchUsers();
+
+Console.WriteLine("\nTesting Fetch Emails...");
+await graphTest.TestFetchEmails();
+
+Console.WriteLine("\nTesting Fetch Message Content...");
+await graphTest.TestFetchMessageContent();
+
+Console.WriteLine("\nTesting Fetch Attachments...");
+await graphTest.TestFetchAttachments();
+
+Console.WriteLine("GraphTest completed.");
 
 // Add CORS services
 builder.Services.AddCors(options =>
