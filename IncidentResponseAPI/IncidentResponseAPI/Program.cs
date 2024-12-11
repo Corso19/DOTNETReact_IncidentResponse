@@ -14,7 +14,6 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Debug logging to verify environment variable loading
-// Console.WriteLine("Loading environment variables...");
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
 var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID")

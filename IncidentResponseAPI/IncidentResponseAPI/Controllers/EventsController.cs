@@ -1,87 +1,65 @@
-﻿using IncidentResponseAPI.Models;
+﻿using IncidentResponseAPI.Dtos;
+using IncidentResponseAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace IncidentResponseAPI.Controllers
 {
-    //TODO -  Add relations in the database for understanding better how to move objects around ->
-    //OR - simplify the code and the models to have only fields instead of nesting objects
     [ApiController]
     [Route("api/[controller]")]
     public class EventsController : ControllerBase
     {
-        private readonly IncidentResponseContext _context;
+        private readonly IEventsService _eventsService;
 
-        public EventsController(IncidentResponseContext context)
+        public EventsController(IEventsService eventsService)
         {
-            _context = context;
+            _eventsService = eventsService;
         }
 
         // GET: api/Events
         [HttpGet]
         [SwaggerOperation(Summary = "Gets a list of events")]
-        public async Task<ActionResult<IEnumerable<EventsModel>>> GetEvents()
+        public async Task<ActionResult<IEnumerable<EventsDto>>> GetEvents()
         {
-            return await _context.Events.Include(e => e.Sensor).ToListAsync();
+            var events = await _eventsService.GetAllAsync();
+            return Ok(events);
         }
 
         // GET: api/Events/5
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Gets an event by ID")]
-        public async Task<ActionResult<EventsModel>> GetEvent(int id)
+        public async Task<ActionResult<EventsDto>> GetEvent(int id)
         {
-            var eventsModel = await _context.Events
-                .Include(e => e.Sensor)
-                .FirstOrDefaultAsync(m => m.EventId == id);
-
-            if (eventsModel == null)
+            var eventDto = await _eventsService.GetByIdAsync(id);
+            if (eventDto == null)
             {
                 return NotFound();
             }
-
-            return eventsModel;
+            return Ok(eventDto);
         }
 
         // POST: api/Events
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new event")]
-        public async Task<ActionResult<EventsModel>> PostEvent(EventsModel eventsModel)
+        public async Task<ActionResult<EventsDto>> PostEvent(EventsDto eventDto)
         {
-            _context.Events.Add(eventsModel);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetEvent), new { id = eventsModel.EventId }, eventsModel);
+            await _eventsService.AddAsync(eventDto);
+            return CreatedAtAction(nameof(GetEvent), new { id = eventDto.EventId }, eventDto);
         }
 
         // PUT: api/Events/5
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Updates an existing event")]
-        public async Task<IActionResult> PutEvent(int id, EventsModel eventsModel)
+        public async Task<IActionResult> PutEvent(int id, EventsDto eventDto)
         {
-            if (id != eventsModel.EventId)
+            if (id != eventDto.EventId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(eventsModel).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EventsModelExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _eventsService.UpdateAsync(id, eventDto);
             return NoContent();
         }
 
@@ -90,23 +68,14 @@ namespace IncidentResponseAPI.Controllers
         [SwaggerOperation(Summary = "Deletes an event by ID")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
-            var eventsModel = await _context.Events.FindAsync(id);
-            if (eventsModel == null)
+            var eventDto = await _eventsService.GetByIdAsync(id);
+            if (eventDto == null)
             {
                 return NotFound();
             }
 
-            _context.Events.Remove(eventsModel);
-            await _context.SaveChangesAsync();
-
+            await _eventsService.DeleteAsync(id);
             return NoContent();
-        }
-
-        private bool EventsModelExists(int id)
-        {
-            return _context.Events.Any(e => e.EventId == id);
         }
     }
 }
-
-
