@@ -8,13 +8,10 @@ using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Load environment variables from .env file
 Env.Load();
-
-
 
 // Debug logging to verify environment variable loading
 // Console.WriteLine("Loading environment variables...");
@@ -39,28 +36,14 @@ builder.Services.AddScoped<IIncidentsRepository, IncidentsRepository>();
 builder.Services.AddScoped<IIncidentsService, IncidentsService>();
 builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
 builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
+builder.Services.AddSingleton<GraphAuthProvider>();
+builder.Services.AddSingleton<GraphAuthService>();
 //Adding database context
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
-    options.UseSqlServer(connectionString));
-
-
-Console.WriteLine("Starting GraphTest...");
-
-var graphTest = new GraphTest();
-
-Console.WriteLine("Testing Fetch Users...");
-await graphTest.TestFetchUsers();
-
-Console.WriteLine("\nTesting Fetch Emails...");
-await graphTest.TestFetchEmails();
-
-Console.WriteLine("\nTesting Fetch Message Content...");
-await graphTest.TestFetchMessageContent();
-
-Console.WriteLine("\nTesting Fetch Attachments...");
-await graphTest.TestFetchAttachments();
-
-Console.WriteLine("GraphTest completed.");
+    options.UseSqlServer(connectionString, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+    }));
 
 // Add CORS services
 builder.Services.AddCors(options =>
@@ -80,6 +63,33 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+
+// Resolve GraphService
+var graphService = app.Services.GetRequiredService<GraphAuthService>();
+
+// Testing FetchUsersAsync
+Console.WriteLine("Testing Fetch Users...");
+var users = await graphService.FetchUsersAsync();
+if (users.Any())
+{
+    var firstUser = users.First();
+
+    // Testing FetchEmailsAsync
+    Console.WriteLine("Testing Fetch Emails...");
+    var emails = await graphService.FetchEmailsAsync(firstUser.Id);
+    if (emails.Any())
+    {
+        var firstEmail = emails.First();
+
+        // Testing FetchMessageContentAsync
+        Console.WriteLine("Testing Fetch Message Content...");
+        var messageContent = await graphService.FetchMessageContentAsync(firstUser.Id, firstEmail.Id);
+
+        // Testing FetchAttachmentsAsync
+        Console.WriteLine("Testing Fetch Attachments...");
+        var attachments = await graphService.FetchAttachmentsAsync(firstUser.Id, firstEmail.Id);
+    }
+}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
