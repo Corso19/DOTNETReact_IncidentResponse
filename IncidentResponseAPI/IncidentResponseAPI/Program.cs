@@ -62,33 +62,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-
-// Resolve GraphService
-var graphService = app.Services.GetRequiredService<GraphAuthService>();
-
-// Testing FetchUsersAsync
-Console.WriteLine("Testing Fetch Users...");
-var users = await graphService.FetchUsersAsync();
-if (users.Any())
-{
-    var firstUser = users.First();
-
-    // Testing FetchEmailsAsync
-    Console.WriteLine("Testing Fetch Emails...");
-    var emails = await graphService.FetchEmailsAsync(firstUser.Id);
-    if (emails.Any())
-    {
-        var firstEmail = emails.First();
-
-        // Testing FetchMessageContentAsync
-        Console.WriteLine("Testing Fetch Message Content...");
-        var messageContent = await graphService.FetchMessageContentAsync(firstUser.Id, firstEmail.Id);
-
-        // Testing FetchAttachmentsAsync
-        Console.WriteLine("Testing Fetch Attachments...");
-        var attachments = await graphService.FetchAttachmentsAsync(firstUser.Id, firstEmail.Id);
-    }
-}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
