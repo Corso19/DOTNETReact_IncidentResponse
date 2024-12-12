@@ -7,11 +7,11 @@ namespace IncidentResponseAPI.Services.Implementations
     {
         private readonly GraphAuthProvider _graphAuthProvider;
 
-        public GraphAuthService()
+        public GraphAuthService(GraphAuthProvider graphAuthProvider)
         {
-            _graphAuthProvider = new GraphAuthProvider();
+            _graphAuthProvider = graphAuthProvider;
         }
-
+    
         public async Task<IEnumerable<User>> FetchUsersAsync()
         {
             var graphClient = await _graphAuthProvider.GetAuthenticatedGraphClient();
