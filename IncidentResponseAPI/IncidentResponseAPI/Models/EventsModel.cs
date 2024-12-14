@@ -11,9 +11,10 @@ namespace IncidentResponseAPI.Models
         public string TypeName { get; set; } = "Email";
         public string Subject { get; set; }
         public string Sender { get; set; }
-        public string Details { get; set; }
+        public string Details { get; set; } //Would be better to be called message
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public bool isProcessed { get; set; } = false;
-        public string MessageId { get; set; }   
+        public string MessageId { get; set; }   //Microsoft Graph MessageId
+        public ICollection<AttachmentModel> Attachments { get; set; } = new List<AttachmentModel>();
     }
 }

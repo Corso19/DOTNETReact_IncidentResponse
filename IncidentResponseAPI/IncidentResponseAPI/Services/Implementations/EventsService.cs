@@ -7,6 +7,7 @@ namespace IncidentResponseAPI.Services.Implementations
     public class EventsService : IEventsService
     {
         private readonly IEventsRepository _eventsRepository;
+        
 
         public EventsService(IEventsRepository eventsRepository)
         {

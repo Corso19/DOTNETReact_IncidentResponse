@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using IncidentResponseAPI.Models;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 namespace IncidentResponseAPI.Models
 {
@@ -14,6 +15,10 @@ namespace IncidentResponseAPI.Models
         public DbSet<IncidentsModel> Incidents { get; set; }
         public DbSet<EventsModel> Events { get; set; }
         public DbSet<SensorsModel> Sensors { get; set; }
+        public DbSet<RecommendationsModel> Recommendations { get; set; }
+        public DbSet<AttachmentModel> Attachments { get; set; }
+        
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,22 +28,12 @@ namespace IncidentResponseAPI.Models
             modelBuilder.Entity<IncidentEventModel>()
                 .HasKey(ie => new { ie.IncidentId, ie.EventId });
 
-            //// Seed data (optional)
-            //modelBuilder.Entity<SensorsModel>().HasData(
-            //    new SensorsModel { SensorId = 1, SensorName = "Sensor1", Type = "Type1", ConfigurationJson = "{}", isEnabled = true, CreatedAd = DateTime.Now }
-            //);
+            modelBuilder.Entity<AttachmentModel>()
+                .HasOne(a => a.Event)
+                .WithMany(e => e.Attachments)
+                .HasForeignKey(a => a.EventId)
+                .OnDelete(DeleteBehavior.Cascade); //Optional
 
-            //modelBuilder.Entity<IncidentsModel>().HasData(
-            //    new IncidentsModel { IncidentId = 1, Title = "Incident1", Description = "Description1", DetectedAt = DateTime.Now, Status = "Open" }
-            //);
-
-            //modelBuilder.Entity<EventsModel>().HasData(
-            //    new EventsModel { EventId = 1, SensorId = 1, EventDataJson = "{}", Timestamp = DateTime.Now, isProcessed = false }
-            //);
-
-            //modelBuilder.Entity<IncidentEventModel>().HasData(
-            //    new IncidentEventModel { IncidentId = 1, EventId = 1 }
-            //);
         }
         public DbSet<IncidentResponseAPI.Models.RecommendationsModel> RecommendationsModel { get; set; } = default!;
     }
