@@ -9,6 +9,9 @@ namespace IncidentResponseAPI.Repositories
         Task AddAsync(EventsModel eventsModel);
         Task UpdateAsync(EventsModel eventsModel);
         Task DeleteAsync(int id);
+        
+        Task<IEnumerable<AttachmentModel>> GetAttachmentsByEventIdAsync(int eventId);
+        // Task AddAttachmentAsync(AttachmentModel attachmentModel);
     }
 }
 

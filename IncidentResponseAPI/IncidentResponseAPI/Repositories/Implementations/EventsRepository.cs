@@ -14,12 +14,18 @@ namespace IncidentResponseAPI.Repositories.Implementations
 
         public async Task<IEnumerable<EventsModel>> GetAllAsync()
         {
-            return await _context.Events.Include(e => e.Sensor).ToListAsync();
+            return await _context.Events
+                .Include(e => e.Sensor)
+                .Include(e =>e.Attachments)
+                .ToListAsync();
         }
 
         public async Task<EventsModel> GetByIdAsync(int id)
         {
-            return await _context.Events.Include(e => e.Sensor).FirstOrDefaultAsync(e => e.EventId == id);
+            return await _context.Events
+                .Include(e => e.Sensor)
+                .Include(e => e.Attachments)
+                .FirstOrDefaultAsync(e => e.EventId == id);
         }
 
         public async Task AddAsync(EventsModel eventsModel)
@@ -43,6 +49,20 @@ namespace IncidentResponseAPI.Repositories.Implementations
                 await _context.SaveChangesAsync();
             }
         }
+        
+        //Methods for attachments
+        public async Task<IEnumerable<AttachmentModel>> GetAttachmentsByEventIdAsync(int eventId)
+        {
+            return await _context.Attachments
+                .Where(a => a.EventId == eventId)
+                .ToListAsync();
+        }
+        
+        // public async Task AddAttachmentAsync(AttachmentModel attachmentModel)
+        // {
+        //     _context.Attachments.Add(attachmentModel);
+        //     await _context.SaveChangesAsync();
+        // }
     }
 }
 
