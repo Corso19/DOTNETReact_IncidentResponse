@@ -27,6 +27,7 @@ var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET")
 builder.Services.AddControllers();
 builder.Services.AddScoped<IEventsRepository, EventsRepository>();
 builder.Services.AddScoped<IEventsService, EventsService>();
+builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<ISensorsRepository, SensorsRepository>();
 builder.Services.AddScoped<ISensorsService, SensorsService>();
 builder.Services.AddScoped<IRecommendationsRepository, RecommendationsRepository>();
