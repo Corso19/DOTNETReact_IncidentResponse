@@ -27,14 +27,21 @@ public class AttachmentRepository : IAttachmentRepository
     }
     
     //Add a new attachment 
-    public async Task AddAsync(AttachmentModel attachmentModel)
+    public async Task AddAttachmentAsync(AttachmentModel attachmentModel)
     {
         _context.Attachments.Add(attachmentModel);
         await _context.SaveChangesAsync();
     }
     
+    //Update an attachment
+    public async Task UpdateAttachmentAsync(AttachmentModel attachmentModel)
+    {
+        _context.Entry(attachmentModel).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+    }
+    
     //Delete an attachment by ID
-    public async Task DeleteAsync(int attachmentId)
+    public async Task DeleteAttachmentAsync(int attachmentId)
     {
         var attachmentModel = await _context.Attachments.FindAsync(attachmentId);
         if (attachmentModel != null)

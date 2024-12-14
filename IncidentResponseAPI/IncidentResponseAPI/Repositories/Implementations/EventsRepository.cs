@@ -58,6 +58,12 @@ namespace IncidentResponseAPI.Repositories.Implementations
                 .ToListAsync();
         }
         
+        public async Task<EventsModel> GetByMessageIdAsync(string messageId)
+        {
+            return await _context.Events.FirstOrDefaultAsync(e => e.MessageId == messageId);
+        }
+
+        
         // public async Task AddAttachmentAsync(AttachmentModel attachmentModel)
         // {
         //     _context.Attachments.Add(attachmentModel);
