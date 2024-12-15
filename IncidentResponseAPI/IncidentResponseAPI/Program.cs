@@ -14,14 +14,20 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Debug logging to verify environment variable loading
-Console.WriteLine("Loading environment variables...");
-var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
-
+var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
+    ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
+var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID")
+    ?? throw new InvalidOperationException("The ApplicationId property has not been initialized.");
+var tenantId = Environment.GetEnvironmentVariable("TENANT_ID")
+    ?? throw new InvalidOperationException("The TenantId property has not been initialized.");
+var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET")
+    ?? throw new InvalidOperationException("The ClientSecret property has not been initialized.");
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddScoped<IEventsRepository, EventsRepository>();
 builder.Services.AddScoped<IEventsService, EventsService>();
+builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<ISensorsRepository, SensorsRepository>();
 builder.Services.AddScoped<ISensorsService, SensorsService>();
 builder.Services.AddScoped<IRecommendationsRepository, RecommendationsRepository>();
@@ -30,15 +36,14 @@ builder.Services.AddScoped<IIncidentsRepository, IncidentsRepository>();
 builder.Services.AddScoped<IIncidentsService, IncidentsService>();
 builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
 builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
-
-// Read connection string from environment variable
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new InvalidOperationException("The ConnectionString property has not been initialized.");
-}
-
+builder.Services.AddSingleton<GraphAuthProvider>();
+builder.Services.AddSingleton<GraphAuthService>();
+//Adding database context
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+    }));
 
 // Add CORS services
 builder.Services.AddCors(options =>
@@ -57,6 +62,31 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+// // Resolve GraphService  
+// var graphService = app.Services.GetRequiredService<GraphAuthService>();  
+//   
+// // Testing FetchUsersAsync  
+// Console.WriteLine("Testing Fetch Users...");  
+// var users = await graphService.FetchUsersAsync();  
+// if (users.Any())  
+// {  
+//     var firstUser = users.First();  
+//   
+//     // Testing FetchEmailsAsync  
+//     Console.WriteLine("Testing Fetch Emails...");  
+//     var emails = await graphService.FetchEmailsAsync(firstUser.Id);  
+//     if (emails.Any())  
+//     {        var firstEmail = emails.First();  
+//   
+//         // Testing FetchMessageContentAsync  
+//         Console.WriteLine("Testing Fetch Message Content...");  
+//         var messageContent = await graphService.FetchMessageContentAsync(firstUser.Id, firstEmail.Id);  
+//   
+//         // Testing FetchAttachmentsAsync  
+//         Console.WriteLine("Testing Fetch Attachments...");  
+//         var attachments = await graphService.FetchAttachmentsAsync(firstUser.Id, firstEmail.Id);  
+//     }}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

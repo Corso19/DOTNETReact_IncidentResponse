@@ -4,6 +4,7 @@ using IncidentResponseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IncidentResponseAPI.Migrations
 {
     [DbContext(typeof(IncidentResponseContext))]
-    partial class IncidentResponseContextModelSnapshot : ModelSnapshot
+    [Migration("20241211140019_UpdateSensorsModel")]
+    partial class UpdateSensorsModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,35 +24,6 @@ namespace IncidentResponseAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("IncidentResponseAPI.Models.AttachmentModel", b =>
-                {
-                    b.Property<int>("AttachmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AttachmentId"));
-
-                    b.Property<byte[]>("Content")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Size")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttachmentId");
-
-                    b.HasIndex("EventId");
-
-                    b.ToTable("Attachments");
-                });
 
             modelBuilder.Entity("IncidentResponseAPI.Models.EventsModel", b =>
                 {
@@ -63,20 +37,8 @@ namespace IncidentResponseAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MessageId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Sender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("SensorId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
@@ -210,17 +172,6 @@ namespace IncidentResponseAPI.Migrations
                     b.ToTable("Sensors");
                 });
 
-            modelBuilder.Entity("IncidentResponseAPI.Models.AttachmentModel", b =>
-                {
-                    b.HasOne("IncidentResponseAPI.Models.EventsModel", "Event")
-                        .WithMany("Attachments")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-                });
-
             modelBuilder.Entity("IncidentResponseAPI.Models.EventsModel", b =>
                 {
                     b.HasOne("IncidentResponseAPI.Models.SensorsModel", "Sensor")
@@ -260,11 +211,6 @@ namespace IncidentResponseAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Incident");
-                });
-
-            modelBuilder.Entity("IncidentResponseAPI.Models.EventsModel", b =>
-                {
-                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("IncidentResponseAPI.Models.IncidentsModel", b =>

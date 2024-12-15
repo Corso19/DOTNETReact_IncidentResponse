@@ -5,14 +5,16 @@ namespace IncidentResponseAPI.Models
     public class EventsModel
     {
         [Key]
-        public int EventId { get; set; } // This will be recognized as the primary key
+        public int EventId { get; set; }
         public int SensorId { get; set; }
         public SensorsModel Sensor { get; set; }
-        //TODO - Change EventDataJson to separate fields <strings>
-        //public string EventDataJson { get; set; }
-        public string TypeName { get; set; }
-        public string Details { get; set; }
+        public string TypeName { get; set; } = "Email";
+        public string Subject { get; set; }
+        public string Sender { get; set; }
+        public string Details { get; set; } //Would be better to be called message
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public bool isProcessed { get; set; } = false;
+        public string MessageId { get; set; }   //Microsoft Graph MessageId
+        public ICollection<AttachmentModel> Attachments { get; set; } = new List<AttachmentModel>();
     }
 }
