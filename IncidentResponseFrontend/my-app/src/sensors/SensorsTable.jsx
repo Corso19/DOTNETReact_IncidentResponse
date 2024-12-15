@@ -4,6 +4,7 @@ import { CrudService } from "../services/CrudService";
 import { ThreeDots } from "react-loader-spinner";
 import { PlusSquareFill } from "react-bootstrap-icons";
 import SensorRow from "./SensorRow";
+import SensorModal from "./SensorModal";
 
 const SensorsTable = () => {
 
@@ -241,6 +242,11 @@ const SensorsTable = () => {
                                     className="clickable color-bg-lightr"
                                     cursor="pointer"
                                     onClick={() => setShowAddSensorModal(true)}
+                                />
+                                <SensorModal 
+                                    sensor={null}
+                                    showModal={showAddSensorModal}
+                                    setShowModal={setShowAddSensorModal}
                                 />
                             </th>
                         </tr>

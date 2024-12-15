@@ -1,11 +1,13 @@
 import React, {useState} from "react";
 import { PencilFill, TrashFill } from 'react-bootstrap-icons';
 import IconButton from "../components/buttons/IconButton";
+import SensorModal from "./SensorModal";
 
 const SensorRow = ({sensor, setSensors}) => {
     const [deleteSensorLoading, setDeleteSensorLoading] = useState(false);
     const [showDeleteSensorModal, setShowDeleteSensorModal] = useState(false);
     const [showUpdateSensorModal, setShowUpdateSensorModal] = useState(false);
+
     return(
         <tr>
             <td align="left">
@@ -25,6 +27,11 @@ const SensorRow = ({sensor, setSensors}) => {
                         className="clickable color-primary-hover"
                         cursor="pointer"
                         onClick={() => {setShowUpdateSensorModal(true)}}
+                    />
+                    <SensorModal 
+                        sensor={sensor}
+                        showModal={showUpdateSensorModal}
+                        setShowModal={setShowUpdateSensorModal}
                     />
                     <IconButton
                         icon={TrashFill}
