@@ -23,6 +23,16 @@ body {
   min-height: 100vh;
 }
 
+/* color styles */
+
+.color-primary-hover {
+  color: var(--bs-primary-hover);
+}
+
+.color-bg-light {
+  color: var(--bs-bg-light);
+}
+
 /* navbar styles */
 .xdr-navbar {
   background: linear-gradient(90deg, var(--bs-primary-dark), var(--bs-primary));
@@ -41,7 +51,7 @@ body {
 }
 
 .xdr-navbar .nav-link {
-  color: var(--bs-light-blue);
+  color: var(--bs-white);
   font-size: 1rem;
   border-radius: 5px;
   padding: 10px 15px;
@@ -61,3 +71,17 @@ body {
   background-color: var(--bs-primary);
 }
 
+/* table styles */
+.sensors-table {
+  border: 2px solid var(--bs-gray-dark) !important;
+}
+
+.sensors-table th {
+  background-color: var(--bs-primary-hover) !important;
+  border: 2px solid var(--bs-gray-dark) !important;
+  color: var(--bs-bg-light) !important;
+}
+
+.sensors-table td {
+  border: 2px solid var(--bs-gray-dark) !important;
+}

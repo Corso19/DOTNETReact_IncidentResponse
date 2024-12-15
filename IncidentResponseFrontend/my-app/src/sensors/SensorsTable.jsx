@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import { CrudService } from "../services/CrudService";
 import { ThreeDots } from "react-loader-spinner";
-import { Plus } from "react-bootstrap-icons";
+import { PlusSquareFill } from "react-bootstrap-icons";
 import SensorRow from "./SensorRow";
 
 const SensorsTable = () => {
@@ -13,30 +13,233 @@ const SensorsTable = () => {
     useEffect(() => {
         setSensorsLoading(true);
         // get sensors
-        CrudService.list("Sensors").then((response) => {
-            console.log("Response: ", response);
-            if (response.data.success) {
-                setSensors(response.data.data);
-            }
-            setSensorsLoading(false);
-        });
+        // CrudService.list("Sensors").then((response) => {
+        //     console.log("Response: ", response);
+        //     if (response.data.success) {
+        //         setSensors(response.data.data);
+        //     }
+        //     setSensorsLoading(false);
+        // });
+        const mock_data = [
+            {
+              id: 1,
+              name: "Temperature Sensor 1",
+              type: "Temperature",
+              is_enabled: true,
+              tenant_id: "tenant_001",
+              application_id: "app_xdr_001",
+            },
+            {
+              id: 2,
+              name: "Motion Sensor 2",
+              type: "Motion",
+              is_enabled: false,
+              tenant_id: "tenant_002",
+              application_id: "app_xdr_002",
+            },
+            {
+              id: 3,
+              name: "Vibration Sensor 3",
+              type: "Vibration",
+              is_enabled: true,
+              tenant_id: "tenant_003",
+              application_id: "app_xdr_003",
+            },
+            {
+              id: 4,
+              name: "Humidity Sensor 4",
+              type: "Humidity",
+              is_enabled: true,
+              tenant_id: "tenant_004",
+              application_id: "app_xdr_004",
+            },
+            {
+              id: 5,
+              name: "Pressure Sensor 5",
+              type: "Pressure",
+              is_enabled: false,
+              tenant_id: "tenant_005",
+              application_id: "app_xdr_005",
+            },
+            {
+                id: 6,
+                name: "Temperature Sensor 1",
+                type: "Temperature",
+                is_enabled: true,
+                tenant_id: "tenant_001",
+                application_id: "app_xdr_001",
+              },
+              {
+                id: 7,
+                name: "Motion Sensor 2",
+                type: "Motion",
+                is_enabled: false,
+                tenant_id: "tenant_002",
+                application_id: "app_xdr_002",
+              },
+              {
+                id: 8,
+                name: "Vibration Sensor 3",
+                type: "Vibration",
+                is_enabled: true,
+                tenant_id: "tenant_003",
+                application_id: "app_xdr_003",
+              },
+              {
+                id: 9,
+                name: "Humidity Sensor 4",
+                type: "Humidity",
+                is_enabled: true,
+                tenant_id: "tenant_004",
+                application_id: "app_xdr_004",
+              },
+              {
+                id: 10,
+                name: "Pressure Sensor 5",
+                type: "Pressure",
+                is_enabled: false,
+                tenant_id: "tenant_005",
+                application_id: "app_xdr_005",
+              },
+              {
+                id: 11,
+                name: "Temperature Sensor 1",
+                type: "Temperature",
+                is_enabled: true,
+                tenant_id: "tenant_001",
+                application_id: "app_xdr_001",
+              },
+              {
+                id: 12,
+                name: "Motion Sensor 2",
+                type: "Motion",
+                is_enabled: false,
+                tenant_id: "tenant_002",
+                application_id: "app_xdr_002",
+              },
+              {
+                id: 13,
+                name: "Vibration Sensor 3",
+                type: "Vibration",
+                is_enabled: true,
+                tenant_id: "tenant_003",
+                application_id: "app_xdr_003",
+              },
+              {
+                id: 14,
+                name: "Humidity Sensor 4",
+                type: "Humidity",
+                is_enabled: true,
+                tenant_id: "tenant_004",
+                application_id: "app_xdr_004",
+              },
+              {
+                id: 15,
+                name: "Pressure Sensor 5",
+                type: "Pressure",
+                is_enabled: false,
+                tenant_id: "tenant_005",
+                application_id: "app_xdr_005",
+              },
+              {
+                id: 16,
+                name: "Temperature Sensor 1",
+                type: "Temperature",
+                is_enabled: true,
+                tenant_id: "tenant_001",
+                application_id: "app_xdr_001",
+              },
+              {
+                id: 17,
+                name: "Motion Sensor 2",
+                type: "Motion",
+                is_enabled: false,
+                tenant_id: "tenant_002",
+                application_id: "app_xdr_002",
+              },
+              {
+                id: 18,
+                name: "Vibration Sensor 3",
+                type: "Vibration",
+                is_enabled: true,
+                tenant_id: "tenant_003",
+                application_id: "app_xdr_003",
+              },
+              {
+                id: 19,
+                name: "Humidity Sensor 4",
+                type: "Humidity",
+                is_enabled: true,
+                tenant_id: "tenant_004",
+                application_id: "app_xdr_004",
+              },
+              {
+                id: 20,
+                name: "Pressure Sensor 5",
+                type: "Pressure",
+                is_enabled: false,
+                tenant_id: "tenant_005",
+                application_id: "app_xdr_005",
+              },
+              {
+                id: 21,
+                name: "Temperature Sensor 1",
+                type: "Temperature",
+                is_enabled: true,
+                tenant_id: "tenant_001",
+                application_id: "app_xdr_001",
+              },
+              {
+                id: 22,
+                name: "Motion Sensor 2",
+                type: "Motion",
+                is_enabled: false,
+                tenant_id: "tenant_002",
+                application_id: "app_xdr_002",
+              },
+              {
+                id: 23,
+                name: "Vibration Sensor 3",
+                type: "Vibration",
+                is_enabled: true,
+                tenant_id: "tenant_003",
+                application_id: "app_xdr_003",
+              },
+              {
+                id: 24,
+                name: "Humidity Sensor 4",
+                type: "Humidity",
+                is_enabled: true,
+                tenant_id: "tenant_004",
+                application_id: "app_xdr_004",
+              },
+              {
+                id: 25,
+                name: "Pressure Sensor 5",
+                type: "Pressure",
+                is_enabled: false,
+                tenant_id: "tenant_005",
+                application_id: "app_xdr_005",
+              }
+            ];
+        setSensors(mock_data);
+        setSensorsLoading(false);
     }, []);
     return(
         <Row className="mt-3">
-            <Col></Col>
-            <Col xs={10}>
-                <table data-toggle="table" className="table table-striped table-bordered border-dark">
+            <Col >
+                <table data-toggle="table" className="table table-bordered table-striped sensors-table">
                     <thead className="text-center">
                         <tr>
-                            <th>Sensor</th>
-                            <th>Type</th>
-                            <th>Enabled</th>
+                            <th style={{ width: "35%" }}>Sensor</th>
+                            <th style={{ width: "35%" }}>Type</th>
+                            <th style={{ width: "20%" }}>Enabled</th>
                             <th>
-                                <Plus
-                                    size={35}
+                                <PlusSquareFill
+                                    size={22}
                                     title="Add sensor"
-                                    color="green"
-                                    className="clickable"
+                                    className="clickable color-bg-lightr"
+                                    cursor="pointer"
                                     onClick={() => setShowAddSensorModal(true)}
                                 />
                             </th>
@@ -54,7 +257,7 @@ const SensorsTable = () => {
                                     <ThreeDots
                                         height="50"
                                         width="50"
-                                        color="rgb(200, 200, 200)"
+                                        className="color-primary-dark"
                                         ariaLabel="three-dots-loading"
                                         visible={true}
                                     />
@@ -81,7 +284,6 @@ const SensorsTable = () => {
                     </tbody>
                 </table>
             </Col>
-            <Col></Col>
         </Row>
     );
 }
