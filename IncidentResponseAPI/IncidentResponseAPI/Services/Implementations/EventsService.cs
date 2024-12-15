@@ -33,11 +33,25 @@ namespace IncidentResponseAPI.Services.Implementations
         //         return MapToDto(e, attachments);
         //     }));
         // }
-        
+        // public async Task<IEnumerable<EventsDto>> GetAllEventsAsync()
+        // {
+        //     var events = await _eventsRepository.GetAllAsync();
+        //
+        //     // Parallelize fetching attachments
+        //     var tasks = events.Select(async eventModel =>
+        //     {
+        //         var attachments = await _attachmentRepository.GetAttachmentsByEventIdAsync(eventModel.EventId);
+        //         return MapToDto(eventModel, attachments);
+        //     });
+        //
+        //     // Use Task.WhenAll to execute all tasks concurrently
+        //     return await Task.WhenAll(tasks);
+        // }
+
         public async Task<IEnumerable<EventsDto>> GetAllEventsAsync()
         {
             var events = await _eventsRepository.GetAllAsync();
-
+        
             // Fetch attachments separately to avoid concurrency issues
             var eventDtos = new List<EventsDto>();
             foreach (var e in events)
@@ -45,7 +59,7 @@ namespace IncidentResponseAPI.Services.Implementations
                 var attachments = await _attachmentRepository.GetAttachmentsByEventIdAsync(e.EventId);
                 eventDtos.Add(MapToDto(e, attachments));
             }
-
+        
             return eventDtos;
         }
 
@@ -180,7 +194,7 @@ namespace IncidentResponseAPI.Services.Implementations
                 Timestamp = eventModel.Timestamp,
                 isProcessed = eventModel.isProcessed,
                 MessageId = eventModel.MessageId,
-                Attachments = eventModel.Attachments.Select(attachment => new AttachmentDto
+                Attachments = attachments.Select(attachment => new AttachmentDto
                 {
                     AttachmentId = attachment.AttachmentId,
                     EventId = attachment.EventId,

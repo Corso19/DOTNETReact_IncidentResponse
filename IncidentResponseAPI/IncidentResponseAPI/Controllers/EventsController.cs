@@ -27,6 +27,7 @@ namespace IncidentResponseAPI.Controllers
             var events = await _eventsService.GetAllEventsAsync();
             return Ok(events);
         }
+        
         // [HttpGet]
         // [SwaggerOperation(Summary = "Gets all events, ensuring sync on first load")]
         // public async Task<ActionResult<IEnumerable<EventsDto>>> GetEvents(string userId)
