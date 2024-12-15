@@ -1,8 +1,20 @@
 import { Button } from "react-bootstrap";
 import Modal from "react-modal";
 import React from "react";
+import LoaderButton from "../buttons/LoaderButton";
+import { Tooltip } from "@mui/material";
+import { RiErrorWarningFill } from "react-icons/ri";
 
-const FormModal = ({showModal, setShowModal, title, children}) => {
+const FormModal = ({
+    showModal, 
+    setShowModal, 
+    title, 
+    children, 
+    submitButtonDisabled,
+    disabledButtonMessage, 
+    submitButtonLoading, 
+    onSubmitClick
+}) => {
     return (
         <Modal isOpen={showModal}>
             <div className="modal-content d-flex card">
@@ -17,45 +29,41 @@ const FormModal = ({showModal, setShowModal, title, children}) => {
                     {children}
                 </div>
                 <hr></hr>
+
                 {/* Modal Footer */}
                 <div className="modal-footer d-flex justify-content-between mb-0">
-                    {/* <div className="d-flex align-items-center">
-                    <LoaderButton
-                        size={buttonsSize}
-                        disabled={submitButtonDisabled}
-                        loading={submitButtonLoading}
-                        onClick={onSubmitClick}
-                        text={submitBttnText ?? "Salvează"}
-                        className="ms-3 px-4 me-1"
-                        variant="outline-primary"
-                        style={{ width: submitBttnSize ? submitBttnSize : "120px" }}
-                    />
-
-                    {submitButtonDisabled && disabledButtonTooltip && (
-                        <Tooltip
-                        title={
-                            <span style={{ fontSize: "1.2em" }}>
-                            {" "}
-                            {disabledButtonTooltip}{" "}
-                            </span>
-                        }
-                        placement="right"
-                        >
-                        <div>
-                            <RiErrorWarningFill
-                            style={{ color: "#DC3545", fontSize: "1.2em" }}
-                            />
-                        </div>
-                        </Tooltip>
-                    )}
-                    </div> */}
                     <Button
                         className="me-3 ps-4 pe-4"
                         variant="outline-secondary"
                         onClick={() => setShowModal(false)}
                     >
-                        Renunță
+                        Cancel
                     </Button>
+                    <div className="d-flex align-items-center">
+                        <LoaderButton
+                            disabled={submitButtonDisabled}
+                            loading={submitButtonLoading}
+                            onClick={onSubmitClick}
+                            text="Save"
+                            className="ms-3 px-4 me-1"
+                            variant="outline-primary"
+                            // style={{ width: submitBttnSize ? submitBttnSize : "120px" }}
+                        />
+                        {submitButtonDisabled && (
+                            <Tooltip
+                                title={
+                                    <span style={{ fontSize: "1.2em" }}>
+                                        {disabledButtonMessage}
+                                    </span>
+                                }
+                                placement="right"
+                            >
+                                <div>
+                                    <RiErrorWarningFill style={{ color: "#DC3545", fontSize: "1.2em" }}/>
+                                </div>
+                            </Tooltip>
+                        )}
+                    </div>
                 </div>
             </div>
         </Modal>
