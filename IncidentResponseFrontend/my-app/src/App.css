@@ -1,38 +1,63 @@
-.App {
-  text-align: center;
+/* define the color palette at the root level */
+:root {
+  --bs-primary: #0073e6; /* Primary Blue */
+  --bs-primary-hover: #005bb5; /* Hover Blue */
+  --bs-primary-dark: #004ba0; /* Darker Blue */
+  --bs-light-blue: #dce7f3; /* Light Blue */
+  --bs-bg-light: #f5faff; /* Light blueish-white for background */
+  --bs-white: #ffffff; /* White */
+  --bs-gray-dark: #333; /* Neutral Dark Text */
+  --bs-table-hover: #f0f8ff; /* Light Blue for table hover */
+  --bs-shadow: rgba(0, 0, 0, 0.1); /* Light Shadow */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* global styels */
+body {
+  background-color: var(--bs-bg-light);
+  color: var(--bs-gray-dark);
+  font-family: 'Arial', sans-serif;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.wrapper {
+  padding: 20px;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+/* navbar styles */
+.xdr-navbar {
+  background: linear-gradient(90deg, var(--bs-primary-dark), var(--bs-primary));
+  color: var(--bs-white);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.xdr-navbar .navbar-brand {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--bs-white);
 }
+
+.xdr-navbar .navbar-brand:hover {
+  color: var(--bs-light-blue);
+  transform: scale(1.05);
+}
+
+.xdr-navbar .nav-link {
+  color: var(--bs-light-blue);
+  font-size: 1rem;
+  border-radius: 5px;
+  padding: 10px 15px;
+}
+
+.xdr-navbar .nav-link:hover {
+  background-color: var(--bs-primary-hover);
+  color: var(--bs-white);
+  font-weight: 500;
+}
+
+.xdr-navbar .navbar-toggler {
+  margin: 5px 0px;
+  border-color: var(--bs-primary-dark);
+  border-width: 2px;
+  color: var(--bs-primary-dark);
+  background-color: var(--bs-primary);
+}
+

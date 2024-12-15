@@ -1,12 +1,12 @@
 import './App.css';
-import UserRouteGroup from './components/routes/UserRouteGroup';
+import RoutesGroup from './components/routes/RoutesGroup';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
     <div className="App">
       <div className="wrapper">
-        <UserRouteGroup />
+        <RoutesGroup />
       </div>
     </div>
   );
