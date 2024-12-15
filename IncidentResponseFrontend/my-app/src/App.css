@@ -35,7 +35,7 @@ body {
 
 /* navbar styles */
 .xdr-navbar {
-  background: linear-gradient(90deg, var(--bs-primary-dark), var(--bs-primary));
+  background-color: var(--bs-primary-hover);
   color: var(--bs-white);
 }
 
@@ -58,13 +58,13 @@ body {
 }
 
 .xdr-navbar .nav-link:hover {
-  background-color: var(--bs-primary-hover);
+  background-color: var(--bs-primary-dark);
   color: var(--bs-white);
   font-weight: 500;
 }
 
 .xdr-navbar .navbar-toggler {
-  margin: 5px 0px;
+  margin: 7px 0px;
   border-color: var(--bs-primary-dark);
   border-width: 2px;
   color: var(--bs-primary-dark);
