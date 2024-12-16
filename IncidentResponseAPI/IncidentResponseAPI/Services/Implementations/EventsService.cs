@@ -23,31 +23,6 @@ namespace IncidentResponseAPI.Services.Implementations
             _graphAuthProvider = graphAuthProvider;
         }
 
-        //CRUD operations for Events
-        // public async Task<IEnumerable<EventsDto>> GetAllEventsAsync()
-        // {
-        //     var events = await _eventsRepository.GetAllAsync();
-        //     return await Task.WhenAll(events.Select(async e =>
-        //     {
-        //         var attachments = await _attachmentRepository.GetAttachmentsByEventIdAsync(e.EventId);
-        //         return MapToDto(e, attachments);
-        //     }));
-        // }
-        // public async Task<IEnumerable<EventsDto>> GetAllEventsAsync()
-        // {
-        //     var events = await _eventsRepository.GetAllAsync();
-        //
-        //     // Parallelize fetching attachments
-        //     var tasks = events.Select(async eventModel =>
-        //     {
-        //         var attachments = await _attachmentRepository.GetAttachmentsByEventIdAsync(eventModel.EventId);
-        //         return MapToDto(eventModel, attachments);
-        //     });
-        //
-        //     // Use Task.WhenAll to execute all tasks concurrently
-        //     return await Task.WhenAll(tasks);
-        // }
-
         public async Task<IEnumerable<EventsDto>> GetAllEventsAsync()
         {
             var events = await _eventsRepository.GetAllAsync();
