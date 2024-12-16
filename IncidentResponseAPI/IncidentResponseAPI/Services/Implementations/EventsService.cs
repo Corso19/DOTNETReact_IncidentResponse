@@ -23,12 +23,12 @@ namespace IncidentResponseAPI.Services.Implementations
             _graphAuthProvider = graphAuthProvider;
         }
 
-        public async Task<IEnumerable<EventsDto>> GetAllEventsAsync()
+        public async Task<IEnumerable<EventDto>> GetAllEventsAsync()
         {
             var events = await _eventsRepository.GetAllAsync();
         
             // Fetch attachments separately to avoid concurrency issues
-            var eventDtos = new List<EventsDto>();
+            var eventDtos = new List<EventDto>();
             foreach (var e in events)
             {
                 var attachments = await _attachmentRepository.GetAttachmentsByEventIdAsync(e.EventId);
@@ -39,7 +39,7 @@ namespace IncidentResponseAPI.Services.Implementations
         }
 
 
-        public async Task<EventsDto> GetEventByIdAsync(int eventId)
+        public async Task<EventDto> GetEventByIdAsync(int eventId)
         {
             var eventModel = await _eventsRepository.GetByIdAsync(eventId);
             if (eventModel == null) return null;
@@ -48,7 +48,7 @@ namespace IncidentResponseAPI.Services.Implementations
             return MapToDto(eventModel, attachments);
         }
         
-        public async Task AddEventAsync(EventsDto eventDto)
+        public async Task AddEventAsync(EventDto eventDto)
         {
             var eventModel = MapToModel(eventDto);
             await _eventsRepository.AddAsync(eventModel);
@@ -71,7 +71,7 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
         
-        public async Task UpdateEventAsync(EventsDto eventDto)
+        public async Task UpdateEventAsync(EventDto eventDto)
         {
             var eventModel = MapToModel(eventDto);
             await _eventsRepository.UpdateAsync(eventModel);
@@ -156,9 +156,9 @@ namespace IncidentResponseAPI.Services.Implementations
         
         //Helper methods
 
-        private EventsDto MapToDto(EventsModel eventModel, IEnumerable<AttachmentModel> attachments)
+        private EventDto MapToDto(EventsModel eventModel, IEnumerable<AttachmentModel> attachments)
         {
-            return new EventsDto
+            return new EventDto
             {
                 EventId = eventModel.EventId,
                 SensorId = eventModel.SensorId,
@@ -180,7 +180,7 @@ namespace IncidentResponseAPI.Services.Implementations
             };
         }
 
-        private EventsModel MapToModel(EventsDto eventDto)
+        private EventsModel MapToModel(EventDto eventDto)
         {
             return new EventsModel
             {

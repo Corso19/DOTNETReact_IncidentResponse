@@ -21,7 +21,7 @@ namespace IncidentResponseAPI.Controllers
         // GET: api/Sensors
         [HttpGet]
         [SwaggerOperation(Summary = "Gets a list of sensors")]
-        public async Task<ActionResult<IEnumerable<SensorsDto>>> GetAllSensors()
+        public async Task<ActionResult<IEnumerable<SensorDto>>> GetAllSensors()
         {
             _logger.LogInformation("Fetching all sensors");
 
@@ -41,7 +41,7 @@ namespace IncidentResponseAPI.Controllers
         // GET: api/Sensors/{id}
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Gets a sensor by ID")]
-        public async Task<ActionResult<SensorsDto>> GetSensorById(int id)
+        public async Task<ActionResult<SensorDto>> GetSensorById(int id)
         {
             _logger.LogInformation("Fetching sensor with ID {Id}", id);
 
@@ -66,15 +66,15 @@ namespace IncidentResponseAPI.Controllers
         // POST: api/Sensors
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new sensor")]
-        public async Task<ActionResult<SensorsDto>> PostSensor(SensorsDto sensorsDto)
+        public async Task<ActionResult<SensorDto>> PostSensor(SensorDto sensorDto)
         {
             _logger.LogInformation("Creating a new sensor");
 
             try
             {
-                await _sensorsService.AddAsync(sensorsDto);
-                _logger.LogInformation("Successfully created sensor with ID {Id}", sensorsDto.SensorId);
-                return CreatedAtAction(nameof(GetSensorById), new { id = sensorsDto.SensorId }, sensorsDto);
+                await _sensorsService.AddAsync(sensorDto);
+                _logger.LogInformation("Successfully created sensor with ID {Id}", sensorDto.SensorId);
+                return CreatedAtAction(nameof(GetSensorById), new { id = sensorDto.SensorId }, sensorDto);
             }
             catch (Exception ex)
             {
@@ -86,11 +86,11 @@ namespace IncidentResponseAPI.Controllers
         // PUT: api/Sensors/{id}
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Updates an existing sensor")]
-        public async Task<IActionResult> PutSensor(int id, SensorsDto sensorsDto)
+        public async Task<IActionResult> PutSensor(int id, SensorDto sensorDto)
         {
             _logger.LogInformation("Updating sensor with ID {Id}", id);
 
-            if (id != sensorsDto.SensorId)
+            if (id != sensorDto.SensorId)
             {
                 _logger.LogWarning("Mismatched sensor ID in request body and URL: {Id}", id);
                 return BadRequest("Sensor ID mismatch.");
@@ -98,7 +98,7 @@ namespace IncidentResponseAPI.Controllers
 
             try
             {
-                await _sensorsService.UpdateAsync(id, sensorsDto);
+                await _sensorsService.UpdateAsync(id, sensorDto);
                 _logger.LogInformation("Successfully updated sensor with ID {Id}", id);
                 return NoContent();
             }

@@ -19,7 +19,7 @@ namespace IncidentResponseAPI.Controllers
         // GET: api/Incidents
         [HttpGet]
         [SwaggerOperation(Summary = "Gets a list of incidents")]
-        public async Task<ActionResult<IEnumerable<IncidentsDto>>> GetIncidents()
+        public async Task<ActionResult<IEnumerable<IncidentDto>>> GetIncidents()
         {
             return Ok(await _incidentsService.GetAllAsync());
         }
@@ -27,7 +27,7 @@ namespace IncidentResponseAPI.Controllers
         // GET: api/Incidents/5
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Gets an incident by ID")]
-        public async Task<ActionResult<IncidentsDto>> GetIncident(int id)
+        public async Task<ActionResult<IncidentDto>> GetIncident(int id)
         {
             var incidentDto = await _incidentsService.GetByIdAsync(id);
 
@@ -42,18 +42,18 @@ namespace IncidentResponseAPI.Controllers
         // POST: api/Incidents
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new incident")]
-        public async Task<ActionResult<IncidentsDto>> PostIncident(IncidentsDto incidentsDto)
+        public async Task<ActionResult<IncidentDto>> PostIncident(IncidentDto incidentDto)
         {
-            await _incidentsService.AddAsync(incidentsDto);
-            return CreatedAtAction(nameof(GetIncident), new { id = incidentsDto.IncidentId }, incidentsDto);
+            await _incidentsService.AddAsync(incidentDto);
+            return CreatedAtAction(nameof(GetIncident), new { id = incidentDto.IncidentId }, incidentDto);
         }
 
         // PUT: api/Incidents/5
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Updates an existing incident")]
-        public async Task<IActionResult> PutIncident(int id, IncidentsDto incidentsDto)
+        public async Task<IActionResult> PutIncident(int id, IncidentDto incidentDto)
         {
-            await _incidentsService.UpdateAsync(id, incidentsDto);
+            await _incidentsService.UpdateAsync(id, incidentDto);
             return NoContent();
         }
 

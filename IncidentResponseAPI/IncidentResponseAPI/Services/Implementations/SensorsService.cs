@@ -13,10 +13,10 @@ namespace IncidentResponseAPI.Services.Implementations
             _sensorsRepository = sensorsRepository;
         }
 
-        public async Task<IEnumerable<SensorsDto>> GetAllAsync()
+        public async Task<IEnumerable<SensorDto>> GetAllAsync()
         {
             var sensors = await _sensorsRepository.GetAllAsync();
-            return sensors.Select(s => new SensorsDto
+            return sensors.Select(s => new SensorDto
             {
                 SensorId = s.SensorId,
                 SensorName = s.SensorName,
@@ -30,12 +30,12 @@ namespace IncidentResponseAPI.Services.Implementations
             }).ToList();
         }
 
-        public async Task<SensorsDto> GetByIdAsync(int id)
+        public async Task<SensorDto> GetByIdAsync(int id)
         {
             var s = await _sensorsRepository.GetByIdAsync(id);
             if (s == null) return null;
 
-            return new SensorsDto
+            return new SensorDto
             {
                 SensorId = s.SensorId,
                 SensorName = s.SensorName,
@@ -49,36 +49,36 @@ namespace IncidentResponseAPI.Services.Implementations
             };
         }
 
-        public async Task AddAsync(SensorsDto sensorsDto)
+        public async Task AddAsync(SensorDto sensorDto)
         {
             var sensorsModel = new SensorsModel
             {
-                SensorName = sensorsDto.SensorName,
-                Type = sensorsDto.Type,
-                TenantId = sensorsDto.TenantId,
-                ApplicationId = sensorsDto.ApplicationId,
-                ClientSecret = sensorsDto.ClientSecret,
-                isEnabled = sensorsDto.isEnabled,
-                CreatedAd = sensorsDto.CreatedAd,
-                LastRunAt = sensorsDto.LastRunAt
+                SensorName = sensorDto.SensorName,
+                Type = sensorDto.Type,
+                TenantId = sensorDto.TenantId,
+                ApplicationId = sensorDto.ApplicationId,
+                ClientSecret = sensorDto.ClientSecret,
+                isEnabled = sensorDto.isEnabled,
+                CreatedAd = sensorDto.CreatedAd,
+                LastRunAt = sensorDto.LastRunAt
             };
 
             await _sensorsRepository.AddAsync(sensorsModel);
         }
 
-        public async Task UpdateAsync(int id, SensorsDto sensorsDto)
+        public async Task UpdateAsync(int id, SensorDto sensorDto)
         {
             var sensorsModel = new SensorsModel
             {
                 SensorId = id,
-                SensorName = sensorsDto.SensorName,
-                Type = sensorsDto.Type,
-                TenantId = sensorsDto.TenantId,
-                ApplicationId = sensorsDto.ApplicationId,
-                ClientSecret = sensorsDto.ClientSecret,
-                isEnabled = sensorsDto.isEnabled,
-                CreatedAd = sensorsDto.CreatedAd,
-                LastRunAt = sensorsDto.LastRunAt
+                SensorName = sensorDto.SensorName,
+                Type = sensorDto.Type,
+                TenantId = sensorDto.TenantId,
+                ApplicationId = sensorDto.ApplicationId,
+                ClientSecret = sensorDto.ClientSecret,
+                isEnabled = sensorDto.isEnabled,
+                CreatedAd = sensorDto.CreatedAd,
+                LastRunAt = sensorDto.LastRunAt
             };
 
             await _sensorsRepository.UpdateAsync(sensorsModel);

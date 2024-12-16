@@ -25,7 +25,7 @@ namespace IncidentResponseAPI.Controllers
         // GET: api/Events
         [HttpGet]
         [SwaggerOperation(Summary = "Gets a list of events")]
-        public async Task<ActionResult<IEnumerable<EventsDto>>> GetAllEvents()
+        public async Task<ActionResult<IEnumerable<EventDto>>> GetAllEvents()
         {
             _logger.LogInformation("Fetching all events");
 
@@ -45,7 +45,7 @@ namespace IncidentResponseAPI.Controllers
         // GET: api/Events/5
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Gets an event by ID")]
-        public async Task<ActionResult<EventsDto>> GetEventbyId(int id)
+        public async Task<ActionResult<EventDto>> GetEventbyId(int id)
         {
             _logger.LogInformation("Fetching event with ID {Id}", id);
 
@@ -70,7 +70,7 @@ namespace IncidentResponseAPI.Controllers
         // POST: api/Events
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new event")]
-        public async Task<ActionResult<EventsDto>> PostEvent(EventsDto eventDto)
+        public async Task<ActionResult<EventDto>> PostEvent(EventDto eventDto)
         {
             _logger.LogInformation("Adding a new event");
 
@@ -90,7 +90,7 @@ namespace IncidentResponseAPI.Controllers
         // PUT: api/Events/5
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Updates an existing event")]
-        public async Task<IActionResult> PutEvent(int id, EventsDto eventDto)
+        public async Task<IActionResult> PutEvent(int id, EventDto eventDto)
         {
             _logger.LogInformation("Updating event with ID {Id}", id);
             
