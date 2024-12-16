@@ -6,6 +6,7 @@ using IncidentResponseAPI.Services;
 using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,8 @@ var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET")
     ?? throw new InvalidOperationException("The ClientSecret property has not been initialized.");
 
 // Add services to the container.
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IEventsRepository, EventsRepository>();
 builder.Services.AddScoped<IEventsService, EventsService>();
