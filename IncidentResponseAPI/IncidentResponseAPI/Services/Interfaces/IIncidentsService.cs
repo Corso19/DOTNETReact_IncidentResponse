@@ -4,10 +4,10 @@ namespace IncidentResponseAPI.Services.Interfaces
 {
     public interface IIncidentsService
     {
-        Task<IEnumerable<IncidentsDto>> GetAllAsync();
-        Task<IncidentsDto> GetByIdAsync(int id);
-        Task AddAsync(IncidentsDto incidentsDto);
-        Task UpdateAsync(int id, IncidentsDto incidentsDto);
+        Task<IEnumerable<IncidentDto>> GetAllAsync();
+        Task<IncidentDto> GetByIdAsync(int id);
+        Task AddAsync(IncidentDto incidentDto);
+        Task UpdateAsync(int id, IncidentDto incidentDto);
         Task DeleteAsync(int id);
     }
 }

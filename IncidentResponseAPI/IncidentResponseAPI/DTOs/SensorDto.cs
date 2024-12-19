@@ -1,6 +1,6 @@
 ﻿namespace IncidentResponseAPI.Dtos
 {
-    public class SensorsDto
+    public class SensorDto
     {
         public int SensorId { get; set; }
         public string SensorName { get; set; }

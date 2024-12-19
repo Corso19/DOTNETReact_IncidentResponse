@@ -14,10 +14,10 @@ namespace IncidentResponseAPI.Services.Implementations
             _incidentsRepository = incidentsRepository;
         }
 
-        public async Task<IEnumerable<IncidentsDto>> GetAllAsync()
+        public async Task<IEnumerable<IncidentDto>> GetAllAsync()
         {
             var incidents = await _incidentsRepository.GetAllAsync();
-            return incidents.Select(i => new IncidentsDto
+            return incidents.Select(i => new IncidentDto
             {
                 IncidentId = i.IncidentId,
                 Title = i.Title,
@@ -27,12 +27,12 @@ namespace IncidentResponseAPI.Services.Implementations
             }).ToList();
         }
 
-        public async Task<IncidentsDto> GetByIdAsync(int id)
+        public async Task<IncidentDto> GetByIdAsync(int id)
         {
             var i = await _incidentsRepository.GetByIdAsync(id);
             if (i == null) return null;
 
-            return new IncidentsDto
+            return new IncidentDto
             {
                 IncidentId = i.IncidentId,
                 Title = i.Title,
@@ -42,28 +42,28 @@ namespace IncidentResponseAPI.Services.Implementations
             };
         }
 
-        public async Task AddAsync(IncidentsDto incidentsDto)
+        public async Task AddAsync(IncidentDto incidentDto)
         {
             var incidentsModel = new IncidentsModel
             {
-                Title = incidentsDto.Title,
-                Description = incidentsDto.Description,
-                DetectedAt = incidentsDto.DetectedAt,
-                Status = incidentsDto.Status
+                Title = incidentDto.Title,
+                Description = incidentDto.Description,
+                DetectedAt = incidentDto.DetectedAt,
+                Status = incidentDto.Status
             };
 
             await _incidentsRepository.AddAsync(incidentsModel);
         }
 
-        public async Task UpdateAsync(int id, IncidentsDto incidentsDto)
+        public async Task UpdateAsync(int id, IncidentDto incidentDto)
         {
             var incidentsModel = new IncidentsModel
             {
                 IncidentId = id,
-                Title = incidentsDto.Title,
-                Description = incidentsDto.Description,
-                DetectedAt = incidentsDto.DetectedAt,
-                Status = incidentsDto.Status
+                Title = incidentDto.Title,
+                Description = incidentDto.Description,
+                DetectedAt = incidentDto.DetectedAt,
+                Status = incidentDto.Status
             };
 
             await _incidentsRepository.UpdateAsync(incidentsModel);
