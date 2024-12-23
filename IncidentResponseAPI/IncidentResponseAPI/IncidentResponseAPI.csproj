@@ -31,8 +31,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
-
 </Project>

@@ -28,12 +28,14 @@ namespace IncidentResponseAPI.Services.Implementations
                     SensorId = s.SensorId,
                     SensorName = s.SensorName,
                     Type = s.Type,
-                    TenantId = s.TenantId,
-                    ApplicationId = s.ApplicationId,
-                    ClientSecret = s.ClientSecret,
+                    Configuration = s.Configuration,
                     isEnabled = s.isEnabled,
-                    CreatedAd = s.CreatedAd,
-                    LastRunAt = s.LastRunAt
+                    CreatedAt = s.CreatedAt,
+                    LastRunAt = s.LastRunAt,
+                    NextRunAfter = s.NextRunAfter,
+                    LastError = s.LastError,
+                    RetrievalInterval = s.RetrievalInterval,
+                    LastEventMarker = s.LastEventMarker
                 }).ToList();
             }
             catch (Exception ex)
@@ -61,12 +63,14 @@ namespace IncidentResponseAPI.Services.Implementations
                     SensorId = s.SensorId,
                     SensorName = s.SensorName,
                     Type = s.Type,
-                    TenantId = s.TenantId,
-                    ApplicationId = s.ApplicationId,
-                    ClientSecret = s.ClientSecret,
+                    Configuration = s.Configuration,
                     isEnabled = s.isEnabled,
-                    CreatedAd = s.CreatedAd,
-                    LastRunAt = s.LastRunAt
+                    CreatedAt = s.CreatedAt,
+                    LastRunAt = s.LastRunAt,
+                    NextRunAfter = s.NextRunAfter,
+                    LastError = s.LastError,
+                    RetrievalInterval = s.RetrievalInterval,
+                    LastEventMarker = s.LastEventMarker
                 };
             }
             catch (Exception ex)
@@ -85,12 +89,14 @@ namespace IncidentResponseAPI.Services.Implementations
                 {
                     SensorName = sensorDto.SensorName,
                     Type = sensorDto.Type,
-                    TenantId = sensorDto.TenantId,
-                    ApplicationId = sensorDto.ApplicationId,
-                    ClientSecret = sensorDto.ClientSecret,
+                    Configuration = sensorDto.Configuration,
                     isEnabled = sensorDto.isEnabled,
-                    CreatedAd = sensorDto.CreatedAd,
-                    LastRunAt = sensorDto.LastRunAt
+                    CreatedAt = sensorDto.CreatedAt,
+                    LastRunAt = sensorDto.LastRunAt,
+                    NextRunAfter = sensorDto.NextRunAfter,
+                    LastError = sensorDto.LastError,
+                    RetrievalInterval = sensorDto.RetrievalInterval,
+                    LastEventMarker = sensorDto.LastEventMarker
                 };
 
                 await _sensorsRepository.AddAsync(sensorsModel);
@@ -113,12 +119,14 @@ namespace IncidentResponseAPI.Services.Implementations
                     SensorId = id,
                     SensorName = sensorDto.SensorName,
                     Type = sensorDto.Type,
-                    TenantId = sensorDto.TenantId,
-                    ApplicationId = sensorDto.ApplicationId,
-                    ClientSecret = sensorDto.ClientSecret,
+                    Configuration = sensorDto.Configuration,
                     isEnabled = sensorDto.isEnabled,
-                    CreatedAd = sensorDto.CreatedAd,
-                    LastRunAt = sensorDto.LastRunAt
+                    CreatedAt = sensorDto.CreatedAt,
+                    LastRunAt = sensorDto.LastRunAt,
+                    NextRunAfter = sensorDto.NextRunAfter,
+                    LastError = sensorDto.LastError,
+                    RetrievalInterval = sensorDto.RetrievalInterval,
+                    LastEventMarker = sensorDto.LastEventMarker
                 };
 
                 await _sensorsRepository.UpdateAsync(sensorsModel);
