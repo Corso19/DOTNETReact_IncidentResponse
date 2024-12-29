@@ -12,6 +12,14 @@
 }
 
 /* global styels */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   background-color: var(--bs-bg-light);
   color: var(--bs-gray-dark);
@@ -24,7 +32,6 @@ body {
 }
 
 /* color styles */
-
 .color-primary-hover {
   color: var(--bs-primary-hover);
 }
@@ -84,4 +91,16 @@ body {
 
 .sensors-table td {
   border: 2px solid var(--bs-gray-dark) !important;
+}
+
+/* modal styles */
+.modal-header {
+  background-color: var(--bs-primary-dark) !important;
+  color: var(--bs-bg-light) !important;
+}
+
+.custom-hr {
+  height: 2px !important;
+  background-color: var(--bs-gray-dark);
+  opacity: 1 !important;
 }
