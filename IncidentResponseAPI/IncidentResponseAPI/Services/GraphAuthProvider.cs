@@ -18,12 +18,20 @@ namespace IncidentResponseAPI.Services
             _applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID");
         }
 
-        public async Task<GraphServiceClient> GetAuthenticatedGraphClient()
+        public async Task<GraphServiceClient> GetAuthenticatedGraphClient(string clientSecret, string applicationId, string tenantId)
         {
-            var clientSecretCredential = new ClientSecretCredential(_tenantId, _applicationId, _clientSecret);
-            var graphServiceClient = new GraphServiceClient(clientSecretCredential, new[] { "https://graph.microsoft.com/.default" });
+            // var clientSecretCredential = new ClientSecretCredential(_tenantId, _applicationId, _clientSecret);
+            // var graphServiceClient = new GraphServiceClient(clientSecretCredential, new[] { "https://graph.microsoft.com/.default" });
+            //
+            // return graphServiceClient;
 
-            return graphServiceClient;
+            var options = new TokenCredentialOptions
+            {
+                AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
+            };
+            
+            var clientSecretCredential = new ClientSecretCredential(tenantId, applicationId, clientSecret, options);
+            return new GraphServiceClient(clientSecretCredential);
         }
     }
 }

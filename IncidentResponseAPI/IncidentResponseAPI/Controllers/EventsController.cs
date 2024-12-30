@@ -1,11 +1,9 @@
 ﻿using IncidentResponseAPI.Dtos;
-using IncidentResponseAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
+using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Services.Interfaces;
+using Newtonsoft.Json;
 
 namespace IncidentResponseAPI.Controllers
 {
@@ -14,11 +12,13 @@ namespace IncidentResponseAPI.Controllers
     public class EventsController : ControllerBase
     {
         private readonly IEventsService _eventsService;
+        private readonly ISensorsService _sensorService;
         private readonly ILogger<EventsController> _logger;
 
-        public EventsController(IEventsService eventsService, ILogger<EventsController> logger)
+        public EventsController(IEventsService eventsService, ISensorsService sensorsService, ILogger<EventsController> logger)
         {
             _eventsService = eventsService;
+            _sensorService = sensorsService;
             _logger = logger;
         }
 
@@ -140,25 +140,26 @@ namespace IncidentResponseAPI.Controllers
             }
         }
         
-        // POST: api/Events/sync/{userId}
-        [HttpPost("sync/{userId}")]
-        [SwaggerOperation(Summary = "Syncs events (emails) for a specific user")]
-        public async Task<IActionResult> SyncEvents(string userId)
+        // POST: api/Events/sync/{sensorId}
+        [HttpPost("sync/{sensorId}")]
+        [SwaggerOperation(Summary = "Syncs events (emails) for a specific sensor")]
+        public async Task<IActionResult> SyncEvents(int sensorId)
         {
-            _logger.LogInformation("Syncing events for user {UserId}", userId);
+            _logger.LogInformation("Syncing events for sensor {SensorId}", sensorId);
 
             try
             {
-                await _eventsService.SyncEventsAsync(userId);
-                _logger.LogInformation("Events synced successfully for user {UserId}", userId);
+                await _eventsService.SyncEventsAsync(sensorId);
+                _logger.LogInformation("Events synced successfully for sensor {SensorId}", sensorId);
                 return Ok("Events synced successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occured while syncing events for user {UserId}", userId);
-                return StatusCode(500, "An error occured while syncing events.");
+                _logger.LogError(ex, "Error occurred while syncing events for sensor {SensorId}", sensorId);
+                return StatusCode(500, "An error occurred while syncing events.");
             }
         }
+
         
         // GET: api/Events/{eventId}/attachments
         [HttpGet("{eventId}/attachments")]
@@ -185,29 +186,54 @@ namespace IncidentResponseAPI.Controllers
             }
         }
         
-        // GET: api/Events/{userId}/message/{messageId}
-        [HttpGet("{userId}/message/{messageId}")]
+        [HttpGet("{sensorId}/message/{messageId}")]
         [SwaggerOperation(Summary = "Fetches the content of a specific email message")]
-        public async Task<ActionResult<string>> GetMessageContent(string userId, string messageId)
+        public async Task<ActionResult<string>> GetMessageContent(int sensorId, string messageId)
         {
-            _logger.LogInformation("Fetching content for message with ID {MessageId} for user {UserId}", messageId, userId);
+            _logger.LogInformation("Fetching content for message with ID {MessageId} for sensor {SensorId}", messageId, sensorId);
 
             try
             {
-                var message = await _eventsService.FetchMessageContentAsync(userId, messageId);
+                // Fetch sensor using the SensorService
+                var sensor = await _sensorService.GetByIdAsync(sensorId);
+                if (sensor == null)
+                {
+                    _logger.LogWarning("Sensor with ID {SensorId} not found.", sensorId);
+                    return NotFound("Sensor not found.");
+                }
+
+                // Deserialize the configuration JSON
+                var config = JsonConvert.DeserializeObject<Configuration>(sensor.Configuration);
+                if (config == null)
+                {
+                    _logger.LogWarning("Invalid configuration for sensor {SensorId}.", sensorId);
+                    return BadRequest("Invalid configuration.");
+                }
+
+                // Fetch the message content using the events service
+                var message = await _eventsService.FetchMessageContentAsync(
+                    config.ClientSecret,
+                    config.ApplicationId,
+                    config.TenantId,
+                    messageId
+                );
+
                 if (message == null)
                 {
-                    _logger.LogWarning("Message with ID {MessageId} not found for user {UserId}", messageId, userId);
+                    _logger.LogWarning("Message with ID {MessageId} not found for sensor {SensorId}", messageId, sensorId);
                     return NotFound("Message not found.");
                 }
-                _logger.LogInformation("Successfully fetched content for message with ID {MessageId} for user {UserId}", messageId, userId);
+
+                _logger.LogInformation("Successfully fetched content for message with ID {MessageId} for sensor {SensorId}", messageId, sensorId);
                 return Ok(message.Body.Content);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occured while fetching content for message with ID {MessageId} for user {UserId}", messageId, userId);
-                return StatusCode(500, "An error occured while fetching message content.");
+                _logger.LogError(ex, "Error occurred while fetching content for message with ID {MessageId} for sensor {SensorId}", messageId, sensorId);
+                return StatusCode(500, "An error occurred while fetching message content.");
             }
         }
+
+
     }
 }

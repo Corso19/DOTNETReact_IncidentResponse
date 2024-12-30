@@ -42,7 +42,7 @@ builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
 builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
 builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
-builder.Services.AddSingleton<GraphAuthService>();
+builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 //Adding database context
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
