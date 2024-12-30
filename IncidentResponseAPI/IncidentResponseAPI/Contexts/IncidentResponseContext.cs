@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using IncidentResponseAPI.Models;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 namespace IncidentResponseAPI.Models
 {
@@ -17,24 +15,29 @@ namespace IncidentResponseAPI.Models
         public DbSet<SensorsModel> Sensors { get; set; }
         public DbSet<RecommendationsModel> Recommendations { get; set; }
         public DbSet<AttachmentModel> Attachments { get; set; }
-        
-        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Define composite key for IncidentEventModel
+            // Composite key for IncidentEventModel
             modelBuilder.Entity<IncidentEventModel>()
                 .HasKey(ie => new { ie.IncidentId, ie.EventId });
 
+            // Relationship for Attachments
             modelBuilder.Entity<AttachmentModel>()
                 .HasOne(a => a.Event)
                 .WithMany(e => e.Attachments)
                 .HasForeignKey(a => a.EventId)
-                .OnDelete(DeleteBehavior.Cascade); //Optional
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // SensorsModel Constraints
+            modelBuilder.Entity<SensorsModel>()
+                .HasCheckConstraint("CK_Sensors_RetrievalInterval", "[RetrievalInterval] BETWEEN 1 AND 1440")
+                .Property(s => s.Configuration)
+                .IsRequired(); // Ensures non-null Configuration
+
+            // Add more model-specific configurations as needed.
         }
-        public DbSet<IncidentResponseAPI.Models.RecommendationsModel> RecommendationsModel { get; set; } = default!;
     }
 }

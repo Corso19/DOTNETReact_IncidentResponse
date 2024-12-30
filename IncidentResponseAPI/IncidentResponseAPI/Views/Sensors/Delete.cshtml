@@ -4,68 +4,77 @@
     ViewData["Title"] = "Delete";
 }
 
-<h1>Delete</h1>
+<h2>Delete</h2>
 
 <h3>Are you sure you want to delete this?</h3>
 <div>
-    <h4>SensorsModel</h4>
+    <h4>Sensor</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.SensorName)
+            Sensor Name
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.SensorName)
+            @Model.SensorName
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Type)
+            Type
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Type)
+            @Model.Type
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TenantId)
+            Configuration
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.TenantId)
+            @Model.Configuration
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ApplicationId)
+            Is Enabled
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ApplicationId)
+            @Model.isEnabled
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ClientSecret)
+            Created At
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ClientSecret)
+            @Model.CreatedAt.ToString("g")
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.isEnabled)
+            Last Run At
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.isEnabled)
+            @Model.LastRunAt?.ToString("g") ?? "N/A"
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAd)
+            Next Run After
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAd)
+            @Model.NextRunAfter?.ToString("g") ?? "N/A"
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.LastRunAt)
+            Retrieval Interval
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.LastRunAt)
+            @Model.RetrievalInterval
+        </dd>
+        <dt class="col-sm-2">
+            Last Error
+        </dt>
+        <dd class="col-sm-10">
+            @Model.LastError ?? "N/A"
+        </dd>
+        <dt class="col-sm-2">
+            Last Event Marker
+        </dt>
+        <dd class="col-sm-10">
+            @Model.LastEventMarker ?? "N/A"
         </dd>
     </dl>
-
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="SensorId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
 </div>
-
-
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="SensorId" />
+    <button type="submit" class="btn btn-danger">Delete</button> |
+    <a asp-action="Index">Back to List</a>
+</form>

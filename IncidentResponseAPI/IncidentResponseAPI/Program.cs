@@ -1,4 +1,5 @@
 using DotNetEnv;
+using IncidentResponseAPI.Interfaces;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories;
 using IncidentResponseAPI.Repositories.Implementations;
@@ -39,6 +40,7 @@ builder.Services.AddScoped<IIncidentsRepository, IncidentsRepository>();
 builder.Services.AddScoped<IIncidentsService, IncidentsService>();
 builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
 builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
+builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddSingleton<GraphAuthService>();
 //Adding database context
