@@ -1,4 +1,5 @@
 using DotNetEnv;
+using IncidentResponseAPI.Interfaces;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories;
 using IncidentResponseAPI.Repositories.Implementations;
@@ -17,12 +18,12 @@ Env.Load();
 // Debug logging to verify environment variable loading
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
-var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID")
-    ?? throw new InvalidOperationException("The ApplicationId property has not been initialized.");
-var tenantId = Environment.GetEnvironmentVariable("TENANT_ID")
-    ?? throw new InvalidOperationException("The TenantId property has not been initialized.");
-var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET")
-    ?? throw new InvalidOperationException("The ClientSecret property has not been initialized.");
+// var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID")
+//     ?? throw new InvalidOperationException("The ApplicationId property has not been initialized.");
+// var tenantId = Environment.GetEnvironmentVariable("TENANT_ID")
+//     ?? throw new InvalidOperationException("The TenantId property has not been initialized.");
+// var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET")
+//     ?? throw new InvalidOperationException("The ClientSecret property has not been initialized.");
 
 // Add services to the container.
 builder.Logging.ClearProviders();
@@ -39,8 +40,9 @@ builder.Services.AddScoped<IIncidentsRepository, IncidentsRepository>();
 builder.Services.AddScoped<IIncidentsService, IncidentsService>();
 builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
 builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
+builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
-builder.Services.AddSingleton<GraphAuthService>();
+builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 //Adding database context
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>

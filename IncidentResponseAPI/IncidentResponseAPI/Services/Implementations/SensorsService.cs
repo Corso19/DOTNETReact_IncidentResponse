@@ -1,7 +1,9 @@
 ﻿using IncidentResponseAPI.Dtos;
+using IncidentResponseAPI.Interfaces;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories;
 using Microsoft.Extensions.Logging;
+using Quartz.Xml;
 
 namespace IncidentResponseAPI.Services.Implementations
 {
@@ -9,11 +11,13 @@ namespace IncidentResponseAPI.Services.Implementations
     {
         private readonly ISensorsRepository _sensorsRepository;
         private readonly ILogger<SensorsService> _logger;
+        private readonly IConfigurationValidator _configurationValidator;
 
-        public SensorsService(ISensorsRepository sensorsRepository, ILogger<SensorsService> logger)
+        public SensorsService(ISensorsRepository sensorsRepository, ILogger<SensorsService> logger, IConfigurationValidator configurationValidator)
         {
             _sensorsRepository = sensorsRepository;
             _logger = logger;
+            _configurationValidator = configurationValidator;
         }
 
         public async Task<IEnumerable<SensorDto>> GetAllAsync()
@@ -28,12 +32,14 @@ namespace IncidentResponseAPI.Services.Implementations
                     SensorId = s.SensorId,
                     SensorName = s.SensorName,
                     Type = s.Type,
-                    TenantId = s.TenantId,
-                    ApplicationId = s.ApplicationId,
-                    ClientSecret = s.ClientSecret,
+                    Configuration = s.Configuration,
                     isEnabled = s.isEnabled,
-                    CreatedAd = s.CreatedAd,
-                    LastRunAt = s.LastRunAt
+                    CreatedAt = s.CreatedAt,
+                    LastRunAt = s.LastRunAt,
+                    NextRunAfter = s.NextRunAfter,
+                    LastError = s.LastError,
+                    RetrievalInterval = s.RetrievalInterval,
+                    LastEventMarker = s.LastEventMarker
                 }).ToList();
             }
             catch (Exception ex)
@@ -61,12 +67,14 @@ namespace IncidentResponseAPI.Services.Implementations
                     SensorId = s.SensorId,
                     SensorName = s.SensorName,
                     Type = s.Type,
-                    TenantId = s.TenantId,
-                    ApplicationId = s.ApplicationId,
-                    ClientSecret = s.ClientSecret,
+                    Configuration = s.Configuration,
                     isEnabled = s.isEnabled,
-                    CreatedAd = s.CreatedAd,
-                    LastRunAt = s.LastRunAt
+                    CreatedAt = s.CreatedAt,
+                    LastRunAt = s.LastRunAt,
+                    NextRunAfter = s.NextRunAfter,
+                    LastError = s.LastError,
+                    RetrievalInterval = s.RetrievalInterval,
+                    LastEventMarker = s.LastEventMarker
                 };
             }
             catch (Exception ex)
@@ -81,20 +89,28 @@ namespace IncidentResponseAPI.Services.Implementations
             _logger.LogInformation("Adding a new sensor.");
             try
             {
+                _configurationValidator.Validate(sensorDto.Configuration);
+
                 var sensorsModel = new SensorsModel
                 {
                     SensorName = sensorDto.SensorName,
                     Type = sensorDto.Type,
-                    TenantId = sensorDto.TenantId,
-                    ApplicationId = sensorDto.ApplicationId,
-                    ClientSecret = sensorDto.ClientSecret,
+                    Configuration = sensorDto.Configuration,
                     isEnabled = sensorDto.isEnabled,
-                    CreatedAd = sensorDto.CreatedAd,
-                    LastRunAt = sensorDto.LastRunAt
+                    CreatedAt = sensorDto.CreatedAt,
+                    LastRunAt = sensorDto.LastRunAt,
+                    NextRunAfter = sensorDto.NextRunAfter,
+                    LastError = sensorDto.LastError,
+                    RetrievalInterval = sensorDto.RetrievalInterval,
+                    LastEventMarker = sensorDto.LastEventMarker
                 };
 
                 await _sensorsRepository.AddAsync(sensorsModel);
                 _logger.LogInformation("Successfully added a new sensor.");
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation failed for new sensor");
             }
             catch (Exception ex)
             {
@@ -108,21 +124,29 @@ namespace IncidentResponseAPI.Services.Implementations
             _logger.LogInformation("Updating sensor with ID {SensorId}.", id);
             try
             {
+                _configurationValidator.Validate(sensorDto.Configuration);
+
                 var sensorsModel = new SensorsModel
                 {
                     SensorId = id,
                     SensorName = sensorDto.SensorName,
                     Type = sensorDto.Type,
-                    TenantId = sensorDto.TenantId,
-                    ApplicationId = sensorDto.ApplicationId,
-                    ClientSecret = sensorDto.ClientSecret,
+                    Configuration = sensorDto.Configuration,
                     isEnabled = sensorDto.isEnabled,
-                    CreatedAd = sensorDto.CreatedAd,
-                    LastRunAt = sensorDto.LastRunAt
+                    CreatedAt = sensorDto.CreatedAt,
+                    LastRunAt = sensorDto.LastRunAt,
+                    NextRunAfter = sensorDto.NextRunAfter,
+                    LastError = sensorDto.LastError,
+                    RetrievalInterval = sensorDto.RetrievalInterval,
+                    LastEventMarker = sensorDto.LastEventMarker
                 };
 
                 await _sensorsRepository.UpdateAsync(sensorsModel);
                 _logger.LogInformation("Successfully updated sensor with ID {SensorId}.", id);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation failed for sensor with ID {SensorId}.", id);
             }
             catch (Exception ex)
             {

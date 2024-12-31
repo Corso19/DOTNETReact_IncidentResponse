@@ -1,4 +1,5 @@
-﻿using IncidentResponseAPI.Dtos;
+﻿using System.ComponentModel.DataAnnotations;
+using IncidentResponseAPI.Dtos;
 using IncidentResponseAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -76,6 +77,11 @@ namespace IncidentResponseAPI.Controllers
                 _logger.LogInformation("Successfully created sensor with ID {Id}", sensorDto.SensorId);
                 return CreatedAtAction(nameof(GetSensorById), new { id = sensorDto.SensorId }, sensorDto);
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error occured while creating the new sensor (configuration)");
+                return BadRequest("Validation error regarding config occured while creating the sensor.");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while creating a new sensor");
@@ -101,6 +107,11 @@ namespace IncidentResponseAPI.Controllers
                 await _sensorsService.UpdateAsync(id, sensorDto);
                 _logger.LogInformation("Successfully updated sensor with ID {Id}", id);
                 return NoContent();
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation failed for sensor with ID {Id}", id);
+                return BadRequest("Validation error occurred while updating the sensor.");
             }
             catch (Exception ex)
             {

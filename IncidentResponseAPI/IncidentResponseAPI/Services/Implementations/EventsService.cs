@@ -1,10 +1,10 @@
-﻿using System.Net;
-using IncidentResponseAPI.Dtos;
+﻿using IncidentResponseAPI.Dtos;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories;
 using IncidentResponseAPI.Services.Interfaces;
-using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Models;
+using System.Linq;
+using Newtonsoft.Json;  
 
 namespace IncidentResponseAPI.Services.Implementations
 {
@@ -13,18 +13,22 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly IEventsRepository _eventsRepository;
         private readonly IAttachmentRepository _attachmentRepository;
         private readonly GraphAuthProvider _graphAuthProvider;
+        private readonly IGraphAuthService _graphAuthService;
         private readonly ILogger<EventsService> _logger;
-
+        private readonly ISensorsRepository _sensorsRepository;
+        
         public EventsService(
             IEventsRepository eventsRepository,
             IAttachmentRepository attachmentRepository,
-            GraphAuthProvider graphAuthProvider,
-            ILogger<EventsService> logger)
+            IGraphAuthService graphAuthService,
+            ILogger<EventsService> logger,
+            ISensorsRepository sensorsRepository)
         {
             _eventsRepository = eventsRepository;
             _attachmentRepository = attachmentRepository;
-            _graphAuthProvider = graphAuthProvider;
+            _graphAuthService = graphAuthService;
             _logger = logger;
+            _sensorsRepository = sensorsRepository;
         }
 
         public async Task<IEnumerable<EventDto>> GetAllEventsAsync()
@@ -144,74 +148,262 @@ namespace IncidentResponseAPI.Services.Implementations
                 throw;
             }
         }
-
-        public async Task SyncEventsAsync(string userId)
+        
+        // public async Task SyncEventsAsync(int sensorId)
+        // {
+        //     _logger.LogInformation("Starting sync for sensor: {SensorId}", sensorId);
+        //
+        //     try
+        //     {
+        //         // Fetch sensor using SensorId
+        //         var sensor = await _sensorsRepository.GetByIdAsync(sensorId);
+        //         if (sensor == null)
+        //         {
+        //             _logger.LogWarning("Sensor with ID {SensorId} not found.", sensorId);
+        //             return;
+        //         }
+        //
+        //         // Validate configuration JSON
+        //         var config = JsonConvert.DeserializeObject<Configuration>(sensor.Configuration);
+        //         if (config == null || string.IsNullOrEmpty(config.ClientSecret) ||
+        //             string.IsNullOrEmpty(config.ApplicationId) || string.IsNullOrEmpty(config.TenantId))
+        //         {
+        //             _logger.LogWarning("Invalid configuration for sensor {SensorId}.", sensorId);
+        //             return;
+        //         }
+        //
+        //         // Retrieve last processed timestamp
+        //         DateTime? lastProcessedTime = null;
+        //         if (!string.IsNullOrEmpty(sensor.LastEventMarker))
+        //         {
+        //             var lastEventMarkerJson =
+        //                 JsonConvert.DeserializeObject<Dictionary<string, string>>(sensor.LastEventMarker);
+        //             if (lastEventMarkerJson != null && lastEventMarkerJson.ContainsKey("LastProcessedTime"))
+        //             {
+        //                 lastProcessedTime = DateTime.Parse(lastEventMarkerJson["LastProcessedTime"]);
+        //             }
+        //         }
+        //
+        //         // Fetch messages for all users
+        //         var messagesByUser = await _graphAuthService.FetchEmailsForAllUsersAsync(
+        //             config.ClientSecret,
+        //             config.ApplicationId,
+        //             config.TenantId,
+        //             lastProcessedTime);
+        //
+        //         DateTime? newLastProcessedTime = lastProcessedTime;
+        //
+        //         foreach (var (userPrincipalName, messages) in messagesByUser)
+        //         {
+        //             foreach (var message in messages)
+        //             {
+        //                 _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
+        //                     message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+        //                     message.Subject ?? "No subject");
+        //
+        //                 // Check if the message is already processed
+        //                 if (await _eventsRepository.GetByMessageIdAsync(message.Id) == null)
+        //                 {
+        //                     var eventModel = new EventsModel
+        //                     {
+        //                         SensorId = sensor.SensorId,
+        //                         TypeName = "Email",
+        //                         Subject = message.Subject ?? "No subject",
+        //                         Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+        //                         Details = message.Body?.Content ?? "No Content",
+        //                         Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
+        //                         isProcessed = false,
+        //                         MessageId = message.Id
+        //                     };
+        //
+        //                     await _eventsRepository.AddAsync(eventModel);
+        //
+        //                     // Fetch attachments for the message
+        //                     var attachments = await _graphAuthService.FetchAttachmentsAsync(
+        //                         config.ClientSecret,
+        //                         config.ApplicationId,
+        //                         config.TenantId,
+        //                         message.Id,
+        //                         userPrincipalName);
+        //
+        //                     foreach (var attachment in attachments.OfType<FileAttachment>())
+        //                     {
+        //                         var attachmentModel = new AttachmentModel
+        //                         {
+        //                             Name = attachment.Name ?? "Unnamed Attachment",
+        //                             Size = attachment.Size ?? 0,
+        //                             Content = attachment.ContentBytes,
+        //                             EventId = eventModel.EventId
+        //                         };
+        //
+        //                         await _attachmentRepository.AddAttachmentAsync(attachmentModel);
+        //                     }
+        //                 }
+        //
+        //                 // Update LastEventMarker
+        //                 newLastProcessedTime = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now;
+        //             }
+        //         }
+        //
+        //         // Save updated LastEventMarker
+        //         if (newLastProcessedTime.HasValue)
+        //         {
+        //             var updatedLastEventMarker = new Dictionary<string, string>
+        //             {
+        //                 { "LastProcessedTime", newLastProcessedTime.Value.ToString("o") }
+        //             };
+        //             sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
+        //
+        //             await _sensorsRepository.UpdateAsync(sensor);
+        //         }
+        //
+        //         _logger.LogInformation("Sync completed for sensor: {SensorId}", sensorId);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error occurred while syncing events for sensor: {SensorId}", sensorId);
+        //         throw;
+        //     }
+        // }
+        public async Task SyncEventsAsync(int sensorId)
         {
-            _logger.LogInformation("Starting sync for user: {UserId}", userId);
+            _logger.LogInformation("Starting sync for sensor: {SensorId}", sensorId);
+
             try
             {
-                var graphClient = await _graphAuthProvider.GetAuthenticatedGraphClient();
-                var messages = await graphClient.Users[userId].MailFolders["Inbox"].Messages.GetAsync();
-
-                foreach (var message in messages.Value)
+                // Fetch sensor using SensorId
+                var sensor = await _sensorsRepository.GetByIdAsync(sensorId);
+                if (sensor == null)
                 {
-                    if (await _eventsRepository.GetByMessageIdAsync(message.Id) == null)
+                    _logger.LogWarning("Sensor with ID {SensorId} not found.", sensorId);
+                    return;
+                }
+
+                // Validate configuration JSON
+                var config = JsonConvert.DeserializeObject<Configuration>(sensor.Configuration);
+                if (config == null || string.IsNullOrEmpty(config.ClientSecret) ||
+                    string.IsNullOrEmpty(config.ApplicationId) || string.IsNullOrEmpty(config.TenantId))
+                {
+                    _logger.LogWarning("Invalid configuration for sensor {SensorId}.", sensorId);
+                    return;
+                }
+
+                // Retrieve last processed timestamp
+                DateTime? lastProcessedTime = null;
+                if (!string.IsNullOrEmpty(sensor.LastEventMarker))
+                {
+                    var lastEventMarkerJson =
+                        JsonConvert.DeserializeObject<Dictionary<string, string>>(sensor.LastEventMarker);
+                    if (lastEventMarkerJson != null && lastEventMarkerJson.ContainsKey("LastProcessedTime"))
                     {
-                        _logger.LogInformation("Adding new event for message ID: {MessageId}", message.Id);
-
-                        var eventModel = new EventsModel
-                        {
-                            SensorId = 1,
-                            TypeName = "Email",
-                            Subject = message.Subject ?? "No subject",
-                            Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
-                            Details = message.Body?.Content ?? "No Content",
-                            Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
-                            isProcessed = false,
-                            MessageId = message.Id
-                        };
-
-                        await _eventsRepository.AddAsync(eventModel);
-
-                        var attachments = await graphClient.Users[userId].Messages[message.Id].Attachments.GetAsync();
-                        foreach (var attachment in attachments.Value.OfType<FileAttachment>())
-                        {
-                            var newAttachment = new AttachmentModel
-                            {
-                                Name = attachment.Name ?? "Unnamed Attachment",
-                                Size = attachment.Size ?? 0,
-                                Content = attachment.ContentBytes,
-                                EventId = eventModel.EventId
-                            };
-
-                            await _attachmentRepository.AddAttachmentAsync(newAttachment);
-                        }
+                        lastProcessedTime = DateTime.Parse(lastEventMarkerJson["LastProcessedTime"]);
                     }
                 }
 
-                _logger.LogInformation("Sync completed for user: {UserId}", userId);
+                // Fetch messages for all users
+                var messagesByUser = await _graphAuthService.FetchEmailsForAllUsersAsync(
+                    config.ClientSecret,
+                    config.ApplicationId,
+                    config.TenantId,
+                    lastProcessedTime);
+
+                DateTime? newLastProcessedTime = lastProcessedTime;
+                int newEmailsCount = 0;
+
+                foreach (var (userPrincipalName, messages) in messagesByUser)
+                {
+                    foreach (var message in messages)
+                    {
+                        _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
+                            message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+                            message.Subject ?? "No subject");
+
+                        // Check if the message is already processed
+                        if (await _eventsRepository.GetByMessageIdAsync(message.Id) == null)
+                        {
+                            var eventModel = new EventsModel
+                            {
+                                SensorId = sensor.SensorId,
+                                TypeName = "Email",
+                                Subject = message.Subject ?? "No subject",
+                                Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+                                Details = message.Body?.Content ?? "No Content",
+                                Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
+                                isProcessed = false,
+                                MessageId = message.Id
+                            };
+
+                            await _eventsRepository.AddAsync(eventModel);
+                            newEmailsCount++;
+
+                            // Fetch attachments for the message
+                            var attachments = await _graphAuthService.FetchAttachmentsAsync(
+                                config.ClientSecret,
+                                config.ApplicationId,
+                                config.TenantId,
+                                message.Id,
+                                userPrincipalName);
+
+                            foreach (var attachment in attachments.OfType<FileAttachment>())
+                            {
+                                var attachmentModel = new AttachmentModel
+                                {
+                                    Name = attachment.Name ?? "Unnamed Attachment",
+                                    Size = attachment.Size ?? 0,
+                                    Content = attachment.ContentBytes,
+                                    EventId = eventModel.EventId
+                                };
+
+                                await _attachmentRepository.AddAttachmentAsync(attachmentModel);
+                            }
+                        }
+
+                        // Update LastEventMarker
+                        newLastProcessedTime = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now;
+                    }
+                }
+
+                // Save updated LastEventMarker
+                if (newLastProcessedTime.HasValue)
+                {
+                    var updatedLastEventMarker = new Dictionary<string, string>
+                    {
+                        { "LastProcessedTime", newLastProcessedTime.Value.ToString("o") }
+                    };
+                    sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
+
+                    await _sensorsRepository.UpdateAsync(sensor);
+                }
+
+                _logger.LogInformation("Sync completed for sensor: {SensorId}. {NewEmailsCount} new emails were added.",
+                    sensorId, newEmailsCount);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while syncing events for user: {UserId}", userId);
+                _logger.LogError(ex, "Error occurred while syncing events for sensor: {SensorId}", sensorId);
                 throw;
             }
         }
 
-        public async Task<Message> FetchMessageContentAsync(string userId, string messageId)
+        public async Task<Message> FetchMessageContentAsync(string clientSecret, string applicationId, string tenantId, string messageId)
         {
-            _logger.LogInformation("Fetching message content for user: {UserId}, message ID: {MessageId}", userId, messageId);
+            _logger.LogInformation("Fetching message content for message ID: {MessageId}", messageId);
+
             try
             {
-                var graphClient = await _graphAuthProvider.GetAuthenticatedGraphClient();
-                return await graphClient.Users[userId].Messages[messageId].GetAsync();
+                // Use the graphAuthService to handle authentication
+                var graphClient = await _graphAuthService.GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
+
+                // Fetch the message content
+                return await graphClient.Me.Messages[messageId].GetAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching message content for user: {UserId}, message ID: {MessageId}", userId, messageId);
+                _logger.LogError(ex, "Error occurred while fetching message content for message ID: {MessageId}", messageId);
                 throw;
             }
         }
+
 
         public async Task<IEnumerable<AttachmentDto>> GetAttachmentsByEventIdAsync(int eventId)
         {

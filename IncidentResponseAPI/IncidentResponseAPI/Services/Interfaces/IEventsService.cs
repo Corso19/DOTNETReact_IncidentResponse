@@ -13,8 +13,10 @@ namespace IncidentResponseAPI.Services.Interfaces
         Task DeleteEventAsync(int id);
         
         //Email/Event-related operations
-        Task SyncEventsAsync(string userId);
-        Task <Message> FetchMessageContentAsync(string userid, string messageId);
+        Task SyncEventsAsync(int sensorId);
+
+        Task<Message> FetchMessageContentAsync(string clientSecret, string applicationId, string tenantId,
+            string messageId);
         
         //Attachment-related operations
         Task<IEnumerable<AttachmentDto>> GetAttachmentsByEventIdAsync(int eventId);

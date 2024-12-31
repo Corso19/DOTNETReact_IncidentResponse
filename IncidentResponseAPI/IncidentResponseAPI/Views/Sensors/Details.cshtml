@@ -4,65 +4,75 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h2>Details</h2>
 
 <div>
-    <h4>SensorsModel</h4>
+    <h4>Sensor</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.SensorName)
+            Sensor Name
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.SensorName)
+            @Model.SensorName
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Type)
+            Type
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Type)
+            @Model.Type
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TenantId)
+            Configuration
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.TenantId)
+            @Model.Configuration
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ApplicationId)
+            Is Enabled
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ApplicationId)
+            @Model.isEnabled
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ClientSecret)
+            Created At
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ClientSecret)
+            @Model.CreatedAt.ToString("g")
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.isEnabled)
+            Last Run At
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.isEnabled)
+            @Model.LastRunAt?.ToString("g") ?? "N/A"
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAd)
+            Next Run After
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAd)
+            @Model.NextRunAfter?.ToString("g") ?? "N/A"
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.LastRunAt)
+            Retrieval Interval
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.LastRunAt)
+            @Model.RetrievalInterval
+        </dd>
+        <dt class="col-sm-2">
+            Last Error
+        </dt>
+        <dd class="col-sm-10">
+            @Model.LastError ?? "N/A"
+        </dd>
+        <dt class="col-sm-2">
+            Last Event Marker
+        </dt>
+        <dd class="col-sm-10">
+            @Model.LastEventMarker ?? "N/A"
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.SensorId">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model.SensorId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
-
-

@@ -14,17 +14,17 @@ namespace IncidentResponseAPI.Repositories.Implementations
 
         public async Task<IEnumerable<RecommendationsModel>> GetAllAsync()
         {
-            return await _context.RecommendationsModel.ToListAsync();
+            return await _context.Recommendations.ToListAsync();
         }
 
         public async Task<RecommendationsModel> GetByIdAsync(int id)
         {
-            return await _context.RecommendationsModel.FindAsync(id);
+            return await _context.Recommendations.FindAsync(id);
         }
 
         public async Task AddAsync(RecommendationsModel recommendationsModel)
         {
-            _context.RecommendationsModel.Add(recommendationsModel);
+            _context.Recommendations.Add(recommendationsModel);
             await _context.SaveChangesAsync();
         }
 
@@ -36,10 +36,10 @@ namespace IncidentResponseAPI.Repositories.Implementations
 
         public async Task DeleteAsync(int id)
         {
-            var recommendationsModel = await _context.RecommendationsModel.FindAsync(id);
+            var recommendationsModel = await _context.Recommendations.FindAsync(id);
             if (recommendationsModel != null)
             {
-                _context.RecommendationsModel.Remove(recommendationsModel);
+                _context.Recommendations.Remove(recommendationsModel);
                 await _context.SaveChangesAsync();
             }
         }
