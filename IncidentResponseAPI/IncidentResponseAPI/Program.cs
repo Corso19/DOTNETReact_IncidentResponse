@@ -18,12 +18,12 @@ Env.Load();
 // Debug logging to verify environment variable loading
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
-var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID")
-    ?? throw new InvalidOperationException("The ApplicationId property has not been initialized.");
-var tenantId = Environment.GetEnvironmentVariable("TENANT_ID")
-    ?? throw new InvalidOperationException("The TenantId property has not been initialized.");
-var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET")
-    ?? throw new InvalidOperationException("The ClientSecret property has not been initialized.");
+// var applicationId = Environment.GetEnvironmentVariable("APPLICATION_ID")
+//     ?? throw new InvalidOperationException("The ApplicationId property has not been initialized.");
+// var tenantId = Environment.GetEnvironmentVariable("TENANT_ID")
+//     ?? throw new InvalidOperationException("The TenantId property has not been initialized.");
+// var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET")
+//     ?? throw new InvalidOperationException("The ClientSecret property has not been initialized.");
 
 // Add services to the container.
 builder.Logging.ClearProviders();

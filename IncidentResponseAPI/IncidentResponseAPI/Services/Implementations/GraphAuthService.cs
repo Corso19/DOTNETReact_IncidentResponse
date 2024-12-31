@@ -15,65 +15,41 @@ namespace IncidentResponseAPI.Services.Implementations
             _graphAuthProvider = graphAuthProvider;
             _logger = logger;
         }
-
-        public async Task<Dictionary<string, IEnumerable<Message>>> FetchEmailsForAllUsersAsync(string clientSecret,
-            string applicationId, string tenantId, DateTime? lastProcessedTime)
+        
+        public async Task<Dictionary<string, List<Message>>> FetchEmailsForAllUsersAsync(
+            string clientSecret, string applicationId, string tenantId, DateTime? lastProcessedTime)
         {
-            _logger.LogInformation("Fetching emails for all users");
+            var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
 
-            try
+            var emailsByUser = new Dictionary<string, List<Message>>();
+
+            // Fetch all users
+            var users = await graphClient.Users.GetAsync();
+            foreach (var user in users.Value)
             {
-                var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
+                var userId = user.Id;
 
-                // Get all users in the organization
-                var users = await graphClient.Users.GetAsync();
+                // Create a filter string if a lastProcessedTime is provided
+                var filter = lastProcessedTime.HasValue ? $"receivedDateTime gt {lastProcessedTime.Value:o}" : null;
 
-                var allEmails = new Dictionary<string, IEnumerable<Message>>();
-
-                foreach (var user in users.Value)
-                {
-                    _logger.LogInformation("Fetching emails for user: {UserPrincipalName}", user.UserPrincipalName);
-
-                    try
+                var messages = await graphClient.Users[userId]
+                    .MailFolders["Inbox"]
+                    .Messages
+                    .GetAsync(requestConfiguration =>
                     {
-                        // Build filter string for new emails
-                        string filterString = lastProcessedTime.HasValue
-                            ? $"receivedDateTime gt {lastProcessedTime.Value.ToString("o")}"
-                            : null;
-
-                        // Fetch messages directly with filter
-                        var messages = await graphClient
-                            .Users[user.Id]
-                            .MailFolders["Inbox"]
-                            .Messages
-                            .GetAsync(requestConfiguration =>
-                            {
-                                if (!string.IsNullOrEmpty(filterString))
-                                {
-                                    requestConfiguration.QueryParameters.Filter = filterString;
-                                }
-                            });
-
-                        if (messages != null && messages.Value.Any())
+                        if (!string.IsNullOrEmpty(filter))
                         {
-                            allEmails[user.UserPrincipalName] = messages.Value;
+                            requestConfiguration.QueryParameters.Filter = filter;
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error fetching emails for user: {UserPrincipalName}",
-                            user.UserPrincipalName);
-                        continue;
-                    }
-                }
+                    });
 
-                return allEmails;
+                if (messages?.Value != null)
+                {
+                    emailsByUser[userId] = messages.Value.ToList();
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching emails for all users");
-                throw;
-            }
+
+            return emailsByUser;
         }
 
         
