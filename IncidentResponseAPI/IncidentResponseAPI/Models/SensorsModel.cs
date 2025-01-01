@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices.JavaScript;
 using IncidentResponseAPI.Helpers;
 
 namespace IncidentResponseAPI.Models

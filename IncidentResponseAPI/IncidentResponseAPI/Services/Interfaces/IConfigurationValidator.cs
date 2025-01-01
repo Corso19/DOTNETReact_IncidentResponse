@@ -1,4 +1,4 @@
-﻿namespace IncidentResponseAPI.Interfaces
+﻿namespace IncidentResponseAPI.Services.Interfaces
 {
     public interface IConfigurationValidator
     {

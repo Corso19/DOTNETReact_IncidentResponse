@@ -1,5 +1,6 @@
 ﻿using IncidentResponseAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using IncidentResponseAPI.Repositories.Interfaces;
 
 namespace IncidentResponseAPI.Repositories.Implementations;
 

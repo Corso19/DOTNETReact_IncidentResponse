@@ -1,6 +1,7 @@
 ﻿using IncidentResponseAPI.Dtos;
 using IncidentResponseAPI.Models;
-using IncidentResponseAPI.Repositories;
+using IncidentResponseAPI.Repositories.Interfaces;
+using IncidentResponseAPI.Services.Interfaces;
 
 namespace IncidentResponseAPI.Services.Implementations
 {

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using IncidentResponseAPI.Models;
-using IncidentResponseAPI.Interfaces;
+using IncidentResponseAPI.Services.Interfaces;
 
 namespace IncidentResponseAPI.Services;
 

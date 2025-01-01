@@ -1,6 +1,6 @@
 ﻿using IncidentResponseAPI.Models;
 
-namespace IncidentResponseAPI.Repositories
+namespace IncidentResponseAPI.Repositories.Interfaces
 {
     public interface ISensorsRepository
     {

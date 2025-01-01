@@ -1,6 +1,6 @@
 ﻿using IncidentResponseAPI.Dtos;
 
-namespace IncidentResponseAPI.Services
+namespace IncidentResponseAPI.Services.Interfaces
 {
     public interface IRecommendationsService
     {
