@@ -13,27 +13,46 @@ const FormModal = ({
     submitButtonDisabled,
     disabledButtonMessage, 
     submitButtonLoading, 
-    onSubmitClick
+    onSubmitClick,
+    width
 }) => {
     return (
-        <Modal isOpen={showModal}>
+        <Modal 
+            isOpen={showModal}
+            style={{
+                content: {
+                    top: "50%",
+                    left: "50%",
+                    right: "auto",
+                    bottom: "auto",
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "white",
+                    width: width,
+                    height: "auto",
+                    maxHeight: "80vh",
+                    maxWidth: "90%",
+                    overflowY: "auto",
+                    overflowX: "hidden"
+                }
+            }}
+        >
             <div className="modal-content d-flex card">
                 {/* MODAL HEADER*/}
-                <div className="modal-header align-items-center" style={{ width: "100%" }}>
+                <div className="modal-header align-items-center color-bs-primary py-2" style={{ width: "100%"}}>
                     <h1 className="text-center mx-auto py-0 my-0">{title}</h1>
                 </div>
-                <hr></hr>
+                <hr className="custom-hr"></hr>
 
                 {/* MODAL BODY*/}
                 <div className="modal-body"> 
                     {children}
                 </div>
-                <hr></hr>
+                <hr className="custom-hr"></hr>
 
                 {/* Modal Footer */}
-                <div className="modal-footer d-flex justify-content-between mb-0">
+                <div className="modal-footer d-flex justify-content-between mb-0 py-2">
                     <Button
-                        className="me-3 ps-4 pe-4"
+                        className="ms-3 px-4"
                         variant="outline-secondary"
                         onClick={() => setShowModal(false)}
                     >
@@ -45,9 +64,8 @@ const FormModal = ({
                             loading={submitButtonLoading}
                             onClick={onSubmitClick}
                             text="Save"
-                            className="ms-3 px-4 me-1"
+                            className="me-3 px-4"
                             variant="outline-primary"
-                            // style={{ width: submitBttnSize ? submitBttnSize : "120px" }}
                         />
                         {submitButtonDisabled && (
                             <Tooltip
