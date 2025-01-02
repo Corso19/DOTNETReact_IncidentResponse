@@ -1,8 +1,7 @@
 ﻿using IncidentResponseAPI.Dtos;
-using IncidentResponseAPI.Interfaces;
 using IncidentResponseAPI.Models;
-using IncidentResponseAPI.Repositories;
-using Microsoft.Extensions.Logging;
+using IncidentResponseAPI.Repositories.Interfaces;
+using IncidentResponseAPI.Services.Interfaces;
 using Quartz.Xml;
 
 namespace IncidentResponseAPI.Services.Implementations

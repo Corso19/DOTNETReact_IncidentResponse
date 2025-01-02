@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using IncidentResponseAPI.Models;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
@@ -13,7 +13,7 @@ namespace IncidentResponseAPI.Helpers
                 try
                 {
                     // Deserialize the JSON into the Configuration object
-                    var configuration = JsonConvert.DeserializeObject<IncidentResponseAPI.Models.Configuration>(configurationJson);
+                    var configuration = JsonConvert.DeserializeObject<Configuration>(configurationJson);
 
                     // Perform validation on the deserialized object
                     var validationResults = new List<ValidationResult>();

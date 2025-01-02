@@ -1,7 +1,7 @@
 ﻿using IncidentResponseAPI.Dtos;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
+
+namespace IncidentResponseAPI.Services.Interfaces;
 public interface ISensorsService
 {
     Task<IEnumerable<SensorDto>> GetAllAsync();

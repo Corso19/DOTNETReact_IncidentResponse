@@ -1,5 +1,5 @@
 ﻿using IncidentResponseAPI.Dtos;
-using IncidentResponseAPI.Services;
+using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
