@@ -2,10 +2,12 @@ using DotNetEnv;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Repositories.Implementations;
+using IncidentResponseAPI.Scheduling;
 using IncidentResponseAPI.Services;
 using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Quartz;
 
 using Microsoft.OpenApi.Models;
 
@@ -18,10 +20,24 @@ Env.Load();
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
 
+// Add Quartz services
+builder.Services.AddQuartz(q =>
+{
+    // Register the EventsProcessingJob
+    var jobKey = new JobKey("EventsProcessingJob");
+    q.AddJob<EventsProcessingJob>(opts => opts.WithIdentity(jobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("EventsProcessingTrigger")
+        .StartNow()
+        .WithCronSchedule("0 0/5 * * * ?")); // Schedule to run every 5 minutes
+});
+
 // Add services to the container.
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Services.AddControllers();
+builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 builder.Services.AddScoped<IEventsRepository, EventsRepository>();
 builder.Services.AddScoped<IEventsService, EventsService>();
 builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
@@ -33,7 +49,7 @@ builder.Services.AddScoped<IIncidentsRepository, IncidentsRepository>();
 builder.Services.AddScoped<IIncidentsService, IncidentsService>();
 builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
 builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
-builder.Services.AddScoped<>
+builder.Services.AddScoped<IEventsProcessingService, EventsProcessingService>();
 builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
