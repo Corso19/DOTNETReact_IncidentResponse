@@ -17,7 +17,7 @@ public class EventsProcessingService(IEventsRepository eventsRepository) : IEven
         foreach (var @event in unprocessedEvents)
         {
             //Forward to detection service, for now incomplete
-            // await _detectionService.Detect(@event);
+            //await _detectionService.Detect(@event);
             
             //Mark event as processed
             @event.isProcessed = true;
