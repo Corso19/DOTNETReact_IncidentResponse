@@ -33,6 +33,7 @@ builder.Services.AddScoped<IIncidentsRepository, IncidentsRepository>();
 builder.Services.AddScoped<IIncidentsService, IncidentsService>();
 builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
 builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
+builder.Services.AddScoped<>
 builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();

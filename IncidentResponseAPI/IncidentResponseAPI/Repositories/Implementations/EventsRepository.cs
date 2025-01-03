@@ -50,6 +50,11 @@ namespace IncidentResponseAPI.Repositories.Implementations
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<IEnumerable<EventsModel>> GetUnprocessedEventsAsync()
+        {
+            return await _context.Events.Where(e => !e.isProcessed).ToListAsync();
+        }
         
         //Methods for attachments
         public async Task<IEnumerable<AttachmentModel>> GetAttachmentsByEventIdAsync(int eventId)
