@@ -169,17 +169,17 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        public async Task SetEnabledAsync(int id, bool isEnabled)
+        public async Task SetEnabledAsync(int id)
         {
-            _logger.LogInformation("Setting enabled status for sensor with ID {SensorId} to {IsEnabled}.", id, isEnabled);
+            _logger.LogInformation("Setting enabled status for sensor with ID {SensorId}.", id);
             try
             {
                 var sensor = await _sensorsRepository.GetByIdAsync(id);
                 if (sensor != null)
                 {
-                    sensor.isEnabled = isEnabled;
+                    sensor.isEnabled = !sensor.isEnabled;
                     await _sensorsRepository.UpdateAsync(sensor);
-                    _logger.LogInformation("Successfully updated enabled status for sensor with ID {SensorId} to {IsEnabled}.", id, isEnabled);
+                    _logger.LogInformation("Successfully toggled enabled status for sensor with ID {SensorId} to {IsEnabled}.", id, sensor.isEnabled);
                 }
                 else
                 {
@@ -188,7 +188,7 @@ namespace IncidentResponseAPI.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while setting enabled status for sensor with ID {SensorId}.", id);
+                _logger.LogError(ex, "Error occurred while toggling enabled status for sensor with ID {SensorId}.", id);
                 throw;
             }
         }

@@ -9,6 +9,6 @@ public interface ISensorsService
     Task AddAsync(SensorDto sensorDto);
     Task UpdateAsync(int id, SensorDto sensorDto);
     Task DeleteAsync(int id);
-    Task SetEnabledAsync(int id, bool isEnabled);
+    Task SetEnabledAsync(int id);
     
 }
