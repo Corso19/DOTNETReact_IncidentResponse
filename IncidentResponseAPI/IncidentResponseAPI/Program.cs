@@ -53,6 +53,7 @@ builder.Services.AddScoped<IEventsProcessingService, EventsProcessingService>();
 builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
+builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
 //Adding database context
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>

@@ -140,22 +140,23 @@ namespace IncidentResponseAPI.Controllers
             }
         }
 
+        //TODO - Negate boolean state instead of selecting a specific state
         // PUT: api/Sensors/{id}/set-enabled
         [HttpPut("{id}/set-enabled")]
         [SwaggerOperation(Summary = "Sets a sensor's enabled status by ID")]
-        public async Task<IActionResult> SetEnabled(int id, [FromQuery] bool isEnabled)
+        public async Task<IActionResult> SetEnabled(int id)
         {
-            _logger.LogInformation("Setting enabled status for sensor with ID {Id} to {IsEnabled}", id, isEnabled);
+            _logger.LogInformation("Toggling enabled status for sensor with ID {Id}", id);
 
             try
             {
-                await _sensorsService.SetEnabledAsync(id, isEnabled);
-                _logger.LogInformation("Successfully set enabled status for sensor with ID {Id} to {IsEnabled}", id, isEnabled);
+                await _sensorsService.SetEnabledAsync(id);
+                _logger.LogInformation("Successfully toggled enabled status for sensor with ID {Id}", id);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while setting enabled status for sensor with ID {Id}", id);
+                _logger.LogError(ex, "Error occurred while toggling enabled status for sensor with ID {Id}", id);
                 return StatusCode(500, "An error occurred while updating the sensor's enabled status.");
             }
         }
