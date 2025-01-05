@@ -1,6 +1,8 @@
-﻿namespace IncidentResponseAPI.Services.Interfaces;
+﻿using IncidentResponseAPI.Models;
 
-public class IIncidentDetectionService
+namespace IncidentResponseAPI.Services.Interfaces;
+
+public interface IIncidentDetectionService
 {
-    
+    Task<bool> Detect(EventsModel @event);
 }

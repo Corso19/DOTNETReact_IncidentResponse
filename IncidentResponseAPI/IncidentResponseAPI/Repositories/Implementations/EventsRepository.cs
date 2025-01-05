@@ -56,6 +56,27 @@ namespace IncidentResponseAPI.Repositories.Implementations
             return await _context.Events.Where(e => !e.isProcessed).ToListAsync();
         }
         
+        public async Task<IEnumerable<EventsModel>> GetEventsBySubjectAsync(string subject)
+        {
+            return await _context.Events
+                .Where(e => e.Subject == subject)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<EventsModel>> GetEventsByTimestampAsync(DateTime timestamp)
+        {
+            return await _context.Events
+                .Where(e => e.Timestamp == timestamp)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<EventsModel>> GetEventsBySenderAsync(string sender)
+        {
+            return await _context.Events
+                .Where(e => e.Sender == sender)
+                .ToListAsync();
+        }
+        
         //Methods for attachments
         public async Task<IEnumerable<AttachmentModel>> GetAttachmentsByEventIdAsync(int eventId)
         {
