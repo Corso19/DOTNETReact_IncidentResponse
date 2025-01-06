@@ -63,7 +63,7 @@ namespace IncidentResponseAPI.Controllers
                 return StatusCode(500, "An error occurred while fetching the sensor.");
             }
         }
-
+        
         // POST: api/Sensors
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new sensor")]
@@ -131,7 +131,6 @@ namespace IncidentResponseAPI.Controllers
             {
                 await _sensorsService.DeleteAsync(id);
                 _logger.LogInformation("Successfully deleted sensor with ID {Id}", id);
-                // return NoContent();
                 return Ok();
             }
             catch (Exception ex)
