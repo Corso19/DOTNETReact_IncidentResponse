@@ -64,6 +64,7 @@ namespace IncidentResponseAPI.Controllers
             }
         }
         
+        //TODO - adding a sensor should bring it back after creation, so it can be used in the frontend
         // POST: api/Sensors
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new sensor")]
