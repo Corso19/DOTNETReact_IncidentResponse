@@ -16,19 +16,22 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly IGraphAuthService _graphAuthService;
         private readonly ILogger<EventsService> _logger;
         private readonly ISensorsRepository _sensorsRepository;
+        private readonly IEventsProcessingService _eventsProcessingService;
         
         public EventsService(
             IEventsRepository eventsRepository,
             IAttachmentRepository attachmentRepository,
             IGraphAuthService graphAuthService,
             ILogger<EventsService> logger,
-            ISensorsRepository sensorsRepository)
+            ISensorsRepository sensorsRepository,
+            IEventsProcessingService eventsProcessingService)
         {
             _eventsRepository = eventsRepository;
             _attachmentRepository = attachmentRepository;
             _graphAuthService = graphAuthService;
             _logger = logger;
             _sensorsRepository = sensorsRepository;
+            _eventsProcessingService = eventsProcessingService;
         }
 
         public async Task<IEnumerable<EventDto>> GetAllEventsAsync()
@@ -101,7 +104,8 @@ namespace IncidentResponseAPI.Services.Implementations
                         await _attachmentRepository.AddAttachmentAsync(attachmentModel);
                     }
                 }
-
+                //Trigger immediate detection
+                await _eventsProcessingService.ProcessEventsAsync();
                 _logger.LogInformation("Successfully added event with Subject: {Subject}", eventDto.Subject);
             }
             catch (Exception ex)
@@ -261,6 +265,9 @@ namespace IncidentResponseAPI.Services.Implementations
 
                 _logger.LogInformation("Sync completed for sensor: {SensorId}. {NewEmailsCount} new emails were added.",
                     sensorId, newEmailsCount);
+                
+                //Trigger immediate detection
+                await _eventsProcessingService.ProcessEventsAsync();
             }
             catch (Exception ex)
             {

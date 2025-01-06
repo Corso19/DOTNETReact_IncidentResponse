@@ -8,7 +8,6 @@ using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,7 +29,7 @@ builder.Services.AddQuartz(q =>
         .ForJob(jobKey)
         .WithIdentity("EventsProcessingTrigger")
         .StartNow()
-        .WithCronSchedule("0 0/5 * * * ?")); // Schedule to run every 5 minutes
+        .WithCronSchedule("0 * * * * ?")); // Schedule to run every 5 minutes
 });
 
 // Add services to the container.
@@ -98,5 +97,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-

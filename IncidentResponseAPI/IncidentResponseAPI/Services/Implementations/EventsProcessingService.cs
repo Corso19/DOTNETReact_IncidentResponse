@@ -20,8 +20,8 @@ public class EventsProcessingService : IEventsProcessingService
 
         foreach (var @event in unprocessedEvents)
         {
-            //Forward to detection service, for now incomplete
-            //await _incidentDetectionService.Detect(@event);
+            //Forward to detection service
+            await _incidentDetectionService.Detect(@event);
             
             //Mark event as processed
             @event.isProcessed = true;

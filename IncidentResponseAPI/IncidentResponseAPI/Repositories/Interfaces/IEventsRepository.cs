@@ -10,6 +10,9 @@ namespace IncidentResponseAPI.Repositories.Interfaces
         Task UpdateAsync(EventsModel eventsModel);
         Task DeleteAsync(int id);
         Task<IEnumerable<EventsModel>> GetUnprocessedEventsAsync();
+        Task<IEnumerable<EventsModel>> GetEventsBySubjectAsync(string subject);
+        Task<IEnumerable<EventsModel>> GetEventsByTimestampAsync(DateTime timestamp);
+        Task<IEnumerable<EventsModel>> GetEventsBySenderAsync(string sender);
         
         Task<IEnumerable<AttachmentModel>> GetAttachmentsByEventIdAsync(int eventId);
         Task<EventsModel> GetByMessageIdAsync(string messageId);
