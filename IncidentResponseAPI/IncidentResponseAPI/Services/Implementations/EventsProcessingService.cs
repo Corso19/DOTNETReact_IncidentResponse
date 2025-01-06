@@ -7,6 +7,7 @@ public class EventsProcessingService : IEventsProcessingService
 {
     private readonly IEventsRepository _eventsRepository;
     private readonly IIncidentDetectionService _incidentDetectionService;
+    //TODO - Check if syncing events is needed or not
 
     public EventsProcessingService(IEventsRepository eventsRepository, IIncidentDetectionService incidentDetectionService)
     {

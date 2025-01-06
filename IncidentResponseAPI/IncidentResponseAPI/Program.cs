@@ -29,7 +29,7 @@ builder.Services.AddQuartz(q =>
         .ForJob(jobKey)
         .WithIdentity("EventsProcessingTrigger")
         .StartNow()
-        .WithCronSchedule("0 * * * * ?")); // Schedule to run every 5 minutes
+        .WithCronSchedule("0 * * * * ?"));
 });
 
 // Add services to the container.
