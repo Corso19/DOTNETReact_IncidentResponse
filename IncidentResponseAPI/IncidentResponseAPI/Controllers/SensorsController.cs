@@ -131,7 +131,8 @@ namespace IncidentResponseAPI.Controllers
             {
                 await _sensorsService.DeleteAsync(id);
                 _logger.LogInformation("Successfully deleted sensor with ID {Id}", id);
-                return NoContent();
+                // return NoContent();
+                return Ok();
             }
             catch (Exception ex)
             {
