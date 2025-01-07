@@ -10,16 +10,20 @@ const FormModal = ({
     setShowModal, 
     title, 
     children, 
-    submitButtonDisabled,
-    disabledButtonMessage, 
-    submitButtonLoading, 
-    onSubmitClick,
-    width
+    disableSubmitButton,
+    disabledMessage, 
+    loadingSubmitButton, 
+    onSubmit,
+    width,
+    deleteAction
 }) => {
     return (
         <Modal 
             isOpen={showModal}
             style={{
+                overlay: {
+                    zIndex: 100, // Lower than modal content but higher than page elements
+                },
                 content: {
                     top: "50%",
                     left: "50%",
@@ -29,17 +33,18 @@ const FormModal = ({
                     backgroundColor: "white",
                     width: width,
                     height: "auto",
-                    maxHeight: "80vh",
+                    maxHeight: "90vh",
                     maxWidth: "90%",
                     overflowY: "auto",
-                    overflowX: "hidden"
+                    overflowX: "hidden",
+                    zIndex: 100
                 }
             }}
         >
             <div className="modal-content d-flex card">
                 {/* MODAL HEADER*/}
                 <div className="modal-header align-items-center color-bs-primary py-2" style={{ width: "100%"}}>
-                    <h1 className="text-center mx-auto py-0 my-0">{title}</h1>
+                    <h2 className={`${deleteAction ? "text-left" : "text-center"} mx-auto py-0 my-0`}>{title}</h2>
                 </div>
                 <hr className="custom-hr"></hr>
 
@@ -50,7 +55,7 @@ const FormModal = ({
                 <hr className="custom-hr"></hr>
 
                 {/* Modal Footer */}
-                <div className="modal-footer d-flex justify-content-between mb-0 py-2">
+                <div className="modal-footer d-flex justify-content-between mb-0">
                     <Button
                         className="ms-3 px-4"
                         variant="outline-secondary"
@@ -59,28 +64,28 @@ const FormModal = ({
                         Cancel
                     </Button>
                     <div className="d-flex align-items-center">
-                        <LoaderButton
-                            disabled={submitButtonDisabled}
-                            loading={submitButtonLoading}
-                            onClick={onSubmitClick}
-                            text="Save"
-                            className="me-3 px-4"
-                            variant="outline-primary"
-                        />
-                        {submitButtonDisabled && (
+                        {disableSubmitButton && (
                             <Tooltip
                                 title={
                                     <span style={{ fontSize: "1.2em" }}>
-                                        {disabledButtonMessage}
+                                        {disabledMessage}
                                     </span>
                                 }
-                                placement="right"
+                                placement="left"
                             >
                                 <div>
-                                    <RiErrorWarningFill style={{ color: "#DC3545", fontSize: "1.2em" }}/>
+                                    <RiErrorWarningFill style={{ color: "#DC3545", fontSize: "1.3em" }}/>
                                 </div>
                             </Tooltip>
                         )}
+                        <LoaderButton
+                            disabled={disableSubmitButton}
+                            loading={loadingSubmitButton}
+                            onClick={onSubmit}
+                            text={deleteAction ? "Delete" : "Save"}
+                            className="mx-3 px-4"
+                            variant={deleteAction ? "outline-danger" : "outline-primary"}
+                        />
                     </div>
                 </div>
             </div>

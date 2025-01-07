@@ -1,8 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { CrudService } from "../services/CrudService";
+import { ThreeDots } from "react-bootstrap-icons";
+import { Accordion, Col, Row } from "react-bootstrap";
+import IncidentItem from "./IncidentItem";
 
 const Incidents = () => {
+    const [incidents, setIncidents] = useState([]);
+    const [incidentsLoading, setIncidentsLoading] = useState(false);
+
+    useEffect(() => {
+        setIncidentsLoading(true);
+        // get sensors
+        CrudService.list("Incidents").then((response) => {
+            if (response.status === 200) {
+                setIncidents(response.data);
+            }
+            setIncidentsLoading(false);
+        });
+    }, []);
+
     return(
-        <h2>Incidents component</h2>
+        <Row className="mt-3">
+            <Col md={9} sm={12}>
+            {
+                incidentsLoading ? (
+                    <div
+                        style={{ width: "100%" }}
+                        className="d-flex justify-content-center"
+                    >
+                        <ThreeDots
+                            height="50"
+                            width="50"
+                            ariaLabel="three-dots-loading"
+                            visible={true}
+                            color="#005bb5"
+                        />
+                    </div>
+                ) : (
+                    incidents.length ? (
+                        <Accordion className="ms-3">
+                        {
+                            incidents.map((incident) => (
+                                <IncidentItem incident={incident} />
+                            ))
+                        }
+                        </Accordion>
+                    ) : (
+                        <h5 className="ms-3">No incidents added.</h5>
+                    )
+                )
+            }
+            </Col>
+        </Row>
     );
 }
 
