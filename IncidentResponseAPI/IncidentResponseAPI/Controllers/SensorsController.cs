@@ -153,7 +153,7 @@ namespace IncidentResponseAPI.Controllers
             {
                 await _sensorsService.SetEnabledAsync(id);
                 _logger.LogInformation("Successfully toggled enabled status for sensor with ID {Id}", id);
-                return NoContent();
+                return Ok();
             }
             catch (Exception ex)
             {
