@@ -5,7 +5,7 @@ const LoaderButton = (props) => {
 
     return (
         <Button
-            disabled={props.conditionForDisable || props.conditionForSpinner ? true : false}
+            disabled={props.disabled || props.loading ? true : false}
             variant={props.variant}
             className={props.className}
             onClick={props.onClick}
@@ -14,7 +14,7 @@ const LoaderButton = (props) => {
             size={props.size}
         >
             { 
-                props.conditionForSpinner ? (
+                props.loading ? (
                     <Spinner
                         as="span"
                         size="sm"

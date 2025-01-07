@@ -27,7 +27,7 @@ function create(source, data) {
   const url = `${API_KEYS.API_URL}/${source}`;
   return axios.post(url, data, {
     headers: {
-      'Content-Type': 'multipart/form-data'
+      'Content-Type': 'application/json'
     }
   });
 }
