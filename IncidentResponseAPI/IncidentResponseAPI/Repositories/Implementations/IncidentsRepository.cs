@@ -13,8 +13,14 @@ namespace IncidentResponseAPI.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<IEnumerable<IncidentsModel>> GetAllAsync()
+        public async Task<IEnumerable<IncidentsModel>> GetAllAsync(bool includeEvent = false)
         {
+            if (includeEvent)
+            {
+                return await _context.Incidents
+                    .Include(i => i.Event)
+                    .ToListAsync();
+            }
             return await _context.Incidents.ToListAsync();
         }
 

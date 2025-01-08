@@ -9,7 +9,7 @@ namespace IncidentResponseAPI.Models
         {
         }
 
-        public DbSet<IncidentEventModel> IncidentEvents { get; set; }
+        
         public DbSet<IncidentsModel> Incidents { get; set; }
         public DbSet<EventsModel> Events { get; set; }
         public DbSet<SensorsModel> Sensors { get; set; }
@@ -19,11 +19,7 @@ namespace IncidentResponseAPI.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            // Composite key for IncidentEventModel
-            modelBuilder.Entity<IncidentEventModel>()
-                .HasKey(ie => new { ie.IncidentId, ie.EventId });
-
+            
             // Relationship for Attachments
             modelBuilder.Entity<AttachmentModel>()
                 .HasOne(a => a.Event)
@@ -31,6 +27,12 @@ namespace IncidentResponseAPI.Models
                 .HasForeignKey(a => a.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Relationship for Incidents
+            modelBuilder.Entity<IncidentsModel>()
+                .HasOne(i => i.Event)
+                .WithMany(e => e.Incidents)
+                .HasForeignKey(i => i.EventId);
+            
             // SensorsModel Constraints
             modelBuilder.Entity<SensorsModel>()
                 .HasCheckConstraint("CK_Sensors_RetrievalInterval", "[RetrievalInterval] BETWEEN 1 AND 1440")

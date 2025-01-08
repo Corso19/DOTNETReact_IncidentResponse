@@ -46,8 +46,6 @@ builder.Services.AddScoped<IRecommendationsRepository, RecommendationsRepository
 builder.Services.AddScoped<IRecommendationsService, RecommendationsService>();
 builder.Services.AddScoped<IIncidentsRepository, IncidentsRepository>();
 builder.Services.AddScoped<IIncidentsService, IncidentsService>();
-builder.Services.AddScoped<IIncidentEventRepository, IncidentEventRepository>();
-builder.Services.AddScoped<IIncidentEventService, IncidentEventService>();
 builder.Services.AddScoped<IEventsProcessingService, EventsProcessingService>();
 builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();

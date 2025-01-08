@@ -32,4 +32,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\IncidentEventModels\Create.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\IncidentEventModels\Delete.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\IncidentEventModels\Details.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\IncidentEventModels\Edit.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\IncidentEventModels\Index.cshtml" />
+  </ItemGroup>
+
 </Project>

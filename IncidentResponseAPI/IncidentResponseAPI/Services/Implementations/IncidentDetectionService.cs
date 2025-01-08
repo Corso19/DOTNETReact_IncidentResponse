@@ -132,10 +132,8 @@ namespace IncidentResponseAPI.Services.Implementations
                 Type = incidentType,
                 DetectedAt = DateTime.Now,
                 Status = "Open",
-                IncidentEvent = new List<IncidentEventModel>
-                {
-                    new IncidentEventModel { EventId = @event.EventId }
-                }
+                EventId = @event.EventId,
+                Event = @event //establish relationship with EventsModel
             };
             _logger.LogInformation("Creating incident for event with ID {EventId}", @event.EventId);
 
