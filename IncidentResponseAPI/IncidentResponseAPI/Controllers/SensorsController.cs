@@ -74,9 +74,12 @@ namespace IncidentResponseAPI.Controllers
 
             try
             {
-                await _sensorsService.AddAsync(sensorDto);
+                // await _sensorsService.AddAsync(sensorDto);
+                // return CreatedAtAction(nameof(GetSensorById), new { id = sensorDto.SensorId }, sensorDto);
+                var createdSensor =  await _sensorsService.AddAsync(sensorDto);
                 _logger.LogInformation("Successfully created sensor with ID {Id}", sensorDto.SensorId);
-                return CreatedAtAction(nameof(GetSensorById), new { id = sensorDto.SensorId }, sensorDto);
+                return CreatedAtAction(nameof(GetSensorById), new { id = createdSensor.SensorId }, createdSensor);
+                
             }
             catch (ValidationException ex)
             {

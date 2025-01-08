@@ -83,7 +83,7 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        public async Task AddAsync(SensorDto sensorDto)
+        public async Task<SensorDto> AddAsync(SensorDto sensorDto)
         {
             _logger.LogInformation("Adding a new sensor.");
             try
@@ -106,10 +106,14 @@ namespace IncidentResponseAPI.Services.Implementations
 
                 await _sensorsRepository.AddAsync(sensorsModel);
                 _logger.LogInformation("Successfully added a new sensor.");
+
+                sensorDto.SensorId = sensorsModel.SensorId;
+                return sensorDto;
             }
             catch (ValidationException ex)
             {
                 _logger.LogWarning(ex, "Validation failed for new sensor");
+                throw;
             }
             catch (Exception ex)
             {
