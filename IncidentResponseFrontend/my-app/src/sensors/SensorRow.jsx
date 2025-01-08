@@ -15,7 +15,7 @@ const SensorRow = ({sensor, setSensors}) => {
     const handleIsEnabledChanged = () => {
         setIsEnabledLoading(true);
         SensorsService.updateIsEnabled(sensor.sensorId).then((response) => {
-            if (response.status === 204){
+            if (response.status === 200){
                 // update sensor local data
                 const updatedIsEnabled = !sensor.isEnabled;
                 setSensors(previousSensors => 
