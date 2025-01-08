@@ -16,14 +16,26 @@ namespace IncidentResponseAPI.Services.Implementations
 
         public async Task<IEnumerable<IncidentDto>> GetAllAsync()
         {
-            var incidents = await _incidentsRepository.GetAllAsync();
+            var incidents = await _incidentsRepository.GetAllAsync(includeEvent: true);
             return incidents.Select(i => new IncidentDto
             {
                 IncidentId = i.IncidentId,
                 Title = i.Title,
                 Description = i.Description,
                 DetectedAt = i.DetectedAt,
-                Status = i.Status
+                Status = i.Status,
+                Type = i.Type,
+                Severity = i.Severity,
+                EventId = i.EventId,
+                Event = i.Event != null ? new EventDto
+                {
+                    EventId = i.Event.EventId,
+                    TypeName = i.Event.TypeName,
+                    Subject = i.Event.Subject,
+                    Sender = i.Event.Sender,
+                    Details = i.Event.Details,
+                    Timestamp = i.Event.Timestamp
+                } : null
             }).ToList();
         }
 

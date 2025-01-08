@@ -1,4 +1,6 @@
-﻿namespace IncidentResponseAPI.Dtos
+﻿using IncidentResponseAPI.Models;
+
+namespace IncidentResponseAPI.Dtos
 {
     public class IncidentDto
     {
@@ -7,5 +9,9 @@
         public string Description { get; set; }
         public DateTime DetectedAt { get; set; }
         public string Status { get; set; }
+        public IncidentType Type { get; set; }
+        public int Severity { get; set; }
+        public int EventId { get; set; }
+        public EventDto Event { get; set; }
     }
 }

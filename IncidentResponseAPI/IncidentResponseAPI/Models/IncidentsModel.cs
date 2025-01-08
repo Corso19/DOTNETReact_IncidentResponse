@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IncidentResponseAPI.Models
 {
@@ -20,7 +21,10 @@ namespace IncidentResponseAPI.Models
         public string Status { get; set; }
         public IncidentType Type { get; set; }
         public int Severity { get; set; }
-        public ICollection<IncidentEventModel> IncidentEvent { get; set; }
-
+        
+        //Foreign Key for Event
+        public int EventId { get; set; }
+        [ForeignKey("EventId")]
+        public EventsModel Event { get; set; }
     }
 }

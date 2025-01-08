@@ -16,5 +16,7 @@ namespace IncidentResponseAPI.Models
         public bool isProcessed { get; set; } = false;
         public string MessageId { get; set; }   //Microsoft Graph MessageId
         public ICollection<AttachmentModel> Attachments { get; set; } = new List<AttachmentModel>();
+        //Navugation property for related Incidents
+        public ICollection<IncidentsModel> Incidents { get; set; } = new List<IncidentsModel>();
     }
 }

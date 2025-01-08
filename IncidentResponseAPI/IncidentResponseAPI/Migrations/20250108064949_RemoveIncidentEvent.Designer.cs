@@ -4,6 +4,7 @@ using IncidentResponseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IncidentResponseAPI.Migrations
 {
     [DbContext(typeof(IncidentResponseContext))]
-    partial class IncidentResponseContextModelSnapshot : ModelSnapshot
+    [Migration("20250108064949_RemoveIncidentEvent")]
+    partial class RemoveIncidentEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,9 +113,6 @@ namespace IncidentResponseAPI.Migrations
                     b.Property<DateTime>("DetectedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Severity")
                         .HasColumnType("int");
 
@@ -128,8 +128,6 @@ namespace IncidentResponseAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("IncidentId");
-
-                    b.HasIndex("EventId");
 
                     b.ToTable("Incidents");
                 });
@@ -233,17 +231,6 @@ namespace IncidentResponseAPI.Migrations
                     b.Navigation("Sensor");
                 });
 
-            modelBuilder.Entity("IncidentResponseAPI.Models.IncidentsModel", b =>
-                {
-                    b.HasOne("IncidentResponseAPI.Models.EventsModel", "Event")
-                        .WithMany("Incidents")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-                });
-
             modelBuilder.Entity("IncidentResponseAPI.Models.RecommendationsModel", b =>
                 {
                     b.HasOne("IncidentResponseAPI.Models.IncidentsModel", "Incident")
@@ -258,8 +245,6 @@ namespace IncidentResponseAPI.Migrations
             modelBuilder.Entity("IncidentResponseAPI.Models.EventsModel", b =>
                 {
                     b.Navigation("Attachments");
-
-                    b.Navigation("Incidents");
                 });
 #pragma warning restore 612, 618
         }
