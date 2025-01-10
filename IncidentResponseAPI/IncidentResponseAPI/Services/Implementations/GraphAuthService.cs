@@ -58,12 +58,7 @@ namespace IncidentResponseAPI.Services.Implementations
             var graphClient = await _graphAuthProvider.GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
             return await graphClient.Me.Messages[messageId].GetAsync();
         }
-
-        // public async Task<IEnumerable<Attachment>> FetchAttachmentsAsync(string clientSecret, string applicationId, string tenantId, string messageId)
-        // {
-        //     var graphClient = await _graphAuthProvider.GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
-        //     return (await graphClient.Me.Messages[messageId].Attachments.GetAsync()).Value;
-        // }
+        
         public async Task<IEnumerable<Attachment>> FetchAttachmentsAsync(string clientSecret, string applicationId, string tenantId, string messageId, string userPrincipalName)
         {
             try

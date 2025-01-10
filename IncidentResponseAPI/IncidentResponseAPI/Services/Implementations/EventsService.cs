@@ -152,7 +152,7 @@ namespace IncidentResponseAPI.Services.Implementations
                 throw;
             }
         }
-        
+
         public async Task SyncEventsAsync(int sensorId)
         {
             _logger.LogInformation("Starting sync for sensor: {SensorId}", sensorId);
@@ -206,45 +206,43 @@ namespace IncidentResponseAPI.Services.Implementations
                             message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
                             message.Subject ?? "No subject");
 
-                        // Check if the message is already processed
-                        if (await _eventsRepository.GetByMessageIdAsync(message.Id) == null)
+
+                        var eventModel = new EventsModel
                         {
-                            var eventModel = new EventsModel
+                            SensorId = sensor.SensorId,
+                            TypeName = "Email",
+                            Subject = message.Subject ?? "No subject",
+                            Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+                            Details = message.Body?.Content ?? "No Content",
+                            Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
+                            isProcessed = false,
+                            MessageId = message.Id
+                        };
+
+                        await _eventsRepository.AddAsync(eventModel);
+                        newEmailsCount++;
+
+                        // Fetch attachments for the message
+                        var attachments = await _graphAuthService.FetchAttachmentsAsync(
+                            config.ClientSecret,
+                            config.ApplicationId,
+                            config.TenantId,
+                            message.Id,
+                            userPrincipalName);
+
+                        foreach (var attachment in attachments.OfType<FileAttachment>())
+                        {
+                            var attachmentModel = new AttachmentModel
                             {
-                                SensorId = sensor.SensorId,
-                                TypeName = "Email",
-                                Subject = message.Subject ?? "No subject",
-                                Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
-                                Details = message.Body?.Content ?? "No Content",
-                                Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
-                                isProcessed = false,
-                                MessageId = message.Id
+                                Name = attachment.Name ?? "Unnamed Attachment",
+                                Size = attachment.Size ?? 0,
+                                Content = attachment.ContentBytes,
+                                EventId = eventModel.EventId
                             };
 
-                            await _eventsRepository.AddAsync(eventModel);
-                            newEmailsCount++;
-
-                            // Fetch attachments for the message
-                            var attachments = await _graphAuthService.FetchAttachmentsAsync(
-                                config.ClientSecret,
-                                config.ApplicationId,
-                                config.TenantId,
-                                message.Id,
-                                userPrincipalName);
-
-                            foreach (var attachment in attachments.OfType<FileAttachment>())
-                            {
-                                var attachmentModel = new AttachmentModel
-                                {
-                                    Name = attachment.Name ?? "Unnamed Attachment",
-                                    Size = attachment.Size ?? 0,
-                                    Content = attachment.ContentBytes,
-                                    EventId = eventModel.EventId
-                                };
-
-                                await _attachmentRepository.AddAttachmentAsync(attachmentModel);
-                            }
+                            await _attachmentRepository.AddAttachmentAsync(attachmentModel);
                         }
+
 
                         // Update LastEventMarker
                         newLastProcessedTime = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now;
@@ -265,7 +263,7 @@ namespace IncidentResponseAPI.Services.Implementations
 
                 _logger.LogInformation("Sync completed for sensor: {SensorId}. {NewEmailsCount} new emails were added.",
                     sensorId, newEmailsCount);
-                
+
                 //Trigger immediate detection
                 await _eventsProcessingService.ProcessEventsAsync();
             }

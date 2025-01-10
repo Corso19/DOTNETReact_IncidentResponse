@@ -7,7 +7,6 @@ namespace IncidentResponseAPI.Services.Interfaces
     {
         Task<Dictionary<string, List<Message>>> FetchEmailsForAllUsersAsync(string clientSecret, string applicationId, string tenantId, DateTime? lastProcessedTime);
         Task<Message> FetchMessageContentAsync(string clientSecret, string applicationId, string tenantId, string messageId);
-        // Task<IEnumerable<Attachment>> FetchAttachmentsAsync(string clientSecret, string applicationId, string tenantId, string messageId);
         Task<IEnumerable<Attachment>> FetchAttachmentsAsync(
             string clientSecret, 
             string applicationId, 
