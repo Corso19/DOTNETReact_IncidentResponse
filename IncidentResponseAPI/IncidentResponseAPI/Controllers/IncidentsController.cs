@@ -42,9 +42,9 @@ namespace IncidentResponseAPI.Controllers
         // POST: api/Incidents
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new incident")]
-        public async Task<ActionResult<IncidentDto>> PostIncident(IncidentDto incidentDto)
+        public async Task<ActionResult<IncidentDto>> PostIncident(IncidentDto incidentDto, CancellationToken cancellationToken)
         {
-            await _incidentsService.AddAsync(incidentDto);
+            await _incidentsService.AddAsync(incidentDto, cancellationToken);
             return CreatedAtAction(nameof(GetIncident), new { id = incidentDto.IncidentId }, incidentDto);
         }
 

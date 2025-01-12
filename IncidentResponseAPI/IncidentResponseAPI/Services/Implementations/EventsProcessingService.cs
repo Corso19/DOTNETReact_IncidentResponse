@@ -7,7 +7,7 @@ public class EventsProcessingService : IEventsProcessingService
 {
     private readonly IEventsRepository _eventsRepository;
     private readonly IIncidentDetectionService _incidentDetectionService;
-    //TODO - Check if syncing events is needed or not
+    // private readonly ILogger<EventsProcessingService> _logger;
 
     public EventsProcessingService(IEventsRepository eventsRepository, IIncidentDetectionService incidentDetectionService)
     {
@@ -15,18 +15,33 @@ public class EventsProcessingService : IEventsProcessingService
         _incidentDetectionService = incidentDetectionService;
     }
 
-    public async Task ProcessEventsAsync()
+    // public async Task ProcessEventsAsync(CancellationToken cancellationToken)
+    // {
+    //     var unprocessedEvents = await _eventsRepository.GetUnprocessedEventsAsync();
+    //     
+    //     foreach (var @event in unprocessedEvents)
+    //     {
+    //         //Forward to detection service
+    //         await _incidentDetectionService.Detect(@event, cancellationToken);
+    //         
+    //         //Mark event as processed
+    //         @event.isProcessed = true;
+    //         await _eventsRepository.UpdateAsync(@event, cancellationToken);
+    //     }
+    // }
+    
+    public async Task ProcessEventsAsync(CancellationToken cancellationToken)
     {
-        var unprocessedEvents = await _eventsRepository.GetUnprocessedEventsAsync();
+        var unprocessedEvents = await _eventsRepository.GetUnprocessedEventsAsync(cancellationToken);
 
         foreach (var @event in unprocessedEvents)
         {
-            //Forward to detection service
-            await _incidentDetectionService.Detect(@event);
-            
-            //Mark event as processed
+            // Forward to detection service
+            await _incidentDetectionService.Detect(@event, cancellationToken);
+
+            // Mark event as processed
             @event.isProcessed = true;
-            await _eventsRepository.UpdateAsync(@event);
+            await _eventsRepository.UpdateAsync(@event, cancellationToken);
         }
     }
 }

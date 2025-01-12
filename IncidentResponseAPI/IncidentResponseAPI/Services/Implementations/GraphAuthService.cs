@@ -2,6 +2,8 @@
 using Microsoft.Graph.Models;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.Graph;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IncidentResponseAPI.Services.Implementations
 {
@@ -15,16 +17,16 @@ namespace IncidentResponseAPI.Services.Implementations
             _graphAuthProvider = graphAuthProvider;
             _logger = logger;
         }
-        
+
         public async Task<Dictionary<string, List<Message>>> FetchEmailsForAllUsersAsync(
-            string clientSecret, string applicationId, string tenantId, DateTime? lastProcessedTime)
+            string clientSecret, string applicationId, string tenantId, DateTime? lastProcessedTime, CancellationToken cancellationToken)
         {
             var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
 
             var emailsByUser = new Dictionary<string, List<Message>>();
 
             // Fetch all users
-            var users = await graphClient.Users.GetAsync();
+            var users = await graphClient.Users.GetAsync(cancellationToken: cancellationToken);
             foreach (var user in users.Value)
             {
                 var userId = user.Id;
@@ -41,7 +43,7 @@ namespace IncidentResponseAPI.Services.Implementations
                         {
                             requestConfiguration.QueryParameters.Filter = filter;
                         }
-                    });
+                    }, cancellationToken);
 
                 if (messages?.Value != null)
                 {
@@ -52,14 +54,13 @@ namespace IncidentResponseAPI.Services.Implementations
             return emailsByUser;
         }
 
-        
         public async Task<Message> FetchMessageContentAsync(string clientSecret, string applicationId, string tenantId, string messageId)
         {
             var graphClient = await _graphAuthProvider.GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
             return await graphClient.Me.Messages[messageId].GetAsync();
         }
-        
-        public async Task<IEnumerable<Attachment>> FetchAttachmentsAsync(string clientSecret, string applicationId, string tenantId, string messageId, string userPrincipalName)
+
+        public async Task<IEnumerable<Attachment>> FetchAttachmentsAsync(string clientSecret, string applicationId, string tenantId, string messageId, string userPrincipalName, CancellationToken cancellationToken)
         {
             try
             {
@@ -70,7 +71,7 @@ namespace IncidentResponseAPI.Services.Implementations
                 var attachments = await graphClient.Users[userPrincipalName]
                     .Messages[messageId]
                     .Attachments
-                    .GetAsync();
+                    .GetAsync(cancellationToken: cancellationToken);
 
                 return attachments.Value;
             }
@@ -81,7 +82,6 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        
         public async Task<GraphServiceClient> GetAuthenticatedGraphClient(string clientSecret, string applicationId, string tenantId)
         {
             var options = new TokenCredentialOptions

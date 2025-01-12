@@ -1,5 +1,6 @@
 using DotNetEnv;
 using IncidentResponseAPI.Models;
+using IncidentResponseAPI.Orchestrators;
 using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Repositories.Implementations;
 using IncidentResponseAPI.Scheduling;
@@ -51,12 +52,17 @@ builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
-//Adding database context
+
+// Add the DbContext and SensorOrchestrator
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
     {
         sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-    }));
+    }),
+    ServiceLifetime.Scoped
+);
+builder.Services.AddSingleton<SensorsOrchestrator>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<SensorsOrchestrator>());
 
 // Add CORS services
 builder.Services.AddCors(options =>

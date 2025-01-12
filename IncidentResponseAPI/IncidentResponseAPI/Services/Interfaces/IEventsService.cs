@@ -8,12 +8,12 @@ namespace IncidentResponseAPI.Services.Interfaces
         //CRUD operations
         Task<IEnumerable<EventDto>> GetAllEventsAsync();
         Task<EventDto> GetEventByIdAsync(int id);
-        Task AddEventAsync(EventDto eventDto);
-        Task UpdateEventAsync(EventDto eventDto);
+        Task AddEventAsync(EventDto eventDto, CancellationToken cancellationToken);
+        Task UpdateEventAsync(EventDto eventDto, CancellationToken cancellationToken);
         Task DeleteEventAsync(int id);
         
         //Email/Event-related operations
-        Task SyncEventsAsync(int sensorId);
+        Task SyncEventsAsync(int sensorId, CancellationToken cancellationToken);
 
         Task<Message> FetchMessageContentAsync(string clientSecret, string applicationId, string tenantId,
             string messageId);

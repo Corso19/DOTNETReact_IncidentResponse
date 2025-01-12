@@ -2,6 +2,7 @@
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Services.Interfaces;
+using Microsoft.Kiota.Abstractions;
 using Quartz.Xml;
 
 namespace IncidentResponseAPI.Services.Implementations
@@ -11,12 +12,59 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly ISensorsRepository _sensorsRepository;
         private readonly ILogger<SensorsService> _logger;
         private readonly IConfigurationValidator _configurationValidator;
+        private readonly IEventsService _eventsService;
+        private readonly IEventsProcessingService _eventsProcessingService;
 
-        public SensorsService(ISensorsRepository sensorsRepository, ILogger<SensorsService> logger, IConfigurationValidator configurationValidator)
+        public SensorsService(ISensorsRepository sensorsRepository, ILogger<SensorsService> logger, IConfigurationValidator configurationValidator, IEventsService eventsService, IEventsProcessingService eventsProcessingService)
         {
             _sensorsRepository = sensorsRepository;
             _logger = logger;
             _configurationValidator = configurationValidator;
+            _eventsService = eventsService;
+            _eventsProcessingService = eventsProcessingService;
+        }
+        
+
+        public async Task RunSensorAsync(SensorsModel sensor)
+        {
+            using (var cts = new CancellationTokenSource(TimeSpan.FromMinutes(sensor.RetrievalInterval)))
+            {
+                try
+                {
+                    //Sync new events
+                    await _eventsService.SyncEventsAsync(sensor.SensorId, cts.Token);
+                    //Process events to detect incidents
+                    await _eventsProcessingService.ProcessEventsAsync(cts.Token);
+                    
+                    //Update LastRunAt and persist to the database
+                    sensor.LastRunAt = DateTime.UtcNow;
+                    await _sensorsRepository.UpdateAsync(sensor);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogWarning("Sensor with ID {SensorId} was canceled after {RetrievalInterval} minutes.", sensor.SensorId, sensor.RetrievalInterval);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while running sensor with ID {SensorId}.", sensor.SensorId);
+                }
+            }
+        }
+
+        public async Task<IEnumerable<SensorsModel>> GetAllEnabledAsync()
+        {
+            _logger.LogInformation("Fetching all enabled sensors.");
+            try
+            {
+                var sensors = await _sensorsRepository.GetAllEnabledAsync();
+                _logger.LogInformation("Successfully fetched all enabled sensors.");
+                return sensors;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching all enabled sensors.");
+                throw;
+            }
         }
 
         public async Task<IEnumerable<SensorDto>> GetAllAsync()

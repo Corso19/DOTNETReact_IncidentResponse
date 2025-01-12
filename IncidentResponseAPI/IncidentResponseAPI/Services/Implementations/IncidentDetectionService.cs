@@ -19,7 +19,7 @@ namespace IncidentResponseAPI.Services.Implementations
             _logger = logger;
         }
 
-        public async Task<bool> Detect(EventsModel @event)
+        public async Task<bool> Detect(EventsModel @event, CancellationToken cancellationToken)
         {
             var incidentsCreated = false;
 
@@ -27,22 +27,22 @@ namespace IncidentResponseAPI.Services.Implementations
             {
                 if (HasSuspiciousAttachment(@event))
                 {
-                    await CreateIncident(@event, IncidentType.SuspiciousAttachment);
+                    await CreateIncident(@event, IncidentType.SuspiciousAttachment, cancellationToken);
                     incidentsCreated = true;
                 }
                 if (IsExternalSender(@event))
                 {
-                    await CreateIncident(@event, IncidentType.ExternalSender);
+                    await CreateIncident(@event, IncidentType.ExternalSender, cancellationToken);
                     incidentsCreated = true;
                 }
-                if (await IsRepeatedEventPatternAsync(@event))
+                if (await IsRepeatedEventPatternAsync(@event, cancellationToken))
                 {
-                    await CreateIncident(@event, IncidentType.RepeatedEventPattern);
+                    await CreateIncident(@event, IncidentType.RepeatedEventPattern, cancellationToken);
                     incidentsCreated = true;
                 }
-                if (await HasUnusualEmailVolumeAsync(@event))
+                if (await HasUnusualEmailVolumeAsync(@event, cancellationToken))
                 {
-                    await CreateIncident(@event, IncidentType.UnusualEmailVolume);
+                    await CreateIncident(@event, IncidentType.UnusualEmailVolume, cancellationToken);
                     incidentsCreated = true;
                 }
             }
@@ -70,19 +70,19 @@ namespace IncidentResponseAPI.Services.Implementations
             return senderDomain != null && !trustedDomains.Contains(senderDomain);
         }
 
-        private async Task<bool> IsRepeatedEventPatternAsync(EventsModel @event)
+        private async Task<bool> IsRepeatedEventPatternAsync(EventsModel @event, CancellationToken cancellationToken)
         {
-            var hasSameSubject = await HasSameSubjectPatternAsync(@event);
-            var hasTimeBasedPattern = await HasTimeBasedPatternAsync(@event);
+            var hasSameSubject = await HasSameSubjectPatternAsync(@event, cancellationToken);
+            var hasTimeBasedPattern = await HasTimeBasedPatternAsync(@event, cancellationToken);
 
             return hasSameSubject || hasTimeBasedPattern;
         }
 
-        private async Task<bool> HasSameSubjectPatternAsync(EventsModel @event)
+        private async Task<bool> HasSameSubjectPatternAsync(EventsModel @event, CancellationToken cancellationToken)
         {
             try
             {
-                var recentEvents = await _eventsRepository.GetEventsBySubjectAsync(@event.Subject);
+                var recentEvents = await _eventsRepository.GetEventsBySubjectAsync(@event.Subject, cancellationToken);
                 return recentEvents.Count() >= 5;
             }
             catch (Exception ex)
@@ -92,11 +92,11 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        private async Task<bool> HasTimeBasedPatternAsync(EventsModel @event)
+        private async Task<bool> HasTimeBasedPatternAsync(EventsModel @event, CancellationToken cancellationToken)
         {
             try
             {
-                var matchingEvents = await _eventsRepository.GetEventsByTimestampAsync(@event.Timestamp);
+                var matchingEvents = await _eventsRepository.GetEventsByTimestampAsync(@event.Timestamp, cancellationToken);
                 return matchingEvents.Count() >= 3;
             }
             catch (Exception ex)
@@ -106,11 +106,11 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        private async Task<bool> HasUnusualEmailVolumeAsync(EventsModel @event)
+        private async Task<bool> HasUnusualEmailVolumeAsync(EventsModel @event, CancellationToken cancellationToken)
         {
             try
             {
-                var recentEvents = await _eventsRepository.GetEventsBySenderAsync(@event.Sender);
+                var recentEvents = await _eventsRepository.GetEventsBySenderAsync(@event.Sender, cancellationToken);
                 return recentEvents.Count() >= 10;
             }
             catch (Exception ex)
@@ -120,7 +120,7 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        private async Task CreateIncident(EventsModel @event, IncidentType incidentType)
+        private async Task CreateIncident(EventsModel @event, IncidentType incidentType, CancellationToken cancellationToken)
         {
             var (severity, description) = IncidentTypeMetadata.GetMetadata(incidentType);
 
@@ -133,13 +133,13 @@ namespace IncidentResponseAPI.Services.Implementations
                 DetectedAt = DateTime.Now,
                 Status = "Open",
                 EventId = @event.EventId,
-                Event = @event //establish relationship with EventsModel
+                Event = @event // establish relationship with EventsModel
             };
             _logger.LogInformation("Creating incident for event with ID {EventId}", @event.EventId);
 
             try
             {
-                await _incidentsRepository.AddAsync(incident);
+                await _incidentsRepository.AddAsync(incident, cancellationToken);
                 _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
             }
             catch (Exception ex)

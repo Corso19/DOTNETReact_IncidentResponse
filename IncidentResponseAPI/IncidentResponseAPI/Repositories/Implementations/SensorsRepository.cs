@@ -28,6 +28,13 @@ namespace IncidentResponseAPI.Repositories.Implementations
             _context.Sensors.Add(sensorsModel);
             await _context.SaveChangesAsync();
         }
+        
+        public async Task<IEnumerable<SensorsModel>> GetAllEnabledAsync()
+        {
+            return await _context.Sensors
+                .Where(s => s.isEnabled)
+                .ToListAsync();
+        }
 
         public async Task UpdateAsync(SensorsModel sensorsModel)
         {

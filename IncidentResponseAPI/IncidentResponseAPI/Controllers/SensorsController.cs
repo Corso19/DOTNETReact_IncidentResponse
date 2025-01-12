@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
 using IncidentResponseAPI.Dtos;
+using IncidentResponseAPI.Orchestrators;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -12,11 +14,13 @@ namespace IncidentResponseAPI.Controllers
     {
         private readonly ISensorsService _sensorsService;
         private readonly ILogger<SensorsController> _logger;
+        private readonly SensorsOrchestrator _sensorsOrchestrator;
 
-        public SensorsController(ISensorsService sensorsService, ILogger<SensorsController> logger)
+        public SensorsController(ISensorsService sensorsService, ILogger<SensorsController> logger, SensorsOrchestrator sensorsOrchestrator)
         {
             _sensorsService = sensorsService;
             _logger = logger;
+            _sensorsOrchestrator = sensorsOrchestrator;
         }
 
         // GET: api/Sensors
@@ -38,7 +42,7 @@ namespace IncidentResponseAPI.Controllers
                 return StatusCode(500, "An error occurred while fetching sensors.");
             }
         }
-
+        
         // GET: api/Sensors/{id}
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Gets a sensor by ID")]
@@ -64,7 +68,6 @@ namespace IncidentResponseAPI.Controllers
             }
         }
         
-        //TODO - adding a sensor should bring it back after creation, so it can be used in the frontend
         // POST: api/Sensors
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new sensor")]
@@ -74,8 +77,6 @@ namespace IncidentResponseAPI.Controllers
 
             try
             {
-                // await _sensorsService.AddAsync(sensorDto);
-                // return CreatedAtAction(nameof(GetSensorById), new { id = sensorDto.SensorId }, sensorDto);
                 var createdSensor =  await _sensorsService.AddAsync(sensorDto);
                 _logger.LogInformation("Successfully created sensor with ID {Id}", sensorDto.SensorId);
                 return CreatedAtAction(nameof(GetSensorById), new { id = createdSensor.SensorId }, createdSensor);
@@ -90,6 +91,29 @@ namespace IncidentResponseAPI.Controllers
             {
                 _logger.LogError(ex, "Error occurred while creating a new sensor");
                 return StatusCode(500, "An error occurred while creating the sensor.");
+            }
+        }
+        
+        [HttpPost("start-orchestrator")]
+        [SwaggerOperation(Summary = "Starts the orchestrator to process all enabled sensors")]
+        public async Task<IActionResult> StartOrchestrator()
+        {
+            _logger.LogInformation("Starting the orchestrator to process all enabled sensors");
+
+            try
+            {
+                var enabledSensors = await _sensorsService.GetAllEnabledAsync();
+                foreach (var sensor in enabledSensors)
+                {
+                    _sensorsOrchestrator.EnqueueSensor(sensor);
+                }
+                _logger.LogInformation("Successfully Enqueued all enabled sensors to the orchestrator");
+                return Ok("Orchestrator started successfully.");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while starting the orchestrator");
+                return StatusCode(500, "An error occurred while starting the orchestrator.");
             }
         }
 
@@ -143,8 +167,7 @@ namespace IncidentResponseAPI.Controllers
                 return StatusCode(500, "An error occurred while deleting the sensor.");
             }
         }
-
-        //TODO - Negate boolean state instead of selecting a specific state
+        
         // PUT: api/Sensors/{id}/set-enabled
         [HttpPut("{id}/set-enabled")]
         [SwaggerOperation(Summary = "Sets a sensor's enabled status by ID")]
