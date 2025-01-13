@@ -4,6 +4,7 @@ using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.Graph.Models;
 using System.Linq;
+using Microsoft.Kiota.Abstractions;
 using Newtonsoft.Json;  
 
 namespace IncidentResponseAPI.Services.Implementations
@@ -274,6 +275,135 @@ namespace IncidentResponseAPI.Services.Implementations
         //     }
         // }
         
+        // public async Task SyncEventsAsync(int sensorId, CancellationToken cancellationToken)
+        // {
+        //     _logger.LogInformation("Starting sync for sensor: {SensorId}", sensorId);
+        //
+        //     try
+        //     {
+        //         // Fetch sensor using SensorId
+        //         var sensor = await _sensorsRepository.GetByIdAsync(sensorId);
+        //         if (sensor == null)
+        //         {
+        //             _logger.LogWarning("Sensor with ID {SensorId} not found.", sensorId);
+        //             return;
+        //         }
+        //
+        //         // Validate configuration JSON
+        //         var config = JsonConvert.DeserializeObject<Configuration>(sensor.Configuration);
+        //         if (config == null || string.IsNullOrEmpty(config.ClientSecret) ||
+        //             string.IsNullOrEmpty(config.ApplicationId) || string.IsNullOrEmpty(config.TenantId))
+        //         {
+        //             _logger.LogWarning("Invalid configuration for sensor {SensorId}.", sensorId);
+        //             return;
+        //         }
+        //
+        //         // Retrieve last processed timestamp
+        //         DateTime? lastProcessedTime = null;
+        //         if (!string.IsNullOrEmpty(sensor.LastEventMarker))
+        //         {
+        //             var lastEventMarkerJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(sensor.LastEventMarker);
+        //             if (lastEventMarkerJson != null && lastEventMarkerJson.ContainsKey("LastProcessedTime"))
+        //             {
+        //                 lastProcessedTime = DateTime.Parse(lastEventMarkerJson["LastProcessedTime"]);
+        //             }
+        //         }
+        //         
+        //         DateTime? maxProcessedTime = lastProcessedTime;
+        //
+        //         // Fetch messages for all users
+        //         var messagesByUser = await _graphAuthService.FetchEmailsForAllUsersAsync(
+        //             config.ClientSecret,
+        //             config.ApplicationId,
+        //             config.TenantId,
+        //             lastProcessedTime,
+        //             cancellationToken);
+        //         
+        //         int newEmailsCount = 0;
+        //
+        //         foreach (var (userPrincipalName, messages) in messagesByUser)
+        //         {
+        //             _logger.LogInformation("Processing messages for user: {UserPrincipalName}", userPrincipalName);
+        //             foreach (var message in messages)
+        //             {
+        //                 _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
+        //                     message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+        //                     message.Subject ?? "No subject");
+        //
+        //                 var eventModel = new EventsModel
+        //                 {
+        //                     SensorId = sensor.SensorId,
+        //                     TypeName = "Email",
+        //                     Subject = message.Subject ?? "No subject",
+        //                     Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+        //                     Details = message.Body?.Content ?? "No Content",
+        //                     Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
+        //                     isProcessed = false,
+        //                     MessageId = message.Id
+        //                 };
+        //
+        //                 await _eventsRepository.AddAsync(eventModel, cancellationToken);
+        //                 
+        //                 if(eventModel.Timestamp >= maxProcessedTime)
+        //                 {
+        //                     _logger.LogInformation("MaxProcessedTime: {MaxProcessedTime}, EventModel Timestamp {EventModelTimestamp}", maxProcessedTime, eventModel.Timestamp);
+        //                     maxProcessedTime = eventModel.Timestamp;
+        //                 }
+        //                 
+        //                 newEmailsCount++;
+        //
+        //                 // Fetch attachments for the message
+        //                 var attachments = await _graphAuthService.FetchAttachmentsAsync(
+        //                     config.ClientSecret,
+        //                     config.ApplicationId,
+        //                     config.TenantId,
+        //                     message.Id,
+        //                     userPrincipalName,
+        //                     cancellationToken);
+        //
+        //                 foreach (var attachment in attachments.OfType<FileAttachment>())
+        //                 {
+        //                     var attachmentModel = new AttachmentModel
+        //                     {
+        //                         Name = attachment.Name ?? "Unnamed Attachment",
+        //                         Size = attachment.Size ?? 0,
+        //                         Content = attachment.ContentBytes,
+        //                         EventId = eventModel.EventId
+        //                     };
+        //
+        //                     await _attachmentRepository.AddAttachmentAsync(attachmentModel, cancellationToken);
+        //                 }
+        //             }
+        //         }
+        //         
+        //         _logger.LogInformation("MaxProcessedTime: {MaxProcessedTime}", maxProcessedTime);
+        //
+        //         // Save updated LastEventMarker
+        //         if (maxProcessedTime.HasValue)
+        //         {
+        //             var updatedLastEventMarker = new Dictionary<string, string>
+        //             {
+        //                 { "LastProcessedTime", maxProcessedTime.Value.ToUniversalTime().ToString("o") }
+        //             };
+        //             _logger.LogInformation("{updatedLastEventMarker}", updatedLastEventMarker);
+        //             sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
+        //
+        //             await _sensorsRepository.UpdateAsync(sensor);
+        //         }
+        //
+        //         _logger.LogInformation("Sync completed for sensor: {SensorId}. {NewEmailsCount} new emails were added.",
+        //             sensorId, newEmailsCount);
+        //
+        //         // Trigger immediate detection
+        //         await _eventsProcessingService.ProcessEventsAsync(cancellationToken);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error occurred while syncing events for sensor: {SensorId}", sensorId);
+        //         throw;
+        //     }
+        // }
+
         public async Task SyncEventsAsync(int sensorId, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting sync for sensor: {SensorId}", sensorId);
@@ -301,12 +431,16 @@ namespace IncidentResponseAPI.Services.Implementations
                 DateTime? lastProcessedTime = null;
                 if (!string.IsNullOrEmpty(sensor.LastEventMarker))
                 {
-                    var lastEventMarkerJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(sensor.LastEventMarker);
+                    var lastEventMarkerJson =
+                        JsonConvert.DeserializeObject<Dictionary<string, string>>(sensor.LastEventMarker);
                     if (lastEventMarkerJson != null && lastEventMarkerJson.ContainsKey("LastProcessedTime"))
                     {
                         lastProcessedTime = DateTime.Parse(lastEventMarkerJson["LastProcessedTime"]);
                     }
                 }
+
+                // Initialize maxProcessedTime to lastProcessedTime or DateTime.MinValue
+                DateTime maxProcessedTime = lastProcessedTime ?? DateTime.MinValue;
 
                 // Fetch messages for all users
                 var messagesByUser = await _graphAuthService.FetchEmailsForAllUsersAsync(
@@ -316,11 +450,11 @@ namespace IncidentResponseAPI.Services.Implementations
                     lastProcessedTime,
                     cancellationToken);
 
-                DateTime? newLastProcessedTime = lastProcessedTime;
                 int newEmailsCount = 0;
 
                 foreach (var (userPrincipalName, messages) in messagesByUser)
                 {
+                    _logger.LogInformation("Processing messages for user: {UserPrincipalName}", userPrincipalName);
                     foreach (var message in messages)
                     {
                         _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
@@ -334,12 +468,21 @@ namespace IncidentResponseAPI.Services.Implementations
                             Subject = message.Subject ?? "No subject",
                             Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
                             Details = message.Body?.Content ?? "No Content",
-                            Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
+                            Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.UtcNow,
                             isProcessed = false,
                             MessageId = message.Id
                         };
 
                         await _eventsRepository.AddAsync(eventModel, cancellationToken);
+
+                        // Update maxProcessedTime if this is the most recent email
+                        if (eventModel.Timestamp > maxProcessedTime)
+                        {
+                            _logger.LogInformation("Updating MaxProcessedTime from {Old} to {New}",
+                                maxProcessedTime, eventModel.Timestamp);
+                            maxProcessedTime = eventModel.Timestamp;
+                        }
+
                         newEmailsCount++;
 
                         // Fetch attachments for the message
@@ -363,21 +506,22 @@ namespace IncidentResponseAPI.Services.Implementations
 
                             await _attachmentRepository.AddAttachmentAsync(attachmentModel, cancellationToken);
                         }
-
-                        // Update LastEventMarker
-                        newLastProcessedTime = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now;
                     }
                 }
 
-                // Save updated LastEventMarker
-                if (newLastProcessedTime.HasValue)
+                _logger.LogInformation("Final MaxProcessedTime: {MaxProcessedTime}", maxProcessedTime);
+
+                // Always update LastEventMarker if we processed any emails
+                if (newEmailsCount > 0)
                 {
                     var updatedLastEventMarker = new Dictionary<string, string>
                     {
-                        { "LastProcessedTime", newLastProcessedTime.Value.ToString("o") }
+                        { "LastProcessedTime", maxProcessedTime.ToUniversalTime().ToString("o") }
                     };
-                    sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
+                    _logger.LogInformation("Updating LastEventMarker to: {Marker}",
+                        JsonConvert.SerializeObject(updatedLastEventMarker));
 
+                    sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
                     await _sensorsRepository.UpdateAsync(sensor);
                 }
 

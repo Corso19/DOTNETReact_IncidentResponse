@@ -18,21 +18,60 @@ namespace IncidentResponseAPI.Services.Implementations
             _logger = logger;
         }
 
+        // public async Task<Dictionary<string, List<Message>>> FetchEmailsForAllUsersAsync(
+        //     string clientSecret, string applicationId, string tenantId, DateTime? lastProcessedTime, CancellationToken cancellationToken)
+        // {
+        //     var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
+        //
+        //     var emailsByUser = new Dictionary<string, List<Message>>();
+        //
+        //     // Fetch all users
+        //     var users = await graphClient.Users.GetAsync(cancellationToken: cancellationToken);
+        //     foreach (var user in users.Value)
+        //     {
+        //         var userId = user.Id;
+        //
+        //         // Create a filter string if a lastProcessedTime is provided
+        //         var filter = lastProcessedTime.HasValue ? $"receivedDateTime gt {lastProcessedTime.Value:o}" : null;
+        //         
+        //
+        //         var messages = await graphClient.Users[userId]
+        //             .MailFolders["Inbox"]
+        //             .Messages
+        //             .GetAsync(requestConfiguration =>
+        //             {
+        //                 if (!string.IsNullOrEmpty(filter))
+        //                 {
+        //                     requestConfiguration.QueryParameters.Filter = filter;
+        //                 }
+        //             }, cancellationToken);
+        //
+        //         if (messages?.Value != null)
+        //         {
+        //             emailsByUser[userId] = messages.Value.ToList();
+        //         }
+        //     }
+        //
+        //     return emailsByUser;
+        // }
+        
         public async Task<Dictionary<string, List<Message>>> FetchEmailsForAllUsersAsync(
             string clientSecret, string applicationId, string tenantId, DateTime? lastProcessedTime, CancellationToken cancellationToken)
         {
             var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
-
             var emailsByUser = new Dictionary<string, List<Message>>();
-
-            // Fetch all users
+    
             var users = await graphClient.Users.GetAsync(cancellationToken: cancellationToken);
             foreach (var user in users.Value)
             {
                 var userId = user.Id;
 
-                // Create a filter string if a lastProcessedTime is provided
-                var filter = lastProcessedTime.HasValue ? $"receivedDateTime gt {lastProcessedTime.Value:o}" : null;
+                // Ensure strict greater than comparison
+                var filter = lastProcessedTime.HasValue 
+                    ? $"receivedDateTime gt {lastProcessedTime.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}" 
+                    : null;
+
+                _logger.LogInformation("Fetching emails with filter: {Filter}", filter);
 
                 var messages = await graphClient.Users[userId]
                     .MailFolders["Inbox"]
@@ -42,12 +81,23 @@ namespace IncidentResponseAPI.Services.Implementations
                         if (!string.IsNullOrEmpty(filter))
                         {
                             requestConfiguration.QueryParameters.Filter = filter;
+                            requestConfiguration.QueryParameters.Orderby = new[] { "receivedDateTime" };
                         }
                     }, cancellationToken);
 
                 if (messages?.Value != null)
                 {
-                    emailsByUser[userId] = messages.Value.ToList();
+                    // Double-check timestamps to ensure no duplicates
+                    var filteredMessages = messages.Value
+                        .Where(m => !lastProcessedTime.HasValue || 
+                                    m.ReceivedDateTime > lastProcessedTime.Value)
+                        .OrderBy(m => m.ReceivedDateTime)
+                        .ToList();
+
+                    emailsByUser[userId] = filteredMessages;
+            
+                    _logger.LogInformation("Retrieved {Count} new messages for user {UserId}", 
+                        filteredMessages.Count, userId);
                 }
             }
 

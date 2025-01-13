@@ -31,14 +31,22 @@ namespace IncidentResponseAPI.Services.Implementations
             {
                 try
                 {
-                    //Sync new events
-                    await _eventsService.SyncEventsAsync(sensor.SensorId, cts.Token);
-                    //Process events to detect incidents
-                    await _eventsProcessingService.ProcessEventsAsync(cts.Token);
-                    
-                    //Update LastRunAt and persist to the database
-                    sensor.LastRunAt = DateTime.UtcNow;
+                    var startTime = DateTime.UtcNow;
+                    _logger.LogInformation("Starting sensor {SensorId} run at {Time}",
+                        sensor.SensorId, startTime);
+
+                    // Update sensor time before processing
+                    sensor.LastRunAt = startTime;
+                    sensor.NextRunAfter = startTime.AddMinutes(sensor.RetrievalInterval);
                     await _sensorsRepository.UpdateAsync(sensor);
+
+                    // Process events
+                    await _eventsService.SyncEventsAsync(sensor.SensorId, cts.Token);
+                    await _eventsProcessingService.ProcessEventsAsync(cts.Token);
+
+                    _logger.LogInformation(
+                        "Updated sensor {SensorId} LastRunAt to {LastRun}, NextRunAfter to {NextRun}",
+                        sensor.SensorId, sensor.LastRunAt, sensor.NextRunAfter);
                 }
                 catch (OperationCanceledException)
                 {

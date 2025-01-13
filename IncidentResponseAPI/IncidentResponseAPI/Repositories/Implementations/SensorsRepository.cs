@@ -38,8 +38,12 @@ namespace IncidentResponseAPI.Repositories.Implementations
 
         public async Task UpdateAsync(SensorsModel sensorsModel)
         {
-            _context.Entry(sensorsModel).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            var existingEntity = await _context.Sensors.FindAsync(sensorsModel.SensorId);
+            if (existingEntity != null)
+            {
+                _context.Entry(existingEntity).CurrentValues.SetValues(sensorsModel);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task DeleteAsync(int id)
