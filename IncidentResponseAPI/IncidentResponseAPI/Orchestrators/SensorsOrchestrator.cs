@@ -31,49 +31,6 @@ public class SensorsOrchestrator : BackgroundService
         ProcessQueue();
     }
 
-    // private async void ProcessQueue()
-    // {
-    //     while (_sensorsQueue.Count > 0)
-    //     {
-    //         await _semaphore.WaitAsync();
-    //         if (_sensorsQueue.TryDequeue(out var sensor))
-    //         {
-    //             _ = Task.Run(async () =>
-    //             {
-    //                 var endTime = DateTime.UtcNow.AddMinutes(sensor.RetrievalInterval);
-    //                 try
-    //                 {
-    //                     using (var scope = _scopeFactory.CreateScope())
-    //                     {
-    //                         var sensorsService = scope.ServiceProvider.GetRequiredService<ISensorsService>();
-
-    //                         while (DateTime.UtcNow < endTime)
-    //                         {
-    //                             try
-    //                             {
-    //                                 await sensorsService.RunSensorAsync(sensor);
-    //                                 sensor.LastRunAt = DateTime.UtcNow;
-    //                                 await Task.Delay(TimeSpan.FromSeconds(DelayBetweenSensorRuns)); // Adjust the delay as needed
-    //                             }
-    //                             catch (Exception ex)
-    //                             {
-    //                                 _logger.LogError(ex,
-    //                                     "Error occurred while running sensor with ID {SensorId}. Retrying...",
-    //                                     sensor.SensorId);
-    //                                 await Task.Delay(TimeSpan.FromSeconds(DelayBetweenSensorRuns)); // Retry after a short delay
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //                 finally
-    //                 {
-    //                     _semaphore.Release();
-    //                 }
-    //             });
-    //         }
-    //     }
-    // }
-
     private async void ProcessQueue()
     {
         while (_sensorsQueue.Count > 0)
