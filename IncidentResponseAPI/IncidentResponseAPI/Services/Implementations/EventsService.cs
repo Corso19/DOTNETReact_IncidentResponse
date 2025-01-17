@@ -407,7 +407,8 @@ namespace IncidentResponseAPI.Services.Implementations
                         }
                     }
                 }
-
+                _logger.LogInformation("Sync completed for sensor: {SensorId}. {NewEmailsCount} new emails were added.",
+                    sensorId, newEmailsCount);
                 _logger.LogInformation("Final MaxProcessedTime: {MaxProcessedTime}", maxProcessedTime);
 
                 // Always update LastEventMarker if we processed any emails
