@@ -4,6 +4,8 @@ using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.Graph.Models;
 using System.Linq;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Kiota.Abstractions;
 using Newtonsoft.Json;  
 
@@ -154,7 +156,7 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        // public async Task SyncEventsAsync(int sensorId)
+        // public async Task SyncEventsAsync(int sensorId, CancellationToken cancellationToken)
         // {
         //     _logger.LogInformation("Starting sync for sensor: {SensorId}", sensorId);
         //
@@ -189,127 +191,8 @@ namespace IncidentResponseAPI.Services.Implementations
         //             }
         //         }
         //
-        //         // Fetch messages for all users
-        //         var messagesByUser = await _graphAuthService.FetchEmailsForAllUsersAsync(
-        //             config.ClientSecret,
-        //             config.ApplicationId,
-        //             config.TenantId,
-        //             lastProcessedTime);
-        //
-        //         DateTime? newLastProcessedTime = lastProcessedTime;
-        //         int newEmailsCount = 0;
-        //
-        //         foreach (var (userPrincipalName, messages) in messagesByUser)
-        //         {
-        //             foreach (var message in messages)
-        //             {
-        //                 _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
-        //                     message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
-        //                     message.Subject ?? "No subject");
-        //
-        //
-        //                 var eventModel = new EventsModel
-        //                 {
-        //                     SensorId = sensor.SensorId,
-        //                     TypeName = "Email",
-        //                     Subject = message.Subject ?? "No subject",
-        //                     Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
-        //                     Details = message.Body?.Content ?? "No Content",
-        //                     Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
-        //                     isProcessed = false,
-        //                     MessageId = message.Id
-        //                 };
-        //
-        //                 await _eventsRepository.AddAsync(eventModel);
-        //                 newEmailsCount++;
-        //
-        //                 // Fetch attachments for the message
-        //                 var attachments = await _graphAuthService.FetchAttachmentsAsync(
-        //                     config.ClientSecret,
-        //                     config.ApplicationId,
-        //                     config.TenantId,
-        //                     message.Id,
-        //                     userPrincipalName);
-        //
-        //                 foreach (var attachment in attachments.OfType<FileAttachment>())
-        //                 {
-        //                     var attachmentModel = new AttachmentModel
-        //                     {
-        //                         Name = attachment.Name ?? "Unnamed Attachment",
-        //                         Size = attachment.Size ?? 0,
-        //                         Content = attachment.ContentBytes,
-        //                         EventId = eventModel.EventId
-        //                     };
-        //
-        //                     await _attachmentRepository.AddAttachmentAsync(attachmentModel);
-        //                 }
-        //
-        //
-        //                 // Update LastEventMarker
-        //                 newLastProcessedTime = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now;
-        //             }
-        //         }
-        //
-        //         // Save updated LastEventMarker
-        //         if (newLastProcessedTime.HasValue)
-        //         {
-        //             var updatedLastEventMarker = new Dictionary<string, string>
-        //             {
-        //                 { "LastProcessedTime", newLastProcessedTime.Value.ToString("o") }
-        //             };
-        //             sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
-        //
-        //             await _sensorsRepository.UpdateAsync(sensor);
-        //         }
-        //
-        //         _logger.LogInformation("Sync completed for sensor: {SensorId}. {NewEmailsCount} new emails were added.",
-        //             sensorId, newEmailsCount);
-        //
-        //         //Trigger immediate detection
-        //         await _eventsProcessingService.ProcessEventsAsync();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "Error occurred while syncing events for sensor: {SensorId}", sensorId);
-        //         throw;
-        //     }
-        // }
-        
-        // public async Task SyncEventsAsync(int sensorId, CancellationToken cancellationToken)
-        // {
-        //     _logger.LogInformation("Starting sync for sensor: {SensorId}", sensorId);
-        //
-        //     try
-        //     {
-        //         // Fetch sensor using SensorId
-        //         var sensor = await _sensorsRepository.GetByIdAsync(sensorId);
-        //         if (sensor == null)
-        //         {
-        //             _logger.LogWarning("Sensor with ID {SensorId} not found.", sensorId);
-        //             return;
-        //         }
-        //
-        //         // Validate configuration JSON
-        //         var config = JsonConvert.DeserializeObject<Configuration>(sensor.Configuration);
-        //         if (config == null || string.IsNullOrEmpty(config.ClientSecret) ||
-        //             string.IsNullOrEmpty(config.ApplicationId) || string.IsNullOrEmpty(config.TenantId))
-        //         {
-        //             _logger.LogWarning("Invalid configuration for sensor {SensorId}.", sensorId);
-        //             return;
-        //         }
-        //
-        //         // Retrieve last processed timestamp
-        //         DateTime? lastProcessedTime = null;
-        //         if (!string.IsNullOrEmpty(sensor.LastEventMarker))
-        //         {
-        //             var lastEventMarkerJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(sensor.LastEventMarker);
-        //             if (lastEventMarkerJson != null && lastEventMarkerJson.ContainsKey("LastProcessedTime"))
-        //             {
-        //                 lastProcessedTime = DateTime.Parse(lastEventMarkerJson["LastProcessedTime"]);
-        //             }
-        //         }
-        //         
-        //         DateTime? maxProcessedTime = lastProcessedTime;
+        //         // Initialize maxProcessedTime to lastProcessedTime or DateTime.MinValue
+        //         DateTime maxProcessedTime = lastProcessedTime ?? DateTime.MinValue;
         //
         //         // Fetch messages for all users
         //         var messagesByUser = await _graphAuthService.FetchEmailsForAllUsersAsync(
@@ -318,7 +201,7 @@ namespace IncidentResponseAPI.Services.Implementations
         //             config.TenantId,
         //             lastProcessedTime,
         //             cancellationToken);
-        //         
+        //
         //         int newEmailsCount = 0;
         //
         //         foreach (var (userPrincipalName, messages) in messagesByUser)
@@ -326,9 +209,7 @@ namespace IncidentResponseAPI.Services.Implementations
         //             _logger.LogInformation("Processing messages for user: {UserPrincipalName}", userPrincipalName);
         //             foreach (var message in messages)
         //             {
-        //                 _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
-        //                     message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
-        //                     message.Subject ?? "No subject");
+        //                 
         //
         //                 var eventModel = new EventsModel
         //                 {
@@ -337,19 +218,26 @@ namespace IncidentResponseAPI.Services.Implementations
         //                     Subject = message.Subject ?? "No subject",
         //                     Sender = message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
         //                     Details = message.Body?.Content ?? "No Content",
-        //                     Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.Now,
+        //                     Timestamp = message.ReceivedDateTime?.UtcDateTime ?? DateTime.UtcNow,
         //                     isProcessed = false,
         //                     MessageId = message.Id
         //                 };
         //
         //                 await _eventsRepository.AddAsync(eventModel, cancellationToken);
         //                 
-        //                 if(eventModel.Timestamp >= maxProcessedTime)
+        //                 _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
+        //                     message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+        //                     message.Subject ?? "No subject");
+        //
+        //                 // Update maxProcessedTime if this is the most recent email
+        //                 maxProcessedTime = eventModel.Timestamp;
+        //                 if (eventModel.Timestamp > maxProcessedTime)
         //                 {
-        //                     _logger.LogInformation("MaxProcessedTime: {MaxProcessedTime}, EventModel Timestamp {EventModelTimestamp}", maxProcessedTime, eventModel.Timestamp);
+        //                     _logger.LogInformation("Updating MaxProcessedTime from {Old} to {New}",
+        //                         maxProcessedTime, eventModel.Timestamp);
         //                     maxProcessedTime = eventModel.Timestamp;
         //                 }
-        //                 
+        //
         //                 newEmailsCount++;
         //
         //                 // Fetch attachments for the message
@@ -375,19 +263,20 @@ namespace IncidentResponseAPI.Services.Implementations
         //                 }
         //             }
         //         }
-        //         
-        //         _logger.LogInformation("MaxProcessedTime: {MaxProcessedTime}", maxProcessedTime);
         //
-        //         // Save updated LastEventMarker
-        //         if (maxProcessedTime.HasValue)
+        //         _logger.LogInformation("Final MaxProcessedTime: {MaxProcessedTime}", maxProcessedTime);
+        //
+        //         // Always update LastEventMarker if we processed any emails
+        //         if (newEmailsCount > 0)
         //         {
         //             var updatedLastEventMarker = new Dictionary<string, string>
         //             {
-        //                 { "LastProcessedTime", maxProcessedTime.Value.ToUniversalTime().ToString("o") }
+        //                 { "LastProcessedTime", maxProcessedTime.ToUniversalTime().ToString("o") }
         //             };
-        //             _logger.LogInformation("{updatedLastEventMarker}", updatedLastEventMarker);
-        //             sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
+        //             _logger.LogInformation("Updating LastEventMarker to: {Marker}",
+        //                 JsonConvert.SerializeObject(updatedLastEventMarker));
         //
+        //             sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
         //             await _sensorsRepository.UpdateAsync(sensor);
         //         }
         //
@@ -457,10 +346,6 @@ namespace IncidentResponseAPI.Services.Implementations
                     _logger.LogInformation("Processing messages for user: {UserPrincipalName}", userPrincipalName);
                     foreach (var message in messages)
                     {
-                        _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
-                            message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
-                            message.Subject ?? "No subject");
-
                         var eventModel = new EventsModel
                         {
                             SensorId = sensor.SensorId,
@@ -473,7 +358,21 @@ namespace IncidentResponseAPI.Services.Implementations
                             MessageId = message.Id
                         };
 
-                        await _eventsRepository.AddAsync(eventModel, cancellationToken);
+                        try
+                        {
+                            await _eventsRepository.AddAsync(eventModel, cancellationToken);
+                        }
+                        catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx &&
+                                                           sqlEx.Number == 2627)
+                        {
+                            // Handle unique constraint violation (duplicate MessageId)
+                            _logger.LogInformation("Message with ID {MessageId} already exists. Skipping.", message.Id);
+                            continue;
+                        }
+
+                        _logger.LogInformation("Processing message from sender: {Sender}, Subject: {Subject}",
+                            message.Sender?.EmailAddress?.Address ?? "Unknown Sender",
+                            message.Subject ?? "No subject");
 
                         // Update maxProcessedTime if this is the most recent email
                         if (eventModel.Timestamp > maxProcessedTime)
@@ -524,16 +423,10 @@ namespace IncidentResponseAPI.Services.Implementations
                     sensor.LastEventMarker = JsonConvert.SerializeObject(updatedLastEventMarker);
                     await _sensorsRepository.UpdateAsync(sensor);
                 }
-
-                _logger.LogInformation("Sync completed for sensor: {SensorId}. {NewEmailsCount} new emails were added.",
-                    sensorId, newEmailsCount);
-
-                // Trigger immediate detection
-                await _eventsProcessingService.ProcessEventsAsync(cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while syncing events for sensor: {SensorId}", sensorId);
+                _logger.LogError(ex, "Error occurred while syncing events for sensor {SensorId}", sensorId);
                 throw;
             }
         }

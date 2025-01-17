@@ -38,6 +38,10 @@ namespace IncidentResponseAPI.Models
                 .HasCheckConstraint("CK_Sensors_RetrievalInterval", "[RetrievalInterval] BETWEEN 1 AND 1440")
                 .Property(s => s.Configuration)
                 .IsRequired(); // Ensures non-null Configuration
+            
+            modelBuilder.Entity<EventsModel>()
+                .HasIndex(e => e.MessageId)
+                .IsUnique();
 
             // Add more model-specific configurations as needed.
         }

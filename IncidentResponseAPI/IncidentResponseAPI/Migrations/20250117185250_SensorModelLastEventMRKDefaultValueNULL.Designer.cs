@@ -4,6 +4,7 @@ using IncidentResponseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IncidentResponseAPI.Migrations
 {
     [DbContext(typeof(IncidentResponseContext))]
-    partial class IncidentResponseContextModelSnapshot : ModelSnapshot
+    [Migration("20250117185250_SensorModelLastEventMRKDefaultValueNULL")]
+    partial class SensorModelLastEventMRKDefaultValueNULL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,7 +68,7 @@ namespace IncidentResponseAPI.Migrations
 
                     b.Property<string>("MessageId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Sender")
                         .IsRequired()
@@ -89,9 +92,6 @@ namespace IncidentResponseAPI.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("EventId");
-
-                    b.HasIndex("MessageId")
-                        .IsUnique();
 
                     b.HasIndex("SensorId");
 
