@@ -21,7 +21,7 @@ const Incidents = () => {
 
     return(
         <Row className="mt-3">
-            <Col md={9} sm={12}>
+            <Col sm={12}>
             {
                 incidentsLoading ? (
                     <div
@@ -38,7 +38,7 @@ const Incidents = () => {
                     </div>
                 ) : (
                     incidents.length ? (
-                        <Accordion className="ms-3">
+                        <Accordion className="mx-3">
                         {
                             incidents.map((incident) => (
                                 <IncidentItem incident={incident} />
@@ -46,7 +46,7 @@ const Incidents = () => {
                         }
                         </Accordion>
                     ) : (
-                        <h5 className="ms-3">No incidents added.</h5>
+                        <h5 className="mx-3">No incidents added.</h5>
                     )
                 )
             }
