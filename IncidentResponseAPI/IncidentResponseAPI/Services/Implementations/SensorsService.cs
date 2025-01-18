@@ -31,7 +31,7 @@ namespace IncidentResponseAPI.Services.Implementations
             {
                 try
                 {
-                    var startTime = DateTime.UtcNow;
+                    var startTime = DateTime.Now;
                     _logger.LogInformation("Starting sensor {SensorId} run at {Time}",
                         sensor.SensorId, startTime);
 
