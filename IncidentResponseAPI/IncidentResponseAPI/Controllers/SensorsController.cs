@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography;
 using IncidentResponseAPI.Dtos;
 using IncidentResponseAPI.Orchestrators;
 using IncidentResponseAPI.Services.Interfaces;
@@ -102,6 +101,8 @@ namespace IncidentResponseAPI.Controllers
 
             try
             {
+                _sensorsOrchestrator.IsRunning = true;
+                
                 var enabledSensors = await _sensorsService.GetAllEnabledAsync();
                 foreach (var sensor in enabledSensors)
                 {
@@ -117,14 +118,32 @@ namespace IncidentResponseAPI.Controllers
             }
         }
 
-        [HttpPost("cancel-all-sensors")]
-        [SwaggerOperation(Summary = "Cancels all running sensors started by the orchestrator")]
-        public IActionResult CancelAllSensors()
+        // [HttpPost("cancel-all-sensors")]
+        // [SwaggerOperation(Summary = "Cancels all running sensors started by the orchestrator")]
+        // public IActionResult CancelAllSensors()
+        // {
+        //     _sensorsService.CancelAllSensors();
+        //     return Ok("All running sensors started by orchestrator have been cancelled.");
+        //     
+        // }
+
+        [HttpPost("stop-orchestrator")]
+        [SwaggerOperation(Summary = "Stops the running orchestrator")]
+        public IActionResult StopOrchestrator()
         {
             _sensorsService.CancelAllSensors();
-            return Ok("All running sensors started by orchestrator have been cancelled.");
-            
+            _sensorsOrchestrator.IsRunning = false;
+            return Ok("Orchestrator stopped successfully.");
         }
+        
+        [HttpGet("orchestrator-status")]
+        [SwaggerOperation(Summary = "Gets the status of the orchestrator")]
+        public IActionResult GetOrchestratorStatus()
+        {
+            return Ok(new { IsRunning = _sensorsOrchestrator.IsRunning });
+        }
+        
+        
 
         // PUT: api/Sensors/{id}
         [HttpPut("{id}")]
