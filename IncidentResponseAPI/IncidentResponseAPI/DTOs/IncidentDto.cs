@@ -1,4 +1,5 @@
-﻿using IncidentResponseAPI.Models;
+﻿using System.Text.Json.Serialization;
+using IncidentResponseAPI.Models;
 
 namespace IncidentResponseAPI.Dtos
 {
@@ -7,6 +8,7 @@ namespace IncidentResponseAPI.Dtos
         public int IncidentId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        [JsonConverter(typeof(CustomDateTimeConverter))]
         public DateTime DetectedAt { get; set; }
         public string Status { get; set; }
         public IncidentType Type { get; set; }
