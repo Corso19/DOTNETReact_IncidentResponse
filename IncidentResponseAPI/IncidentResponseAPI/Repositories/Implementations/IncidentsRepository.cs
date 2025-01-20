@@ -29,10 +29,10 @@ namespace IncidentResponseAPI.Repositories.Implementations
             return await _context.Incidents.FindAsync(id);
         }
 
-        public async Task AddAsync(IncidentsModel incidentsModel)
+        public async Task AddAsync(IncidentsModel incidentsModel, CancellationToken cancellationToken)
         {
             _context.Incidents.Add(incidentsModel);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task UpdateAsync(IncidentsModel incidentsModel)

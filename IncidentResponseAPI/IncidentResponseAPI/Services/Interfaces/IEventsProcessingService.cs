@@ -2,5 +2,5 @@
 
 public interface IEventsProcessingService
 {
-    Task ProcessEventsAsync();
+    Task ProcessEventsAsync(CancellationToken cancellationToken);
 }

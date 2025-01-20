@@ -70,13 +70,13 @@ namespace IncidentResponseAPI.Controllers
         // POST: api/Events
         [HttpPost]
         [SwaggerOperation(Summary = "Creates a new event")]
-        public async Task<ActionResult<EventDto>> PostEvent(EventDto eventDto)
+        public async Task<ActionResult<EventDto>> PostEvent(EventDto eventDto, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Adding a new event");
 
             try
             {
-                await _eventsService.AddEventAsync(eventDto);
+                await _eventsService.AddEventAsync(eventDto, cancellationToken);
                 _logger.LogInformation("Successfully added a new event with ID {Id}", eventDto.EventId);
                 return CreatedAtAction(nameof(GetEventbyId), new { id = eventDto.EventId }, eventDto);
             }
@@ -90,7 +90,7 @@ namespace IncidentResponseAPI.Controllers
         // PUT: api/Events/5
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Updates an existing event")]
-        public async Task<IActionResult> PutEvent(int id, EventDto eventDto)
+        public async Task<IActionResult> PutEvent(int id, EventDto eventDto, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Updating event with ID {Id}", id);
             
@@ -102,7 +102,7 @@ namespace IncidentResponseAPI.Controllers
 
             try
             {
-                await _eventsService.UpdateEventAsync(eventDto);
+                await _eventsService.UpdateEventAsync(eventDto, cancellationToken);
                 _logger.LogInformation("Successfully updated event with ID {Id}", id);
                 return NoContent();
             }
@@ -143,13 +143,13 @@ namespace IncidentResponseAPI.Controllers
         // POST: api/Events/sync/{sensorId}
         [HttpPost("sync/{sensorId}")]
         [SwaggerOperation(Summary = "Syncs events (emails) for a specific sensor")]
-        public async Task<IActionResult> SyncEvents(int sensorId)
+        public async Task<IActionResult> SyncEvents(int sensorId, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Syncing events for sensor {SensorId}", sensorId);
 
             try
             {
-                await _eventsService.SyncEventsAsync(sensorId);
+                await _eventsService.SyncEventsAsync(sensorId, cancellationToken);
                 _logger.LogInformation("Events synced successfully for sensor {SensorId}", sensorId);
                 return Ok("Events synced successfully.");
             }

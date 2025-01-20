@@ -28,11 +28,22 @@ namespace IncidentResponseAPI.Repositories.Implementations
             _context.Sensors.Add(sensorsModel);
             await _context.SaveChangesAsync();
         }
+        
+        public async Task<IEnumerable<SensorsModel>> GetAllEnabledAsync()
+        {
+            return await _context.Sensors
+                .Where(s => s.isEnabled)
+                .ToListAsync();
+        }
 
         public async Task UpdateAsync(SensorsModel sensorsModel)
         {
-            _context.Entry(sensorsModel).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            var existingEntity = await _context.Sensors.FindAsync(sensorsModel.SensorId);
+            if (existingEntity != null)
+            {
+                _context.Entry(existingEntity).CurrentValues.SetValues(sensorsModel);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task DeleteAsync(int id)

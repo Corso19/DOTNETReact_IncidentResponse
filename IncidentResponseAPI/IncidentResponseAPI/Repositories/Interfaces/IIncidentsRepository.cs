@@ -6,7 +6,7 @@ namespace IncidentResponseAPI.Repositories.Interfaces
     {
         Task<IEnumerable<IncidentsModel>> GetAllAsync(bool includeEvent = false);
         Task<IncidentsModel> GetByIdAsync(int id);
-        Task AddAsync(IncidentsModel incidentsModel);
+        Task AddAsync(IncidentsModel incidentsModel, CancellationToken cancellationToken);
         Task UpdateAsync(IncidentsModel incidentsModel);
         Task DeleteAsync(int id);
     }

@@ -6,7 +6,7 @@ namespace IncidentResponseAPI.Services.Interfaces
     {
         Task<IEnumerable<IncidentDto>> GetAllAsync();
         Task<IncidentDto> GetByIdAsync(int id);
-        Task AddAsync(IncidentDto incidentDto);
+        Task AddAsync(IncidentDto incidentDto, CancellationToken cancellationToken);
         Task UpdateAsync(int id, IncidentDto incidentDto);
         Task DeleteAsync(int id);
     }

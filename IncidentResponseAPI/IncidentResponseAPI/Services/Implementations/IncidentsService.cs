@@ -54,7 +54,7 @@ namespace IncidentResponseAPI.Services.Implementations
             };
         }
 
-        public async Task AddAsync(IncidentDto incidentDto)
+        public async Task AddAsync(IncidentDto incidentDto, CancellationToken cancellationToken)
         {
             var incidentsModel = new IncidentsModel
             {
@@ -64,7 +64,7 @@ namespace IncidentResponseAPI.Services.Implementations
                 Status = incidentDto.Status
             };
 
-            await _incidentsRepository.AddAsync(incidentsModel);
+            await _incidentsRepository.AddAsync(incidentsModel, cancellationToken);
         }
 
         public async Task UpdateAsync(int id, IncidentDto incidentDto)

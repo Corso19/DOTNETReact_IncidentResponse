@@ -4,5 +4,5 @@ namespace IncidentResponseAPI.Services.Interfaces;
 
 public interface IIncidentDetectionService
 {
-    Task<bool> Detect(EventsModel @event);
+    Task<bool> Detect(EventsModel @event, CancellationToken cancellationToken);
 }

@@ -1,6 +1,6 @@
 ﻿using IncidentResponseAPI.Models;
-using Microsoft.EntityFrameworkCore;
 using IncidentResponseAPI.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace IncidentResponseAPI.Repositories.Implementations
 {
@@ -15,89 +15,68 @@ namespace IncidentResponseAPI.Repositories.Implementations
 
         public async Task<IEnumerable<EventsModel>> GetAllAsync()
         {
-            return await _context.Events
-                .Include(e => e.Sensor)
-                .Include(e =>e.Attachments)
-                .ToListAsync();
+            return await _context.Events.ToListAsync();
         }
 
         public async Task<EventsModel> GetByIdAsync(int id)
         {
-            return await _context.Events
-                .Include(e => e.Sensor)
-                .Include(e => e.Attachments)
-                .FirstOrDefaultAsync(e => e.EventId == id);
+            return await _context.Events.FindAsync(id);
         }
 
-        public async Task AddAsync(EventsModel eventsModel)
+        public async Task AddAsync(EventsModel eventsModel, CancellationToken cancellationToken)
         {
-            _context.Events.Add(eventsModel);
-            await _context.SaveChangesAsync();
+            await _context.Events.AddAsync(eventsModel, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(EventsModel eventsModel)
+        public async Task UpdateAsync(EventsModel eventsModel, CancellationToken cancellationToken)
         {
-            _context.Entry(eventsModel).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _context.Events.Update(eventsModel);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var eventsModel = await _context.Events.FindAsync(id);
-            if (eventsModel != null)
+            var eventModel = await _context.Events.FindAsync(id);
+            if (eventModel != null)
             {
-                _context.Events.Remove(eventsModel);
+                _context.Events.Remove(eventModel);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task<IEnumerable<EventsModel>> GetUnprocessedEventsAsync()
+        public async Task<IEnumerable<EventsModel>> GetUnprocessedEventsAsync(CancellationToken cancellationToken)
         {
-            return await _context.Events.Where(e => !e.isProcessed).ToListAsync();
+            return await _context.Events
+                .Where(e => !e.isProcessed)
+                .ToListAsync(cancellationToken);
         }
-        
-        public async Task<IEnumerable<EventsModel>> GetEventsBySubjectAsync(string subject)
+
+        public async Task<IEnumerable<EventsModel>> GetEventsBySubjectAsync(string subject, CancellationToken cancellationToken)
         {
             return await _context.Events
                 .Where(e => e.Subject == subject)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
-        
-        public async Task<IEnumerable<EventsModel>> GetEventsByTimestampAsync(DateTime timestamp)
+
+        public async Task<IEnumerable<EventsModel>> GetEventsByTimestampAsync(DateTime timestamp, CancellationToken cancellationToken)
         {
             return await _context.Events
                 .Where(e => e.Timestamp == timestamp)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
-        
-        public async Task<IEnumerable<EventsModel>> GetEventsBySenderAsync(string sender)
+
+        public async Task<IEnumerable<EventsModel>> GetEventsBySenderAsync(string sender, CancellationToken cancellationToken)
         {
             return await _context.Events
                 .Where(e => e.Sender == sender)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
-        
-        //Methods for attachments
-        public async Task<IEnumerable<AttachmentModel>> GetAttachmentsByEventIdAsync(int eventId)
-        {
-            return await _context.Attachments
-                .Where(a => a.EventId == eventId)
-                .ToListAsync();
-        }
-        
+
         public async Task<EventsModel> GetByMessageIdAsync(string messageId)
         {
-            return await _context.Events.FirstOrDefaultAsync(e => e.MessageId == messageId);
+            return await _context.Events
+                .FirstOrDefaultAsync(e => e.MessageId == messageId);
         }
-
-        
-        // public async Task AddAttachmentAsync(AttachmentModel attachmentModel)
-        // {
-        //     _context.Attachments.Add(attachmentModel);
-        //     await _context.SaveChangesAsync();
-        // }
     }
 }
-
-
-

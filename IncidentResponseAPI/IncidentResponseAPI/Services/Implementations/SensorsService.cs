@@ -1,7 +1,10 @@
-﻿using IncidentResponseAPI.Dtos;
+﻿using System.Collections.Concurrent;
+using IncidentResponseAPI.Dtos;
 using IncidentResponseAPI.Models;
+using IncidentResponseAPI.Orchestrators;
 using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Services.Interfaces;
+using Microsoft.Kiota.Abstractions;
 using Quartz.Xml;
 
 namespace IncidentResponseAPI.Services.Implementations
@@ -11,12 +14,81 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly ISensorsRepository _sensorsRepository;
         private readonly ILogger<SensorsService> _logger;
         private readonly IConfigurationValidator _configurationValidator;
+        private readonly IEventsService _eventsService;
+        private readonly IEventsProcessingService _eventsProcessingService;
+        private readonly SensorsOrchestrator _sensorsOrchestrator;
+        private readonly ConcurrentDictionary<int, CancellationTokenSource> _cancellationTokenSources = new ();
 
-        public SensorsService(ISensorsRepository sensorsRepository, ILogger<SensorsService> logger, IConfigurationValidator configurationValidator)
+        public SensorsService(
+            ISensorsRepository sensorsRepository, 
+            ILogger<SensorsService> logger, 
+            IConfigurationValidator configurationValidator, 
+            IEventsService eventsService, 
+            IEventsProcessingService eventsProcessingService,
+            SensorsOrchestrator sensorsOrchestrator)
         {
             _sensorsRepository = sensorsRepository;
             _logger = logger;
             _configurationValidator = configurationValidator;
+            _eventsService = eventsService;
+            _eventsProcessingService = eventsProcessingService;
+            _sensorsOrchestrator = sensorsOrchestrator;
+        }
+
+
+        public async Task RunSensorAsync(SensorsModel sensor, CancellationToken cancellationToken)
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(sensor.RetrievalInterval));
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+            {
+                _cancellationTokenSources[sensor.SensorId] = cts;
+
+                try
+                {
+                    var startTime = DateTime.Now;
+                    _logger.LogInformation("Starting sensor {SensorId} run at {Time}", sensor.SensorId, startTime);
+
+                    // Update sensor time before processing
+                    sensor.LastRunAt = startTime;
+                    sensor.NextRunAfter = startTime.AddMinutes(sensor.RetrievalInterval);
+                    await _sensorsRepository.UpdateAsync(sensor);
+
+                    // Process events
+                    await _eventsService.SyncEventsAsync(sensor.SensorId, linkedCts.Token);
+                    await _eventsProcessingService.ProcessEventsAsync(linkedCts.Token);
+
+                    _logger.LogInformation("Updated sensor {SensorId} LastRunAt to {LastRun}, NextRunAfter to {NextRun}", sensor.SensorId, sensor.LastRunAt, sensor.NextRunAfter);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogWarning("Sensor with ID {SensorId} was canceled after {RetrievalInterval} minutes.", sensor.SensorId, sensor.RetrievalInterval);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while running sensor with ID {SensorId}.", sensor.SensorId);
+                }
+                finally
+                {
+                    _cancellationTokenSources.TryRemove(sensor.SensorId, out _);
+                    cts.Dispose();
+                }
+            }
+        }
+
+        public async Task<IEnumerable<SensorsModel>> GetAllEnabledAsync()
+        {
+            _logger.LogInformation("Fetching all enabled sensors.");
+            try
+            {
+                var sensors = await _sensorsRepository.GetAllEnabledAsync();
+                _logger.LogInformation("Successfully fetched all enabled sensors.");
+                return sensors;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching all enabled sensors.");
+                throw;
+            }
         }
 
         public async Task<IEnumerable<SensorDto>> GetAllAsync()
@@ -195,6 +267,19 @@ namespace IncidentResponseAPI.Services.Implementations
                 _logger.LogError(ex, "Error occurred while toggling enabled status for sensor with ID {SensorId}.", id);
                 throw;
             }
+        }
+
+        public void CancelAllSensors()
+        {
+            _sensorsOrchestrator.CancelAllSensors();
+
+            foreach (var cts in _cancellationTokenSources.Values)
+            {
+                cts.Cancel();
+            }
+
+            _cancellationTokenSources.Clear();
+            _logger.LogInformation("All running sensors have been cancelled.");
         }
     }
 }
