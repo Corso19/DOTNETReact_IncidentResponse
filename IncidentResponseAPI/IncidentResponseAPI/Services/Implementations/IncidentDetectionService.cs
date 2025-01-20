@@ -126,7 +126,7 @@ namespace IncidentResponseAPI.Services.Implementations
 
             var incident = new IncidentsModel
             {
-                Title = $"Incident detected: {incidentType}",
+                Title = incidentType.ToString(),
                 Description = description,
                 Severity = severity,
                 Type = incidentType,
