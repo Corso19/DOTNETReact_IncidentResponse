@@ -117,6 +117,15 @@ namespace IncidentResponseAPI.Controllers
             }
         }
 
+        [HttpPost("cancel-all-sensors")]
+        [SwaggerOperation(Summary = "Cancels all running sensors started by the orchestrator")]
+        public IActionResult CancelAllSensors()
+        {
+            _sensorsService.CancelAllSensors();
+            return Ok("All running sensors started by orchestrator have been cancelled.");
+            
+        }
+
         // PUT: api/Sensors/{id}
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Updates an existing sensor")]

@@ -16,6 +16,7 @@ public class SensorsOrchestrator : BackgroundService
     private readonly SemaphoreSlim _semaphore;
     private const int MaxConcurrentSensors = 5;
     private const int DelayBetweenSensorRuns = 20;
+    private CancellationTokenSource _orchestratorCts;
 
     public SensorsOrchestrator(IServiceScopeFactory scopeFactory, ILogger<SensorsOrchestrator> logger)
     {
@@ -23,12 +24,20 @@ public class SensorsOrchestrator : BackgroundService
         _logger = logger;
         _sensorsQueue = new ConcurrentQueue<SensorsModel>();
         _semaphore = new SemaphoreSlim(MaxConcurrentSensors);
+        _orchestratorCts = new CancellationTokenSource();
     }
 
     public void EnqueueSensor(SensorsModel sensor)
     {
         _sensorsQueue.Enqueue(sensor);
         ProcessQueue();
+    }
+    
+    public void CancelAllSensors()
+    {
+        _orchestratorCts.Cancel();
+        //_orchestratorCts.Dispose();
+        _orchestratorCts = new CancellationTokenSource();
     }
 
     private async void ProcessQueue()
@@ -47,7 +56,7 @@ public class SensorsOrchestrator : BackgroundService
                         {
                             var sensorsService = scope.ServiceProvider.GetRequiredService<ISensorsService>();
 
-                            while (DateTime.UtcNow < endTime)
+                            while (DateTime.UtcNow < endTime && !_orchestratorCts.Token.IsCancellationRequested)
                             {
                                 // Get fresh sensor instance before each run
                                 var freshSensorDto = await sensorsService.GetByIdAsync(sensor.SensorId);
@@ -72,11 +81,11 @@ public class SensorsOrchestrator : BackgroundService
                                     LastEventMarker = freshSensorDto.LastEventMarker
                                 };
 
-                                await sensorsService.RunSensorAsync(freshSensor);
+                                await sensorsService.RunSensorAsync(freshSensor, _orchestratorCts.Token);
                                 _logger.LogInformation("Sensor {SensorId} run completed at {Time}",
                                     sensor.SensorId, DateTime.UtcNow);
 
-                                await Task.Delay(TimeSpan.FromSeconds(DelayBetweenSensorRuns));
+                                await Task.Delay(TimeSpan.FromSeconds(DelayBetweenSensorRuns), _orchestratorCts.Token);
                             }
                         }
                     }
