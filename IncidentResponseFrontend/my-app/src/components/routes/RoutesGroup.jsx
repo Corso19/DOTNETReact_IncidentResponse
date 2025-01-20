@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import UserNavbar from "../navbars/UserNavbar";
 import Sensors from "../../sensors/SensorsTable";
-import Incidents from "../../incidents/IncidentsTable";
+import Incidents from "../../incidents/Incidents";
 const RoutesGroup = () => {
     return (
         <BrowserRouter basename="/">

@@ -1,7 +1,9 @@
 import React from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
+import Orchestrator from '../../orchestrator/Orchestrator';
 
 const UserNavbar = () => {
+
     return (
         <Navbar expand="sm" className="xdr-navbar">
             <Container>
@@ -16,6 +18,7 @@ const UserNavbar = () => {
                             Incidents
                         </Nav.Link>
                     </Nav> 
+                    <Orchestrator />
                 </Navbar.Collapse>
             </Container>
         </Navbar>

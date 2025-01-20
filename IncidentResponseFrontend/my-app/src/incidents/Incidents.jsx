@@ -41,7 +41,10 @@ const Incidents = () => {
                         <Accordion className="mx-3">
                         {
                             incidents.map((incident) => (
-                                <IncidentItem incident={incident} />
+                                <IncidentItem
+                                    key={incident.incidentId} 
+                                    incident={incident} 
+                                />
                             ))
                         }
                         </Accordion>
