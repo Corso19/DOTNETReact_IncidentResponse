@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography.Pkcs;
 using IncidentResponseAPI.Constants;
+using IncidentResponseAPI.Dtos;
 using IncidentResponseAPI.Helpers;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories.Interfaces;
@@ -157,7 +158,37 @@ namespace IncidentResponseAPI.Services.Implementations
                 };
                 
                 await _recommendationsRepository.AddAsync(recommendation);
-                await _hubContext.Clients.All.SendAsync("ReceivedIncident", incident.IncidentId, cancellationToken);
+
+                // Create DTO for notification using existing IncidentDto
+                var incidentDto = new IncidentDto
+                {
+                    IncidentId = incident.IncidentId,
+                    Title = incident.Title,
+                    Description = incident.Description,
+                    DetectedAt = incident.DetectedAt,
+                    Status = incident.Status,
+                    Type = incident.Type,
+                    Severity = incident.Severity,
+                    EventId = incident.EventId,
+                    Event = new EventDto
+                    {
+                        EventId = @event.EventId,
+                        TypeName = @event.TypeName,
+                        Subject = @event.Subject,
+                        Sender = @event.Sender,
+                        Details = @event.Details,
+                        Timestamp = @event.Timestamp
+                    },
+                    Recommendation = new RecommendationsDto
+                    {
+                        RecommendationId = recommendation.RecommendationId,
+                        IncidentId = recommendation.IncidentId,
+                        Description = recommendation.Description,
+                        isCompleted = recommendation.isCompleted
+                    }
+                };
+
+                await _hubContext.Clients.All.SendAsync("ReceivedIncident", incidentDto, cancellationToken);
                 _logger.LogInformation("Creating recommendation for incident with ID {IncidentId}", incident.IncidentId);
             }
             catch (Exception ex)
