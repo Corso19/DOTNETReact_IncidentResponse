@@ -1,4 +1,5 @@
-﻿using IncidentResponseAPI.Dtos;
+﻿using IncidentResponseAPI.Constants;
+using IncidentResponseAPI.Dtos;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Services.Interfaces;
@@ -16,7 +17,7 @@ namespace IncidentResponseAPI.Services.Implementations
 
         public async Task<IEnumerable<IncidentDto>> GetAllAsync()
         {
-            var incidents = await _incidentsRepository.GetAllAsync(includeEvent: true, includeRelations: true);
+            var incidents = await _incidentsRepository.GetAllAsync(includeEvent: true);
             return incidents.Select(i => new IncidentDto
             {
                 IncidentId = i.IncidentId,
@@ -38,13 +39,7 @@ namespace IncidentResponseAPI.Services.Implementations
                         Timestamp = i.Event.Timestamp
                     }
                     : null,
-                Recommendations = i.Recommendations?.Select(r => new RecommendationsDto
-                {
-                    RecommendationId = r.RecommendationId,
-                    IncidentId = r.IncidentId,
-                    Description = r.Description,
-                    isCompleted = r.isCompleted
-                }).ToList() ?? new List<RecommendationsDto>()
+                Recommendations = RecommendationMetadata.GetRecommendations(i.Type)
             }).ToList();
         }
 
@@ -74,13 +69,7 @@ namespace IncidentResponseAPI.Services.Implementations
                         Timestamp = i.Event.Timestamp
                     }
                     : null,
-                Recommendations = i.Recommendations?.Select(r => new RecommendationsDto
-                {
-                    RecommendationId = r.RecommendationId,
-                    IncidentId = r.IncidentId,
-                    Description = r.Description,
-                    isCompleted = r.isCompleted
-                }).ToList()
+                Recommendations = RecommendationMetadata.GetRecommendations(i.Type)
             };
         }
 

@@ -249,36 +249,28 @@ namespace IncidentResponseAPI.Services.Implementations
         }
 
         private async Task<IncidentDto> MapToIncidentDto(IncidentsModel incident, EventsModel @event)
+{
+    return new IncidentDto
+    {
+        IncidentId = incident.IncidentId,
+        Title = incident.Title,
+        Description = incident.Description,
+        DetectedAt = incident.DetectedAt,
+        Status = incident.Status,
+        Type = incident.Type,
+        Severity = incident.Severity,
+        EventId = incident.EventId,
+        Event = new EventDto
         {
-            var recommendations = await _recommendationsRepository.GetByIncidentIdAsync(incident.IncidentId);
-
-            return new IncidentDto
-            {
-                IncidentId = incident.IncidentId,
-                Title = incident.Title,
-                Description = incident.Description,
-                DetectedAt = incident.DetectedAt,
-                Status = incident.Status,
-                Type = incident.Type,
-                Severity = incident.Severity,
-                EventId = incident.EventId,
-                Event = new EventDto
-                {
-                    EventId = @event.EventId,
-                    TypeName = @event.TypeName,
-                    Subject = @event.Subject,
-                    Sender = @event.Sender,
-                    Details = @event.Details,
-                    Timestamp = @event.Timestamp
-                },
-                Recommendations = incident.Recommendations?.Select(r => new RecommendationsDto
-                {
-                    RecommendationId = r.RecommendationId,
-                    IncidentId = r.IncidentId,
-                    Description = r.Description,
-                    isCompleted = r.isCompleted
-                }).ToList() ?? new List<RecommendationsDto>()
-            };
-        }
+            EventId = @event.EventId,
+            TypeName = @event.TypeName,
+            Subject = @event.Subject,
+            Sender = @event.Sender,
+            Details = @event.Details,
+            Timestamp = @event.Timestamp
+        },
+        Recommendations = RecommendationMetadata.GetRecommendations(incident.Type) // Direct array from metadata
+    };
+}
     }
 }
