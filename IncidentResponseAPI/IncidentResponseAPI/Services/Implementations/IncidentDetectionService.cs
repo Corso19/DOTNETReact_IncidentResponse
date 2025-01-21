@@ -157,6 +157,7 @@ namespace IncidentResponseAPI.Services.Implementations
                 };
                 
                 await _recommendationsRepository.AddAsync(recommendation);
+                await _hubContext.Clients.All.SendAsync("ReceivedIncident", incident.IncidentId, cancellationToken);
                 _logger.LogInformation("Creating recommendation for incident with ID {IncidentId}", incident.IncidentId);
             }
             catch (Exception ex)
