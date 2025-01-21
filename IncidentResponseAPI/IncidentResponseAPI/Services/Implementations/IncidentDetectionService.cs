@@ -133,76 +133,6 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        // private async Task CreateIncident(EventsModel @event, IncidentType incidentType, CancellationToken cancellationToken)
-        // {
-        //     var (severity, description) = IncidentTypeMetadata.GetMetadata(incidentType);
-
-        //     var incident = new IncidentsModel
-        //     {
-        //         Title = incidentType.ToString(),
-        //         Description = description,
-        //         Severity = severity,
-        //         Type = incidentType,
-        //         DetectedAt = DateTime.Now,
-        //         Status = "Open",
-        //         EventId = @event.EventId,
-        //         Event = @event // establish relationship with EventsModel
-        //     };
-        //     _logger.LogInformation("Creating incident for event with ID {EventId}", @event.EventId);
-
-        //     try
-        //     {
-        //         //save both in single transaction
-        //         await _incidentsRepository.AddAsync(incident, cancellationToken);
-        //         _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
-
-        //         var recommendation = new RecommendationsModel
-        //         {
-        //             Description = RecommendationMetadata.GetRecommendation(incidentType),
-        //             IncidentId = incident.IncidentId,
-        //             isCompleted = false,
-        //         };
-
-        //         await _recommendationsRepository.AddAsync(recommendation);
-
-        //         // Create DTO for notification using existing IncidentDto
-        //         var incidentDto = new IncidentDto
-        //         {
-        //             IncidentId = incident.IncidentId,
-        //             Title = incident.Title,
-        //             Description = incident.Description,
-        //             DetectedAt = incident.DetectedAt,
-        //             Status = incident.Status,
-        //             Type = incident.Type,
-        //             Severity = incident.Severity,
-        //             EventId = incident.EventId,
-        //             Event = new EventDto
-        //             {
-        //                 EventId = @event.EventId,
-        //                 TypeName = @event.TypeName,
-        //                 Subject = @event.Subject,
-        //                 Sender = @event.Sender,
-        //                 Details = @event.Details,
-        //                 Timestamp = @event.Timestamp
-        //             },
-        //             Recommendation = new RecommendationsDto
-        //             {
-        //                 RecommendationId = recommendation.RecommendationId,
-        //                 IncidentId = recommendation.IncidentId,
-        //                 Description = recommendation.Description,
-        //                 isCompleted = recommendation.isCompleted
-        //             }
-        //         };
-
-        //         await _hubContext.Clients.All.SendAsync("ReceivedIncident", incidentDto, cancellationToken);
-        //         _logger.LogInformation("Creating recommendation for incident with ID {IncidentId}", incident.IncidentId);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "Error creating incident.");
-        //     }
-        // }
-
         private async Task CreateIncident(EventsModel @event, IncidentType incidentType,
             CancellationToken cancellationToken)
         {
@@ -274,7 +204,15 @@ namespace IncidentResponseAPI.Services.Implementations
                     Details = @event.Details,
                     Timestamp = @event.Timestamp
                 },
-                Recommendations = RecommendationMetadata.GetRecommendations(incident.Type) // Direct array from metadata
+                Recommendations = RecommendationMetadata.GetRecommendations(incident.Type),
+                Attachment = @event.Attachments.Select(a => new AttachmentDto
+                {
+                    AttachmentId = a.AttachmentId,
+                    Name = a.Name,
+                    Size = a.Size,
+                    Content = a.Content,
+                    EventId = a.EventId
+                }).ToList()
             };
         }
     }
