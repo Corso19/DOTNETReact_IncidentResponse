@@ -164,7 +164,7 @@ namespace IncidentResponseAPI.Controllers
                 sensorDto.SensorId = id;
                 await _sensorsService.UpdateAsync(id, sensorDto);
                 _logger.LogInformation("Successfully updated sensor with ID {Id}", id);
-                return NoContent();
+                return Ok("Sensor updated successfully.");
             }
             catch (ValidationException ex)
             {
