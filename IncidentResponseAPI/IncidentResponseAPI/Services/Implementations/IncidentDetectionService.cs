@@ -203,7 +203,8 @@ namespace IncidentResponseAPI.Services.Implementations
         //     }
         // }
 
-        private async Task CreateIncident(EventsModel @event, IncidentType incidentType, CancellationToken cancellationToken)
+        private async Task CreateIncident(EventsModel @event, IncidentType incidentType,
+            CancellationToken cancellationToken)
         {
             var (severity, description) = IncidentTypeMetadata.GetMetadata(incidentType);
 
@@ -236,12 +237,13 @@ namespace IncidentResponseAPI.Services.Implementations
                     };
 
                     await _recommendationsRepository.AddAsync(recommendation);
-                    _logger.LogInformation("Recommendation created for incident with ID {IncidentId}", incident.IncidentId);
+                    _logger.LogInformation("Recommendation created for incident with ID {IncidentId}",
+                        incident.IncidentId);
                 }
 
                 var incidentDto = await MapToIncidentDto(incident, @event);
                 _logger.LogInformation("Sending notification for incident with ID {IncidentId}", incident.IncidentId);
-                await _hubContext.Clients.All.SendAsync("ReceiveIncident", incidentDto, cancellationToken);
+                await _hubContext.Clients.All.SendAsync("ReceivedIncident", incidentDto, cancellationToken);
                 _logger.LogInformation("Notification sent for incident with ID {IncidentId}", incident.IncidentId);
             }
             catch (Exception ex)
@@ -252,28 +254,28 @@ namespace IncidentResponseAPI.Services.Implementations
         }
 
         private async Task<IncidentDto> MapToIncidentDto(IncidentsModel incident, EventsModel @event)
-{
-    return new IncidentDto
-    {
-        IncidentId = incident.IncidentId,
-        Title = incident.Title,
-        Description = incident.Description,
-        DetectedAt = incident.DetectedAt,
-        Status = incident.Status,
-        Type = incident.Type,
-        Severity = incident.Severity,
-        EventId = incident.EventId,
-        Event = new EventDto
         {
-            EventId = @event.EventId,
-            TypeName = @event.TypeName,
-            Subject = @event.Subject,
-            Sender = @event.Sender,
-            Details = @event.Details,
-            Timestamp = @event.Timestamp
-        },
-        Recommendations = RecommendationMetadata.GetRecommendations(incident.Type) // Direct array from metadata
-    };
-}
+            return new IncidentDto
+            {
+                IncidentId = incident.IncidentId,
+                Title = incident.Title,
+                Description = incident.Description,
+                DetectedAt = incident.DetectedAt,
+                Status = incident.Status,
+                Type = incident.Type,
+                Severity = incident.Severity,
+                EventId = incident.EventId,
+                Event = new EventDto
+                {
+                    EventId = @event.EventId,
+                    TypeName = @event.TypeName,
+                    Subject = @event.Subject,
+                    Sender = @event.Sender,
+                    Details = @event.Details,
+                    Timestamp = @event.Timestamp
+                },
+                Recommendations = RecommendationMetadata.GetRecommendations(incident.Type) // Direct array from metadata
+            };
+        }
     }
 }
