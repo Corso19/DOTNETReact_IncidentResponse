@@ -13,15 +13,21 @@ namespace IncidentResponseAPI.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<IEnumerable<IncidentsModel>> GetAllAsync(bool includeEvent = false)
+        public async Task<IEnumerable<IncidentsModel>> GetAllAsync(bool includeEvent = false, bool includeRelations = false)
         {
+            var query = _context.Incidents.AsQueryable();
+
             if (includeEvent)
             {
-                return await _context.Incidents
-                    .Include(i => i.Event)
-                    .ToListAsync();
+                query = query.Include(i => i.Event);
             }
-            return await _context.Incidents.ToListAsync();
+
+            if (includeRelations)
+            {
+                query = query.Include(i => i.Recommendation);
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task<IncidentsModel> GetByIdAsync(int id)

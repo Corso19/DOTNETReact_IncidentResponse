@@ -4,7 +4,7 @@ namespace IncidentResponseAPI.Repositories.Interfaces
 {
     public interface IIncidentsRepository
     {
-        Task<IEnumerable<IncidentsModel>> GetAllAsync(bool includeEvent = false);
+        Task<IEnumerable<IncidentsModel>> GetAllAsync(bool includeEvent = false, bool includeRelations = false);
         Task<IncidentsModel> GetByIdAsync(int id);
         Task AddAsync(IncidentsModel incidentsModel, CancellationToken cancellationToken);
         Task UpdateAsync(IncidentsModel incidentsModel);

@@ -15,5 +15,6 @@ namespace IncidentResponseAPI.Dtos
         public int Severity { get; set; }
         public int EventId { get; set; }
         public EventDto Event { get; set; }
+        public RecommendationsDto Recommendation { get; set; } //single recommendation
     }
 }

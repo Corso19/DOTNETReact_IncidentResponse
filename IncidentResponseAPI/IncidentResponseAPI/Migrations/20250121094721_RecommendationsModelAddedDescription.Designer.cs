@@ -4,6 +4,7 @@ using IncidentResponseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IncidentResponseAPI.Migrations
 {
     [DbContext(typeof(IncidentResponseContext))]
-    partial class IncidentResponseContextModelSnapshot : ModelSnapshot
+    [Migration("20250121094721_RecommendationsModelAddedDescription")]
+    partial class RecommendationsModelAddedDescription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,8 +160,7 @@ namespace IncidentResponseAPI.Migrations
 
                     b.HasKey("RecommendationId");
 
-                    b.HasIndex("IncidentId")
-                        .IsUnique();
+                    b.HasIndex("IncidentId");
 
                     b.ToTable("Recommendations");
                 });
@@ -251,8 +253,8 @@ namespace IncidentResponseAPI.Migrations
             modelBuilder.Entity("IncidentResponseAPI.Models.RecommendationsModel", b =>
                 {
                     b.HasOne("IncidentResponseAPI.Models.IncidentsModel", "Incident")
-                        .WithOne("Recommendation")
-                        .HasForeignKey("IncidentResponseAPI.Models.RecommendationsModel", "IncidentId")
+                        .WithMany()
+                        .HasForeignKey("IncidentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -264,12 +266,6 @@ namespace IncidentResponseAPI.Migrations
                     b.Navigation("Attachments");
 
                     b.Navigation("Incidents");
-                });
-
-            modelBuilder.Entity("IncidentResponseAPI.Models.IncidentsModel", b =>
-                {
-                    b.Navigation("Recommendation")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
