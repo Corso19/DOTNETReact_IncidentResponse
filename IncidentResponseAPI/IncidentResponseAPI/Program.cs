@@ -87,7 +87,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-app.MapHub<IncidentHub>("incidentHub");
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -101,7 +101,10 @@ if (app.Environment.IsDevelopment())
 }
 
 // Use CORS policy
-app.UseCors("AllowSpecificOrigin");
+//app.UseCors("AllowSpecificOrigin");
+app.UseCors("AllowReactApp");
+
+app.MapHub<IncidentHub>("/incidentHub");
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
