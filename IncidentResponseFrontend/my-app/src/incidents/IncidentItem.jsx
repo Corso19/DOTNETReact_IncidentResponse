@@ -7,7 +7,7 @@ const IncidentItem = ({incident}) => {
             <Accordion.Header className="accordion-header">{incident.title} - {incident.detectedAt}</Accordion.Header>
             <Accordion.Body className="accordion-body">
                 <Tabs
-                    defaultActiveKey="incident"
+                    defaultActiveKey="entity"
                     id={`incident-id-${incident.incidentId}`}
                     className="mt-2 mb-4 incident-tabs"
                     fill

@@ -3,10 +3,45 @@ import { CrudService } from "../services/CrudService";
 import { ThreeDots } from "react-bootstrap-icons";
 import { Accordion, Col, Row } from "react-bootstrap";
 import IncidentItem from "./IncidentItem";
+import { HubConnectionBuilder, HttpTransportType } from '@microsoft/signalr';
 
 const Incidents = () => {
     const [incidents, setIncidents] = useState([]);
     const [incidentsLoading, setIncidentsLoading] = useState(false);
+    const [connection, setConnection] = useState(null);
+
+    // connect to signalr
+    useEffect(() => {
+        const new_connection = new HubConnectionBuilder()
+            .withUrl('https://localhost:7142/incidentHub', {
+                withCredentials: true,
+                skipNegotiation: false,
+                transport: HttpTransportType.WebSockets
+            })
+            .withAutomaticReconnect()
+            .build();
+        console.log("Connection: ", connection);
+        setConnection(new_connection);
+        return () => {
+            if (new_connection) {
+                new_connection.stop().then(() => console.log("SignalR connection stopped."));
+            }
+        };
+    }, []);
+
+    // recieve new incident from signalr
+    useEffect(() => {
+        if (connection) {
+            connection.start()
+                .then(() => {
+                    connection.on('ReceiveIncident', incident => {
+                        setIncidents(previous_incidents => [...previous_incidents, incident]);
+                        console.log("New incident: ", incident);
+                    });
+                })
+                .catch(error => console.log('Connection failed: ', error));
+        }
+    }, [connection]);
 
     useEffect(() => {
         setIncidentsLoading(true);

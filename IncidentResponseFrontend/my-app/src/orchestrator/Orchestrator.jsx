@@ -30,6 +30,7 @@ const Orchestrator = () => {
                         key={index}
                         id={`radio-${index}`}
                         type="radio"
+                        title={index % 2 ? 'Stop the orchestrator' : 'Start the orchestrator'}
                         variant={index % 2 ? 'outline-danger' : 'outline-info'}
                         name="radio"
                         value={radio.value}

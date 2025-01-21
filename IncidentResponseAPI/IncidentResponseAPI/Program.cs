@@ -55,7 +55,11 @@ builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
-builder.Services.AddSignalR();
+//builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 
 // Add the DbContext and SensorOrchestrator
@@ -72,10 +76,11 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<Sensor
 // Add CORS services
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
+    options.AddPolicy("AllowReactApp",
         policyBuilder => policyBuilder.WithOrigins("http://localhost:3000")
                           .AllowAnyHeader()
-                          .AllowAnyMethod());
+                          .AllowAnyMethod()
+                          .AllowCredentials());
 });
 
 // Add Swagger services
