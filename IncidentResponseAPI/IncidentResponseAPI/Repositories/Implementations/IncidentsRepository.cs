@@ -31,14 +31,23 @@ namespace IncidentResponseAPI.Repositories.Implementations
 
             return await _context.Incidents
         .Include(i => i.Event)
+            .ThenInclude(e => e.Attachments)
         .Include(i => i.Recommendations)
         .ToListAsync();
         }
 
+        // public async Task<IncidentsModel> GetByIdAsync(int id)
+        // {
+        //     return await _context.Incidents.FindAsync(id);
+        // }
+
         public async Task<IncidentsModel> GetByIdAsync(int id)
-        {
-            return await _context.Incidents.FindAsync(id);
-        }
+{
+    return await _context.Incidents
+        .Include(i => i.Event)
+            .ThenInclude(e => e.Attachments)  // Include attachments with events
+        .FirstOrDefaultAsync(i => i.IncidentId == id);
+}
 
         public async Task AddAsync(IncidentsModel incidentsModel, CancellationToken cancellationToken)
         {
