@@ -223,6 +223,7 @@ namespace IncidentResponseAPI.Services.Implementations
             try
             {
                 await _incidentsRepository.AddAsync(incident, cancellationToken);
+                _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
 
                 // Create multiple recommendations
                 var recommendationSteps = RecommendationMetadata.GetRecommendations(incidentType);
@@ -236,10 +237,12 @@ namespace IncidentResponseAPI.Services.Implementations
                     };
 
                     await _recommendationsRepository.AddAsync(recommendation);
+                    _logger.LogInformation("Recommendation created for incident with ID {IncidentId}", incident.IncidentId);
                 }
 
                 var incidentDto = await MapToIncidentDto(incident, @event);
                 await _hubContext.Clients.All.SendAsync("ReceiveIncident", incidentDto, cancellationToken);
+                _logger.LogInformation("Notification sent for incident with ID {IncidentId}", incident.IncidentId);
             }
             catch (Exception ex)
             {
