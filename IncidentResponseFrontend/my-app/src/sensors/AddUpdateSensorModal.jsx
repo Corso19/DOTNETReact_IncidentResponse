@@ -21,12 +21,13 @@ const AddUpdateSensorModal = ({sensor, setSensors, showModal, setShowModal}) => 
     // initialize modal data
     useEffect(() => {
         if (sensor) {
+            const configuration = JSON.parse(sensor.configuration);
             setSensorObject({
                 name: sensor.sensorName,
                 isEnabled: sensor.isEnabled,
-                clientSecret: sensor.configuration.clientSecret,
-                tenantId: sensor.configuration.tenantId,
-                applicationId: sensor.configuration.applicationId,
+                clientSecret: configuration.clientSecret,
+                tenantId: configuration.tenantId,
+                applicationId: configuration.applicationId,
               });
           } else {
             setSensorObject(initialSensorObject);
@@ -57,12 +58,27 @@ const AddUpdateSensorModal = ({sensor, setSensors, showModal, setShowModal}) => 
         setSubmitButtonLoading(true);
         try {
             if (sensor) {
-              // Update existing sensor logic here
+                // update sensor
+                CrudService.update("Sensors", sensor.sensorId, data).then((response) => {
+                    if (response.status === 200) {
+                        // update local data
+                        setSensors((previous_sensors) =>
+                            previous_sensors.map((current_sensor) =>
+                            current_sensor.sensorId === sensor.sensorId
+                                ? { ...sensor, ...data }
+                                : current_sensor
+                            )
+                        );
+                    }
+                    setSubmitButtonLoading(false);
+                    console.log("Response: ", response);
+                });
             } else {
+                // add sensor
                 CrudService.create("Sensors", data).then((response) => {
                     if(response.status === 201){
                         // update local data
-                        setSensors((previousSensors) => [...previousSensors, response.data]);
+                        setSensors((previous_sensors) => [...previous_sensors, response.data]);
                     }
                     setSubmitButtonLoading(false);
                     console.log("Response: ", response);

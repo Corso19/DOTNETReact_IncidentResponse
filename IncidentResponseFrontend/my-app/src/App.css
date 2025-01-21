@@ -149,5 +149,13 @@ body {
 }
 
 .incident-tabs .nav-link:hover {
-  border: 2px solid var(--bs-gray-dark) !important;
+  border-top: 2px solid var(--bs-gray-dark) !important;
+  border-left: 2px solid var(--bs-gray-dark) !important;
+  border-right: 2px solid var(--bs-gray-dark) !important;
+}
+
+.incident-tab {
+  border: 2px solid var(--bs-gray-dark);
+  border-radius: 4px;
+  padding: 20px;
 }

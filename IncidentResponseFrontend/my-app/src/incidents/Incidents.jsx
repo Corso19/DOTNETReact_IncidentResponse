@@ -4,13 +4,16 @@ import { ThreeDots } from "react-bootstrap-icons";
 import { Accordion, Col, Row } from "react-bootstrap";
 import IncidentItem from "./IncidentItem";
 import { HubConnectionBuilder, HttpTransportType } from '@microsoft/signalr';
+import API_KEYS from "../constants/api-keys";
 
 const Incidents = () => {
     const [incidents, setIncidents] = useState([]);
     const [incidentsLoading, setIncidentsLoading] = useState(false);
     const [connection, setConnection] = useState(null);
+    const base_url = `${API_KEYS.API_URL}`;
 
     // connect to signalr
+
     useEffect(() => {
         const new_connection = new HubConnectionBuilder()
             .withUrl('https://localhost:7142/incidentHub', {
@@ -20,28 +23,31 @@ const Incidents = () => {
             })
             .withAutomaticReconnect()
             .build();
-        console.log("Connection: ", connection);
-        setConnection(new_connection);
+    
+        // Add incident handler before starting connection
+        new_connection.on('ReceivedIncident', incident => {
+            console.log("Received new incident:", incident);
+            setIncidents(previous_incidents => [...previous_incidents, incident]);
+        });
+    
+        // Start connection
+        new_connection.start()
+            .then(() => {
+                console.log("SignalR Connected Successfully!");
+                setConnection(new_connection);
+            })
+            .catch(error => console.error("SignalR Connection Error:", error));
+    
+        // Cleanup
         return () => {
             if (new_connection) {
-                new_connection.stop().then(() => console.log("SignalR connection stopped."));
+                new_connection.off('ReceivedIncident');
+                new_connection.stop()
+                    .then(() => console.log("SignalR connection stopped."))
+                    .catch(err => console.error("Error stopping connection:", err));
             }
         };
     }, []);
-
-    // recieve new incident from signalr
-    useEffect(() => {
-        if (connection) {
-            connection.start()
-                .then(() => {
-                    connection.on('ReceivedIncident', incident => {
-                        setIncidents(previous_incidents => [...previous_incidents, incident]);
-                        console.log("New incident: ", incident);
-                    });
-                })
-                .catch(error => console.log('Connection failed: ', error));
-        }
-    }, [connection]);
 
     useEffect(() => {
         setIncidentsLoading(true);
@@ -55,6 +61,7 @@ const Incidents = () => {
     }, []);
 
     return(
+        incidents && (
         <Row className="mt-3">
             <Col sm={12}>
             {
@@ -90,6 +97,7 @@ const Incidents = () => {
             }
             </Col>
         </Row>
+        )
     );
 }
 
