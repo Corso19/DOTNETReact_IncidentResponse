@@ -1,8 +1,10 @@
 ﻿using System.Security.Cryptography.Pkcs;
 using IncidentResponseAPI.Constants;
+using IncidentResponseAPI.Helpers;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 
 namespace IncidentResponseAPI.Services.Implementations
 {
@@ -12,13 +14,15 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly IEventsRepository _eventsRepository;
         private readonly ILogger<IncidentDetectionService> _logger;
         private readonly IRecommendationsRepository _recommendationsRepository;
+        private readonly IHubContext<IncidentHub> _hubContext;
 
-        public IncidentDetectionService(IIncidentsRepository incidentsRepository,IRecommendationsRepository recommendationsRepository, IEventsRepository eventsRepository, ILogger<IncidentDetectionService> logger)
+        public IncidentDetectionService(IHubContext<IncidentHub> hubContext,IIncidentsRepository incidentsRepository,IRecommendationsRepository recommendationsRepository, IEventsRepository eventsRepository, ILogger<IncidentDetectionService> logger)
         {
             _incidentsRepository = incidentsRepository;
             _eventsRepository = eventsRepository;
             _logger = logger;
             _recommendationsRepository = recommendationsRepository;
+            _hubContext = hubContext;
         }
 
         public async Task<bool> Detect(EventsModel @event, CancellationToken cancellationToken)
