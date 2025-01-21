@@ -17,7 +17,9 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly IRecommendationsRepository _recommendationsRepository;
         private readonly IHubContext<IncidentHub> _hubContext;
 
-        public IncidentDetectionService(IHubContext<IncidentHub> hubContext,IIncidentsRepository incidentsRepository,IRecommendationsRepository recommendationsRepository, IEventsRepository eventsRepository, ILogger<IncidentDetectionService> logger)
+        public IncidentDetectionService(IHubContext<IncidentHub> hubContext, IIncidentsRepository incidentsRepository,
+            IRecommendationsRepository recommendationsRepository, IEventsRepository eventsRepository,
+            ILogger<IncidentDetectionService> logger)
         {
             _incidentsRepository = incidentsRepository;
             _eventsRepository = eventsRepository;
@@ -37,16 +39,19 @@ namespace IncidentResponseAPI.Services.Implementations
                     await CreateIncident(@event, IncidentType.SuspiciousAttachment, cancellationToken);
                     incidentsCreated = true;
                 }
+
                 if (IsExternalSender(@event))
                 {
                     await CreateIncident(@event, IncidentType.ExternalSender, cancellationToken);
                     incidentsCreated = true;
                 }
+
                 if (await IsRepeatedEventPatternAsync(@event, cancellationToken))
                 {
                     await CreateIncident(@event, IncidentType.RepeatedEventPattern, cancellationToken);
                     incidentsCreated = true;
                 }
+
                 if (await HasUnusualEmailVolumeAsync(@event, cancellationToken))
                 {
                     await CreateIncident(@event, IncidentType.UnusualEmailVolume, cancellationToken);
@@ -103,7 +108,8 @@ namespace IncidentResponseAPI.Services.Implementations
         {
             try
             {
-                var matchingEvents = await _eventsRepository.GetEventsByTimestampAsync(@event.Timestamp, cancellationToken);
+                var matchingEvents =
+                    await _eventsRepository.GetEventsByTimestampAsync(@event.Timestamp, cancellationToken);
                 return matchingEvents.Count() >= 3;
             }
             catch (Exception ex)
@@ -127,7 +133,78 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        private async Task CreateIncident(EventsModel @event, IncidentType incidentType, CancellationToken cancellationToken)
+        // private async Task CreateIncident(EventsModel @event, IncidentType incidentType, CancellationToken cancellationToken)
+        // {
+        //     var (severity, description) = IncidentTypeMetadata.GetMetadata(incidentType);
+
+        //     var incident = new IncidentsModel
+        //     {
+        //         Title = incidentType.ToString(),
+        //         Description = description,
+        //         Severity = severity,
+        //         Type = incidentType,
+        //         DetectedAt = DateTime.Now,
+        //         Status = "Open",
+        //         EventId = @event.EventId,
+        //         Event = @event // establish relationship with EventsModel
+        //     };
+        //     _logger.LogInformation("Creating incident for event with ID {EventId}", @event.EventId);
+
+        //     try
+        //     {
+        //         //save both in single transaction
+        //         await _incidentsRepository.AddAsync(incident, cancellationToken);
+        //         _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
+
+        //         var recommendation = new RecommendationsModel
+        //         {
+        //             Description = RecommendationMetadata.GetRecommendation(incidentType),
+        //             IncidentId = incident.IncidentId,
+        //             isCompleted = false,
+        //         };
+
+        //         await _recommendationsRepository.AddAsync(recommendation);
+
+        //         // Create DTO for notification using existing IncidentDto
+        //         var incidentDto = new IncidentDto
+        //         {
+        //             IncidentId = incident.IncidentId,
+        //             Title = incident.Title,
+        //             Description = incident.Description,
+        //             DetectedAt = incident.DetectedAt,
+        //             Status = incident.Status,
+        //             Type = incident.Type,
+        //             Severity = incident.Severity,
+        //             EventId = incident.EventId,
+        //             Event = new EventDto
+        //             {
+        //                 EventId = @event.EventId,
+        //                 TypeName = @event.TypeName,
+        //                 Subject = @event.Subject,
+        //                 Sender = @event.Sender,
+        //                 Details = @event.Details,
+        //                 Timestamp = @event.Timestamp
+        //             },
+        //             Recommendation = new RecommendationsDto
+        //             {
+        //                 RecommendationId = recommendation.RecommendationId,
+        //                 IncidentId = recommendation.IncidentId,
+        //                 Description = recommendation.Description,
+        //                 isCompleted = recommendation.isCompleted
+        //             }
+        //         };
+
+        //         await _hubContext.Clients.All.SendAsync("ReceivedIncident", incidentDto, cancellationToken);
+        //         _logger.LogInformation("Creating recommendation for incident with ID {IncidentId}", incident.IncidentId);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error creating incident.");
+        //     }
+        // }
+
+        private async Task CreateIncident(EventsModel @event, IncidentType incidentType,
+            CancellationToken cancellationToken)
         {
             var (severity, description) = IncidentTypeMetadata.GetMetadata(incidentType);
 
@@ -140,61 +217,68 @@ namespace IncidentResponseAPI.Services.Implementations
                 DetectedAt = DateTime.Now,
                 Status = "Open",
                 EventId = @event.EventId,
-                Event = @event // establish relationship with EventsModel
+                Event = @event
             };
-            _logger.LogInformation("Creating incident for event with ID {EventId}", @event.EventId);
 
             try
             {
-                //save both in single transaction
                 await _incidentsRepository.AddAsync(incident, cancellationToken);
-                _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
-                
-                var recommendation = new RecommendationsModel
-                {
-                    Description = RecommendationMetadata.GetRecommendation(incidentType),
-                    IncidentId = incident.IncidentId,
-                    isCompleted = false,
-                };
-                
-                await _recommendationsRepository.AddAsync(recommendation);
 
-                // Create DTO for notification using existing IncidentDto
-                var incidentDto = new IncidentDto
+                // Create multiple recommendations
+                var recommendationSteps = RecommendationMetadata.GetRecommendations(incidentType);
+                foreach (var step in recommendationSteps)
                 {
-                    IncidentId = incident.IncidentId,
-                    Title = incident.Title,
-                    Description = incident.Description,
-                    DetectedAt = incident.DetectedAt,
-                    Status = incident.Status,
-                    Type = incident.Type,
-                    Severity = incident.Severity,
-                    EventId = incident.EventId,
-                    Event = new EventDto
+                    var recommendation = new RecommendationsModel
                     {
-                        EventId = @event.EventId,
-                        TypeName = @event.TypeName,
-                        Subject = @event.Subject,
-                        Sender = @event.Sender,
-                        Details = @event.Details,
-                        Timestamp = @event.Timestamp
-                    },
-                    Recommendation = new RecommendationsDto
-                    {
-                        RecommendationId = recommendation.RecommendationId,
-                        IncidentId = recommendation.IncidentId,
-                        Description = recommendation.Description,
-                        isCompleted = recommendation.isCompleted
-                    }
-                };
+                        IncidentId = incident.IncidentId,
+                        Description = step,
+                        isCompleted = false
+                    };
 
-                await _hubContext.Clients.All.SendAsync("ReceivedIncident", incidentDto, cancellationToken);
-                _logger.LogInformation("Creating recommendation for incident with ID {IncidentId}", incident.IncidentId);
+                    await _recommendationsRepository.AddAsync(recommendation);
+                }
+
+                var incidentDto = await MapToIncidentDto(incident, @event);
+                await _hubContext.Clients.All.SendAsync("ReceiveIncident", incidentDto, cancellationToken);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating incident.");
+                throw;
             }
+        }
+
+        private async Task<IncidentDto> MapToIncidentDto(IncidentsModel incident, EventsModel @event)
+        {
+            var recommendations = await _recommendationsRepository.GetByIncidentIdAsync(incident.IncidentId);
+
+            return new IncidentDto
+            {
+                IncidentId = incident.IncidentId,
+                Title = incident.Title,
+                Description = incident.Description,
+                DetectedAt = incident.DetectedAt,
+                Status = incident.Status,
+                Type = incident.Type,
+                Severity = incident.Severity,
+                EventId = incident.EventId,
+                Event = new EventDto
+                {
+                    EventId = @event.EventId,
+                    TypeName = @event.TypeName,
+                    Subject = @event.Subject,
+                    Sender = @event.Sender,
+                    Details = @event.Details,
+                    Timestamp = @event.Timestamp
+                },
+                Recommendations = incident.Recommendations?.Select(r => new RecommendationsDto
+                {
+                    RecommendationId = r.RecommendationId,
+                    IncidentId = r.IncidentId,
+                    Description = r.Description,
+                    isCompleted = r.isCompleted
+                }).ToList() ?? new List<RecommendationsDto>()
+            };
         }
     }
 }

@@ -44,5 +44,13 @@ namespace IncidentResponseAPI.Repositories.Implementations
                 await _context.SaveChangesAsync();
             }
         }
+        
+        public async Task<IEnumerable<RecommendationsModel>> GetByIncidentIdAsync(int incidentId)
+        {
+            return await _context.Recommendations
+                .Where(r => r.IncidentId == incidentId)
+                .ToListAsync();
+        }
+        
     }
 }

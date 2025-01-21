@@ -16,7 +16,7 @@ namespace IncidentResponseAPI.Services.Implementations
 
         public async Task<IEnumerable<IncidentDto>> GetAllAsync()
         {
-            var incidents = await _incidentsRepository.GetAllAsync(includeEvent:true, includeRelations: true);
+            var incidents = await _incidentsRepository.GetAllAsync(includeEvent: true, includeRelations: true);
             return incidents.Select(i => new IncidentDto
             {
                 IncidentId = i.IncidentId,
@@ -38,15 +38,13 @@ namespace IncidentResponseAPI.Services.Implementations
                         Timestamp = i.Event.Timestamp
                     }
                     : null,
-                Recommendation = i.Recommendation != null
-                    ? new RecommendationsDto // Single recommendation
-                    {
-                        RecommendationId = i.Recommendation.RecommendationId,
-                        IncidentId = i.Recommendation.IncidentId,
-                        Description = i.Recommendation.Description,
-                        isCompleted = i.Recommendation.isCompleted
-                    }
-                    : null
+                Recommendations = i.Recommendations?.Select(r => new RecommendationsDto
+                {
+                    RecommendationId = r.RecommendationId,
+                    IncidentId = r.IncidentId,
+                    Description = r.Description,
+                    isCompleted = r.isCompleted
+                }).ToList() ?? new List<RecommendationsDto>()
             }).ToList();
         }
 
@@ -76,15 +74,13 @@ namespace IncidentResponseAPI.Services.Implementations
                         Timestamp = i.Event.Timestamp
                     }
                     : null,
-                Recommendation = i.Recommendation != null
-                    ? new RecommendationsDto
-                    {
-                        RecommendationId = i.Recommendation.RecommendationId,
-                        IncidentId = i.Recommendation.IncidentId,
-                        Description = i.Recommendation.Description,
-                        isCompleted = i.Recommendation.isCompleted
-                    }
-                    : null
+                Recommendations = i.Recommendations?.Select(r => new RecommendationsDto
+                {
+                    RecommendationId = r.RecommendationId,
+                    IncidentId = r.IncidentId,
+                    Description = r.Description,
+                    isCompleted = r.isCompleted
+                }).ToList()
             };
         }
 
@@ -95,7 +91,10 @@ namespace IncidentResponseAPI.Services.Implementations
                 Title = incidentDto.Title,
                 Description = incidentDto.Description,
                 DetectedAt = incidentDto.DetectedAt,
-                Status = incidentDto.Status
+                Status = incidentDto.Status,
+                Type = incidentDto.Type,
+                Severity = incidentDto.Severity,
+                EventId = incidentDto.EventId
             };
 
             await _incidentsRepository.AddAsync(incidentsModel, cancellationToken);

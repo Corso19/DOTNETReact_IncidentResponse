@@ -9,5 +9,6 @@ namespace IncidentResponseAPI.Repositories.Interfaces
         Task AddAsync(RecommendationsModel recommendationsModel);
         Task UpdateAsync(RecommendationsModel recommendationsModel);
         Task DeleteAsync(int id);
+        Task<IEnumerable<RecommendationsModel>> GetByIncidentIdAsync(int incidentId);
     }
 }
