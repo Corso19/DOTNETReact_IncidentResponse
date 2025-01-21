@@ -21,7 +21,7 @@ namespace IncidentResponseAPI.Services.Implementations
             {
                 RecommendationId = r.RecommendationId,
                 IncidentId = r.IncidentId,
-                Recommendation = r.Recommendation,
+                Description = r.Description,
                 isCompleted = r.isCompleted
             }).ToList();
         }
@@ -35,7 +35,7 @@ namespace IncidentResponseAPI.Services.Implementations
             {
                 RecommendationId = r.RecommendationId,
                 IncidentId = r.IncidentId,
-                Recommendation = r.Recommendation,
+                Description = r.Description,
                 isCompleted = r.isCompleted
             };
         }
@@ -45,7 +45,7 @@ namespace IncidentResponseAPI.Services.Implementations
             var recommendationsModel = new RecommendationsModel
             {
                 IncidentId = recommendationsDto.IncidentId,
-                Recommendation = recommendationsDto.Recommendation,
+                Description = recommendationsDto.Description,
                 isCompleted = recommendationsDto.isCompleted
             };
 
@@ -58,7 +58,7 @@ namespace IncidentResponseAPI.Services.Implementations
             {
                 RecommendationId = id,
                 IncidentId = recommendationsDto.IncidentId,
-                Recommendation = recommendationsDto.Recommendation,
+                Description = recommendationsDto.Description,
                 isCompleted = recommendationsDto.isCompleted
             };
 

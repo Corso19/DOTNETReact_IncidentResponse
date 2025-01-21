@@ -11,12 +11,14 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly IIncidentsRepository _incidentsRepository;
         private readonly IEventsRepository _eventsRepository;
         private readonly ILogger<IncidentDetectionService> _logger;
+        private readonly IRecommendationsRepository _recommendationsRepository;
 
-        public IncidentDetectionService(IIncidentsRepository incidentsRepository, IEventsRepository eventsRepository, ILogger<IncidentDetectionService> logger)
+        public IncidentDetectionService(IIncidentsRepository incidentsRepository,IRecommendationsRepository recommendationsRepository, IEventsRepository eventsRepository, ILogger<IncidentDetectionService> logger)
         {
             _incidentsRepository = incidentsRepository;
             _eventsRepository = eventsRepository;
             _logger = logger;
+            _recommendationsRepository = recommendationsRepository;
         }
 
         public async Task<bool> Detect(EventsModel @event, CancellationToken cancellationToken)
@@ -139,8 +141,19 @@ namespace IncidentResponseAPI.Services.Implementations
 
             try
             {
+                //save both in single transaction
                 await _incidentsRepository.AddAsync(incident, cancellationToken);
                 _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
+                
+                var recommendation = new RecommendationsModel
+                {
+                    Description = RecommendationMetadata.GetRecommendation(incidentType),
+                    IncidentId = incident.IncidentId,
+                    isCompleted = false,
+                };
+                
+                await _recommendationsRepository.AddAsync(recommendation);
+                _logger.LogInformation("Creating recommendation for incident with ID {IncidentId}", incident.IncidentId);
             }
             catch (Exception ex)
             {

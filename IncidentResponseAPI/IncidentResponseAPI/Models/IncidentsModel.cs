@@ -13,6 +13,7 @@ namespace IncidentResponseAPI.Models
     
     public class IncidentsModel
     {
+
         [Key]
         public int IncidentId { get; set; }
         public string Title { get; set; }
@@ -26,5 +27,6 @@ namespace IncidentResponseAPI.Models
         public int EventId { get; set; }
         [ForeignKey("EventId")]
         public EventsModel Event { get; set; }
+        public virtual RecommendationsModel Recommendation { get; set; } //single recommendation
     }
 }

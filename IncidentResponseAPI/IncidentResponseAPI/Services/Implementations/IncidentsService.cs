@@ -16,7 +16,7 @@ namespace IncidentResponseAPI.Services.Implementations
 
         public async Task<IEnumerable<IncidentDto>> GetAllAsync()
         {
-            var incidents = await _incidentsRepository.GetAllAsync(includeEvent: true);
+            var incidents = await _incidentsRepository.GetAllAsync(includeEvent:true, includeRelations: true);
             return incidents.Select(i => new IncidentDto
             {
                 IncidentId = i.IncidentId,
@@ -27,15 +27,26 @@ namespace IncidentResponseAPI.Services.Implementations
                 Type = i.Type,
                 Severity = i.Severity,
                 EventId = i.EventId,
-                Event = i.Event != null ? new EventDto
-                {
-                    EventId = i.Event.EventId,
-                    TypeName = i.Event.TypeName,
-                    Subject = i.Event.Subject,
-                    Sender = i.Event.Sender,
-                    Details = i.Event.Details,
-                    Timestamp = i.Event.Timestamp
-                } : null
+                Event = i.Event != null
+                    ? new EventDto
+                    {
+                        EventId = i.Event.EventId,
+                        TypeName = i.Event.TypeName,
+                        Subject = i.Event.Subject,
+                        Sender = i.Event.Sender,
+                        Details = i.Event.Details,
+                        Timestamp = i.Event.Timestamp
+                    }
+                    : null,
+                Recommendation = i.Recommendation != null
+                    ? new RecommendationsDto // Single recommendation
+                    {
+                        RecommendationId = i.Recommendation.RecommendationId,
+                        IncidentId = i.Recommendation.IncidentId,
+                        Description = i.Recommendation.Description,
+                        isCompleted = i.Recommendation.isCompleted
+                    }
+                    : null
             }).ToList();
         }
 
@@ -50,7 +61,30 @@ namespace IncidentResponseAPI.Services.Implementations
                 Title = i.Title,
                 Description = i.Description,
                 DetectedAt = i.DetectedAt,
-                Status = i.Status
+                Status = i.Status,
+                Type = i.Type,
+                Severity = i.Severity,
+                EventId = i.EventId,
+                Event = i.Event != null
+                    ? new EventDto
+                    {
+                        EventId = i.Event.EventId,
+                        TypeName = i.Event.TypeName,
+                        Subject = i.Event.Subject,
+                        Sender = i.Event.Sender,
+                        Details = i.Event.Details,
+                        Timestamp = i.Event.Timestamp
+                    }
+                    : null,
+                Recommendation = i.Recommendation != null
+                    ? new RecommendationsDto
+                    {
+                        RecommendationId = i.Recommendation.RecommendationId,
+                        IncidentId = i.Recommendation.IncidentId,
+                        Description = i.Recommendation.Description,
+                        isCompleted = i.Recommendation.isCompleted
+                    }
+                    : null
             };
         }
 
