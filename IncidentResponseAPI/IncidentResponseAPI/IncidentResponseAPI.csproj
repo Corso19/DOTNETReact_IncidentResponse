@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
