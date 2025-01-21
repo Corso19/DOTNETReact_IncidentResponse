@@ -4,13 +4,11 @@ import { ThreeDots } from "react-bootstrap-icons";
 import { Accordion, Col, Row } from "react-bootstrap";
 import IncidentItem from "./IncidentItem";
 import { HubConnectionBuilder, HttpTransportType } from '@microsoft/signalr';
-import API_KEYS from "../constants/api-keys";
 
 const Incidents = () => {
     const [incidents, setIncidents] = useState([]);
     const [incidentsLoading, setIncidentsLoading] = useState(false);
     const [connection, setConnection] = useState(null);
-    const base_url = `${API_KEYS.API_URL}`;
 
     // connect to signalr
 
