@@ -152,14 +152,16 @@ namespace IncidentResponseAPI.Controllers
         {
             _logger.LogInformation("Updating sensor with ID {Id}", id);
 
-            if (id != sensorDto.SensorId)
-            {
-                _logger.LogWarning("Mismatched sensor ID in request body and URL: {Id}", id);
-                return BadRequest("Sensor ID mismatch.");
-            }
+            // if (id != sensorDto.SensorId)
+            // {
+            //     _logger.LogWarning("Mismatched sensor ID in request body and URL: {Id}", id);
+            //     return BadRequest("Sensor ID mismatch.");
+            // }
 
             try
             {
+                // Use the id parameter instead of sensorDto.SensorId
+                sensorDto.SensorId = id;
                 await _sensorsService.UpdateAsync(id, sensorDto);
                 _logger.LogInformation("Successfully updated sensor with ID {Id}", id);
                 return NoContent();
