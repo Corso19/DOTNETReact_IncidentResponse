@@ -34,7 +34,7 @@ const Incidents = () => {
         if (connection) {
             connection.start()
                 .then(() => {
-                    connection.on('ReceiveIncident', incident => {
+                    connection.on('ReceivedIncident', incident => {
                         setIncidents(previous_incidents => [...previous_incidents, incident]);
                         console.log("New incident: ", incident);
                     });
