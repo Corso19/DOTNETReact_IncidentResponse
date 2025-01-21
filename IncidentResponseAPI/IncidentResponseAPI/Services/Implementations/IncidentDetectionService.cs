@@ -203,8 +203,7 @@ namespace IncidentResponseAPI.Services.Implementations
         //     }
         // }
 
-        private async Task CreateIncident(EventsModel @event, IncidentType incidentType,
-            CancellationToken cancellationToken)
+        private async Task CreateIncident(EventsModel @event, IncidentType incidentType, CancellationToken cancellationToken)
         {
             var (severity, description) = IncidentTypeMetadata.GetMetadata(incidentType);
 
@@ -241,6 +240,7 @@ namespace IncidentResponseAPI.Services.Implementations
                 }
 
                 var incidentDto = await MapToIncidentDto(incident, @event);
+                _logger.LogInformation("Sending notification for incident with ID {IncidentId}", incident.IncidentId);
                 await _hubContext.Clients.All.SendAsync("ReceiveIncident", incidentDto, cancellationToken);
                 _logger.LogInformation("Notification sent for incident with ID {IncidentId}", incident.IncidentId);
             }
