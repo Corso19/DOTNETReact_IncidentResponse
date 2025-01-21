@@ -202,17 +202,17 @@ namespace IncidentResponseAPI.Services.Implementations
                     Subject = @event.Subject,
                     Sender = @event.Sender,
                     Details = @event.Details,
-                    Timestamp = @event.Timestamp
+                    Timestamp = @event.Timestamp,
+                    Attachments = @event.Attachments.Select(a => new AttachmentDto
+                    {
+                        AttachmentId = a.AttachmentId,
+                        Name = a.Name,
+                        Size = a.Size,
+                        Content = a.Content,
+                        EventId = a.EventId
+                    }).ToList()
                 },
-                Recommendations = RecommendationMetadata.GetRecommendations(incident.Type),
-                Attachment = @event.Attachments.Select(a => new AttachmentDto
-                {
-                    AttachmentId = a.AttachmentId,
-                    Name = a.Name,
-                    Size = a.Size,
-                    Content = a.Content,
-                    EventId = a.EventId
-                }).ToList()
+                Recommendations = RecommendationMetadata.GetRecommendations(incident.Type)
             };
         }
     }

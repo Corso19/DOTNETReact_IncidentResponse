@@ -16,6 +16,5 @@ namespace IncidentResponseAPI.Dtos
         public int EventId { get; set; }
         public EventDto Event { get; set; }
         public string[] Recommendations { get; set; }
-        public IEnumerable<AttachmentDto> Attachment { get; set; }
     }
 }
