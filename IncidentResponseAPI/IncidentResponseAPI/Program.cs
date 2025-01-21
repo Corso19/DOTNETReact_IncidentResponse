@@ -1,4 +1,5 @@
 using DotNetEnv;
+using IncidentResponseAPI.Helpers;
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Orchestrators;
 using IncidentResponseAPI.Repositories.Interfaces;
@@ -54,6 +55,8 @@ builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
+builder.Services.AddSignalR();
+
 
 // Add the DbContext and SensorOrchestrator
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
@@ -83,6 +86,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.MapHub<IncidentHub>("incidentHub");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
