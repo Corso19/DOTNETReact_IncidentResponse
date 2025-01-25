@@ -38,64 +38,6 @@ public class SensorsOrchestrator : BackgroundService
         _orchestratorCts = new CancellationTokenSource();
         IsRunning = false;
     }
-
-    // private async void ProcessQueue()
-    // {
-    //     while (_sensorsQueue.Count > 0)
-    //     {
-    //         await _semaphore.WaitAsync();
-    //         if (_sensorsQueue.TryDequeue(out var sensor))
-    //         {
-    //             _ = Task.Run(async () =>
-    //             {
-    //                 var endTime = DateTime.UtcNow.AddMinutes(sensor.RetrievalInterval);
-    //                 try
-    //                 {
-    //                     using (var scope = _scopeFactory.CreateScope())
-    //                     {
-    //                         var sensorsService = scope.ServiceProvider.GetRequiredService<ISensorsService>();
-    //
-    //                         while (DateTime.UtcNow < endTime && !_orchestratorCts.Token.IsCancellationRequested)
-    //                         {
-    //                             // Get fresh sensor instance before each run
-    //                             var freshSensorDto = await sensorsService.GetByIdAsync(sensor.SensorId);
-    //                             if (freshSensorDto == null)
-    //                             {
-    //                                 _logger.LogError("Sensor {SensorId} not found", sensor.SensorId);
-    //                                 break;
-    //                             }
-    //
-    //                             var freshSensor = new SensorsModel
-    //                             {
-    //                                 SensorId = freshSensorDto.SensorId,
-    //                                 SensorName = freshSensorDto.SensorName,
-    //                                 Type = freshSensorDto.Type,
-    //                                 Configuration = freshSensorDto.Configuration,
-    //                                 isEnabled = freshSensorDto.isEnabled,
-    //                                 CreatedAt = freshSensorDto.CreatedAt,
-    //                                 LastRunAt = freshSensorDto.LastRunAt,
-    //                                 NextRunAfter = freshSensorDto.NextRunAfter,
-    //                                 LastError = freshSensorDto.LastError,
-    //                                 RetrievalInterval = freshSensorDto.RetrievalInterval,
-    //                                 LastEventMarker = freshSensorDto.LastEventMarker
-    //                             };
-    //
-    //                             await sensorsService.RunSensorAsync(freshSensor, _orchestratorCts.Token);
-    //                             _logger.LogInformation("Sensor {SensorId} run completed at {Time}",
-    //                                 sensor.SensorId, DateTime.UtcNow);
-    //
-    //                             await Task.Delay(TimeSpan.FromSeconds(DelayBetweenSensorRuns), _orchestratorCts.Token);
-    //                         }
-    //                     }
-    //                 }
-    //                 finally
-    //                 {
-    //                     _semaphore.Release();
-    //                 }
-    //             });
-    //         }
-    //     }
-    // }
     
     private async void ProcessQueue()
     {
