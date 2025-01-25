@@ -7,18 +7,18 @@ function startOrchestrator(){
     return axios.post(url);
 }
 
-function stopOrchestrator(){
-    const url = base_url + `/Sensors/stop-orchestrator`;
-    return axios.post(url);
-}
+// function stopOrchestrator(){
+//     const url = base_url + `/Sensors/stop-orchestrator`;
+//     return axios.post(url);
+// }
 
-function getOrchestratorStatus(){
-    const url = base_url + `/Sensors/orchestrator-status`;
-    return axios.get(url);
-}
+// function getOrchestratorStatus(){
+//     const url = base_url + `/Sensors/orchestrator-status`;
+//     return axios.get(url);
+// }
 
 export const OrchestratorService = {
-    startOrchestrator,
-    stopOrchestrator,
-    getOrchestratorStatus
+    startOrchestrator
+    // stopOrchestrator,
+    // getOrchestratorStatus
 }
