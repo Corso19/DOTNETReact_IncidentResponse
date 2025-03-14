@@ -23,19 +23,6 @@ Env.Load();
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
 
-// Add Quartz services
-// builder.Services.AddQuartz(q =>
-// {
-//     // Register the EventsProcessingJob
-//     var jobKey = new JobKey("EventsProcessingJob");
-//     q.AddJob<EventsProcessingJob>(opts => opts.WithIdentity(jobKey));
-//     q.AddTrigger(opts => opts
-//         .ForJob(jobKey)
-//         .WithIdentity("EventsProcessingTrigger")
-//         .StartNow()
-//         .WithCronSchedule("0 * * * * ?"));
-// });
-
 // Add services to the container.
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
