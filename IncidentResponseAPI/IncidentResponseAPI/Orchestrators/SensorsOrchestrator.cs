@@ -1,117 +1,6 @@
-﻿// using System.Collections.Concurrent;
-// using IncidentResponseAPI.Models;
-// using IncidentResponseAPI.Services.Interfaces;
-// namespace IncidentResponseAPI.Orchestrators;
-
-// public class SensorsOrchestrator : BackgroundService
-// {
-//     private readonly IServiceScopeFactory _scopeFactory;
-//     private readonly ILogger<SensorsOrchestrator> _logger;
-//     private readonly ConcurrentQueue<SensorsModel> _sensorsQueue;
-//     private readonly SemaphoreSlim _semaphore;
-//     private const int MaxConcurrentSensors = 5;
-//     private const int DelayBetweenSensorRuns = 20;
-//     private CancellationTokenSource _orchestratorCts;
-
-//     public bool IsRunning { get; set; } 
-
-//     public SensorsOrchestrator(IServiceScopeFactory scopeFactory, ILogger<SensorsOrchestrator> logger)
-//     {
-//         _scopeFactory = scopeFactory;
-//         _logger = logger;
-//         _sensorsQueue = new ConcurrentQueue<SensorsModel>();
-//         _semaphore = new SemaphoreSlim(MaxConcurrentSensors);
-//         _orchestratorCts = new CancellationTokenSource();
-//         IsRunning = false;
-//     }
-
-//     public void EnqueueSensor(SensorsModel sensor)
-//     {
-//         _sensorsQueue.Enqueue(sensor);
-//         ProcessQueue();
-//     }
-
-//     public void CancelAllSensors()
-//     {
-//         _orchestratorCts.Cancel();
-//         //_orchestratorCts.Dispose();
-//         _orchestratorCts = new CancellationTokenSource();
-//         IsRunning = false;
-//     }
-
-//     private async void ProcessQueue()
-//     {
-//         IsRunning = true; // Update status
-//         while (_sensorsQueue.Count > 0)
-//         {
-//             await _semaphore.WaitAsync();
-//             if (_sensorsQueue.TryDequeue(out var sensor))
-//             {
-//                 _ = Task.Run(async () =>
-//                 {
-//                     var endTime = DateTime.UtcNow.AddMinutes(sensor.RetrievalInterval);
-//                     try
-//                     {
-//                         using (var scope = _scopeFactory.CreateScope())
-//                         {
-//                             var sensorsService = scope.ServiceProvider.GetRequiredService<ISensorsService>();
-
-//                             while (DateTime.UtcNow < endTime && !_orchestratorCts.Token.IsCancellationRequested)
-//                             {
-//                                 var freshSensorDto = await sensorsService.GetByIdAsync(sensor.SensorId);
-//                                 if (freshSensorDto == null)
-//                                 {
-//                                     _logger.LogError("Sensor {SensorId} not found", sensor.SensorId);
-//                                     break;
-//                                 }
-
-//                                 var freshSensor = new SensorsModel
-//                                 {
-//                                     SensorId = freshSensorDto.SensorId,
-//                                     SensorName = freshSensorDto.SensorName,
-//                                     Type = freshSensorDto.Type,
-//                                     Configuration = freshSensorDto.Configuration,
-//                                     isEnabled = freshSensorDto.isEnabled,
-//                                     CreatedAt = freshSensorDto.CreatedAt,
-//                                     LastRunAt = freshSensorDto.LastRunAt,
-//                                     NextRunAfter = freshSensorDto.NextRunAfter,
-//                                     LastError = freshSensorDto.LastError,
-//                                     RetrievalInterval = freshSensorDto.RetrievalInterval,
-//                                     LastEventMarker = freshSensorDto.LastEventMarker
-//                                 };
-
-//                                 await sensorsService.RunSensorAsync(freshSensor, _orchestratorCts.Token);
-//                                 _logger.LogInformation("Sensor {SensorId} run completed at {Time}",
-//                                     sensor.SensorId, DateTime.UtcNow);
-
-//                                 await Task.Delay(TimeSpan.FromSeconds(DelayBetweenSensorRuns), _orchestratorCts.Token);
-//                             }
-//                         }
-//                     }
-//                     finally
-//                     {
-//                         _semaphore.Release();
-//                         if (_sensorsQueue.IsEmpty)
-//                         {
-//                             IsRunning = false; // Update status
-//                         }
-//                     }
-//                 });
-//             }
-//         }
-//     }
-
-//     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-//     {
-//         while (!stoppingToken.IsCancellationRequested)
-//         {
-//             await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-//         }
-//     }
-// }
-
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using IncidentResponseAPI.Models;
+using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 
 namespace IncidentResponseAPI.Orchestrators;
@@ -125,10 +14,12 @@ public class SensorsOrchestrator : BackgroundService
     private const int MaxConcurrentSensors = 5;
     private const int DelayBetweenSensorRuns = 20;
     private CancellationTokenSource _orchestratorCts;
+    private readonly SecurityMetricsService _metricsService;
 
     public bool IsRunning { get; set; }
 
-    public SensorsOrchestrator(IServiceScopeFactory scopeFactory, ILogger<SensorsOrchestrator> logger)
+    public SensorsOrchestrator(IServiceScopeFactory scopeFactory, ILogger<SensorsOrchestrator> logger
+    , SecurityMetricsService metricsService)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
@@ -136,6 +27,7 @@ public class SensorsOrchestrator : BackgroundService
         _semaphore = new SemaphoreSlim(MaxConcurrentSensors);
         _orchestratorCts = new CancellationTokenSource();
         IsRunning = false;
+        _metricsService = metricsService;
     }
 
     public void EnqueueSensor(SensorsModel sensor)
@@ -165,6 +57,7 @@ public class SensorsOrchestrator : BackgroundService
                                 if (freshSensorDto == null)
                                 {
                                     _logger.LogError("Sensor {SensorId} not found", sensor.SensorId);
+                                    _metricsService.SensorErrors
                                     break;
                                 }
 

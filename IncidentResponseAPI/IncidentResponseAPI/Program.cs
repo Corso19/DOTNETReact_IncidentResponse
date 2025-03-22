@@ -4,15 +4,13 @@ using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Orchestrators;
 using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Repositories.Implementations;
-using IncidentResponseAPI.Scheduling;
 using IncidentResponseAPI.Services;
 using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Graph.Models;
-using Quartz;
 using Microsoft.OpenApi.Models;
 using WebApplication = Microsoft.AspNetCore.Builder.WebApplication;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,12 +40,16 @@ builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
+builder.Services.AddSingleton<SecurityMetricsService>();
+builder.Services.AddMetricServer(options => {
+    options.Port = 9090;
+});
+
 //builder.Services.AddSignalR();
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
 });
-
 
 // Add the DbContext and SensorOrchestrator
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
@@ -78,8 +80,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
