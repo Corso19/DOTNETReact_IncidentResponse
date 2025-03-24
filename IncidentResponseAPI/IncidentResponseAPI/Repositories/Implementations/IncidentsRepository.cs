@@ -1,58 +1,52 @@
 ﻿using IncidentResponseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using IncidentResponseAPI.Repositories.Interfaces;
+using IncidentResponseAPI.Services.Implementations;
+using Prometheus;
 
 namespace IncidentResponseAPI.Repositories.Implementations
 {
     public class IncidentsRepository : IIncidentsRepository
     {
         private readonly IncidentResponseContext _context;
+        private readonly SecurityMetricsService _metricsService;
 
-        public IncidentsRepository(IncidentResponseContext context)
+        public IncidentsRepository(IncidentResponseContext context, SecurityMetricsService metricsService)
         {
             _context = context;
+            _metricsService = metricsService;
         }
 
-        public async Task<IEnumerable<IncidentsModel>> GetAllAsync(bool includeEvent = false, bool includeRelations = false)
+        public async Task<IEnumerable<IncidentsModel>> GetAllAsync(bool includeEvent = false,
+            bool includeRelations = false)
         {
-            // var query = _context.Incidents.AsQueryable();
-
-            // if (includeEvent)
-            // {
-            //     query = query.Include(i => i.Event);
-            // }
-
-            // if (includeRelations)
-            // {
-            //     query = query.Include(i => i.Recommendation);
-            // }
-
-            // return await query.ToListAsync();
-
             return await _context.Incidents
-        .Include(i => i.Event)
-            .ThenInclude(e => e.Attachments)
-        .Include(i => i.Recommendations)
-        .ToListAsync();
+                .Include(i => i.Event)
+                .ThenInclude(e => e.Attachments)
+                .Include(i => i.Recommendations)
+                .ToListAsync();
         }
 
-        // public async Task<IncidentsModel> GetByIdAsync(int id)
-        // {
-        //     return await _context.Incidents.FindAsync(id);
-        // }
 
         public async Task<IncidentsModel> GetByIdAsync(int id)
-{
-    return await _context.Incidents
-        .Include(i => i.Event)
-            .ThenInclude(e => e.Attachments)  // Include attachments with events
-        .FirstOrDefaultAsync(i => i.IncidentId == id);
-}
+        {
+            return await _context.Incidents
+                .Include(i => i.Event)
+                .ThenInclude(e => e.Attachments) // Include attachments with events
+                .FirstOrDefaultAsync(i => i.IncidentId == id);
+        }
 
         public async Task AddAsync(IncidentsModel incidentsModel, CancellationToken cancellationToken)
         {
             _context.Incidents.Add(incidentsModel);
             await _context.SaveChangesAsync(cancellationToken);
+            
+            _metricsService.IncidentsDetected
+                .WithLabels(
+                    incidentsModel.Severity.ToString(),
+                    incidentsModel.Type.ToString()
+                    )
+                .Inc();
         }
 
         public async Task UpdateAsync(IncidentsModel incidentsModel)
