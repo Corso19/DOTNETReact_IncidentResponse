@@ -2,6 +2,7 @@
 using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
+using Prometheus;
 
 namespace IncidentResponseAPI.Orchestrators;
 
@@ -57,7 +58,7 @@ public class SensorsOrchestrator : BackgroundService
                                 if (freshSensorDto == null)
                                 {
                                     _logger.LogError("Sensor {SensorId} not found", sensor.SensorId);
-                                    _metricsService.SensorErrors
+                                    _metricsService.SensorErrors.WithLabels(sensor.Type, "not_found").Inc();
                                     break;
                                 }
 
@@ -66,6 +67,9 @@ public class SensorsOrchestrator : BackgroundService
                                     _logger.LogInformation("Sensor {SensorId} is disabled", sensor.SensorId);
                                     break;
                                 }
+                                
+                                //update activity sensors gauge when starting a sensor
+                                _metricsService.ActiveSensors.WithLabels(sensor.Type).Inc();
 
                                 var freshSensor = new SensorsModel
                                 {
@@ -82,8 +86,30 @@ public class SensorsOrchestrator : BackgroundService
                                     LastEventMarker = freshSensorDto.LastEventMarker
                                 };
 
-                                await sensorsService.RunSensorAsync(freshSensor, _orchestratorCts.Token);
-                                _logger.LogInformation("Sensor {SensorId} run completed", sensor.SensorId);
+                                try
+                                {
+                                    using (var timer = _metricsService.EventProcessingTime.WithLabels(sensor.Type)
+                                               .NewTimer())
+                                    {
+                                        await sensorsService.RunSensorAsync(freshSensor, _orchestratorCts.Token);
+                                    }
+                                    
+                                    //increment successful sensor runs counter
+                                    _metricsService.SensorRuns.WithLabels(sensor.Type, sensor.SensorName).Inc();
+                                    
+                                    _logger.LogInformation("Sensor {SensorId} run completed", sensor.SensorId);
+                                }
+                                catch (Exception ex)
+                                {
+                                    //track sensor errors
+                                    _metricsService.SensorErrors.WithLabels(sensor.Type, "execution_error").Inc();
+                                    _logger.LogError(ex, "Error running sensor {SensorId}", sensor.SensorId);
+                                }
+                                finally
+                                {
+                                    //decrement active sensors when done
+                                    _metricsService.ActiveSensors.WithLabels(sensor.Type).Dec();
+                                }
 
                                 // Re-enqueue the sensor if still enabled
                                 _sensorsQueue.Enqueue(sensor);
