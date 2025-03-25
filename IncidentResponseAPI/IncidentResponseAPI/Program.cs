@@ -42,9 +42,8 @@ builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
 builder.Services.AddSingleton<SecurityMetricsService>();
 builder.Services.AddMetricServer(options => {
-    options.Port = 9090;
+    options.Port = 9091;
 });
-
 //builder.Services.AddSignalR();
 builder.Services.AddSignalR(options =>
 {
