@@ -65,7 +65,7 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<Sensor
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        policyBuilder => policyBuilder.WithOrigins("http://localhost:3000")
+        policyBuilder => policyBuilder.WithOrigins("http://localhost:3001")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials());
