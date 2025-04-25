@@ -269,17 +269,17 @@ namespace IncidentResponseAPI.Services.Implementations
             }
         }
 
-        public void CancelAllSensors()
-        {
-            _sensorsOrchestrator.CancelAllSensors();
-
-            foreach (var cts in _cancellationTokenSources.Values)
-            {
-                cts.Cancel();
-            }
-
-            _cancellationTokenSources.Clear();
-            _logger.LogInformation("All running sensors have been cancelled.");
-        }
+        // public void CancelAllSensors()
+        // {
+        //     _sensorsOrchestrator.CancelAllSensors();
+        //
+        //     foreach (var cts in _cancellationTokenSources.Values)
+        //     {
+        //         cts.Cancel();
+        //     }
+        //
+        //     _cancellationTokenSources.Clear();
+        //     _logger.LogInformation("All running sensors have been cancelled.");
+        // }
     }
 }

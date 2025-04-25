@@ -159,3 +159,19 @@ body {
   border-radius: 4px;
   padding: 20px;
 }
+
+/* Grafana dashboard styles */
+
+.grafana-container {
+  padding: 20px;
+  background-color: var(--bs-bg-light);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px var(--bs-shadow);
+  height: calc(100vh - 100px);
+}
+
+.grafana-container iframe {
+  border-radius: 4px;
+  background-color: var(--bs-white);
+  height: 100%;
+}

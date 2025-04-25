@@ -16,4 +16,14 @@ public class GraphAuthProvider
         var clientSecretCredential = new ClientSecretCredential(tenantId, applicationId, clientSecret, options);
         return await Task.FromResult(new GraphServiceClient(clientSecretCredential));
     }
+
+    // public GraphServiceClient GetUserDelegatedClient(string accessToken)
+    // {
+    //     return new GraphServiceClient(new DelegateAuthenticationProvider(request =>
+    //     {
+    //         request.Headers.Authorization = 
+    //             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+    //         return Task.CompletedTask;
+    //     }));
+    // }
 }

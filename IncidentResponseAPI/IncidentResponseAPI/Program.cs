@@ -4,15 +4,13 @@ using IncidentResponseAPI.Models;
 using IncidentResponseAPI.Orchestrators;
 using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Repositories.Implementations;
-using IncidentResponseAPI.Scheduling;
 using IncidentResponseAPI.Services;
 using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Graph.Models;
-using Quartz;
 using Microsoft.OpenApi.Models;
 using WebApplication = Microsoft.AspNetCore.Builder.WebApplication;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,19 +20,6 @@ Env.Load();
 // Debug logging to verify environment variable loading
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
-
-// Add Quartz services
-// builder.Services.AddQuartz(q =>
-// {
-//     // Register the EventsProcessingJob
-//     var jobKey = new JobKey("EventsProcessingJob");
-//     q.AddJob<EventsProcessingJob>(opts => opts.WithIdentity(jobKey));
-//     q.AddTrigger(opts => opts
-//         .ForJob(jobKey)
-//         .WithIdentity("EventsProcessingTrigger")
-//         .StartNow()
-//         .WithCronSchedule("0 * * * * ?"));
-// });
 
 // Add services to the container.
 builder.Logging.ClearProviders();
@@ -55,12 +40,15 @@ builder.Services.AddScoped<IConfigurationValidator, ConfigurationValidator>();
 builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
+builder.Services.AddSingleton<SecurityMetricsService>();
+builder.Services.AddMetricServer(options => {
+    options.Port = 9091;
+});
 //builder.Services.AddSignalR();
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
 });
-
 
 // Add the DbContext and SensorOrchestrator
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
@@ -77,7 +65,7 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<Sensor
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        policyBuilder => policyBuilder.WithOrigins("http://localhost:3000")
+        policyBuilder => policyBuilder.WithOrigins("http://localhost:3001")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials());
@@ -91,8 +79,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -13,6 +13,6 @@ public interface ISensorsService
     Task UpdateAsync(int id, SensorDto sensorDto);
     Task DeleteAsync(int id);
     Task SetEnabledAsync(int id);
-    void CancelAllSensors();
+    //void CancelAllSensors();
 
 }

@@ -20,11 +20,11 @@ const Orchestrator = () => {
         //         setOrchestratorState(current_orchestrator_status);
         //     }
         // });
-        OrchestratorService.startOrchestrator().then((response) => {
-            if(response.status === 200){
-                console.log("Orchestrator started successfully!");
-            }
-        });
+        // OrchestratorService.startOrchestrator().then((response) => {
+        //     if(response.status === 200){
+        //         console.log("Orchestrator started successfully!");
+        //     }
+        // });
     }, []);
 
     return(

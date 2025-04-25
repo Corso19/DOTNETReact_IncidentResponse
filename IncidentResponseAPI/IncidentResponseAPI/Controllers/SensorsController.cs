@@ -117,24 +117,6 @@ namespace IncidentResponseAPI.Controllers
                 return StatusCode(500, "An error occurred while starting the orchestrator.");
             }
         }
-
-        // [HttpPost("cancel-all-sensors")]
-        // [SwaggerOperation(Summary = "Cancels all running sensors started by the orchestrator")]
-        // public IActionResult CancelAllSensors()
-        // {
-        //     _sensorsService.CancelAllSensors();
-        //     return Ok("All running sensors started by orchestrator have been cancelled.");
-        //     
-        // }
-
-        [HttpPost("stop-orchestrator")]
-        [SwaggerOperation(Summary = "Stops the running orchestrator")]
-        public IActionResult StopOrchestrator()
-        {
-            _sensorsService.CancelAllSensors();
-            _sensorsOrchestrator.IsRunning = false;
-            return Ok("Orchestrator stopped successfully.");
-        }
         
         [HttpGet("orchestrator-status")]
         [SwaggerOperation(Summary = "Gets the status of the orchestrator")]
@@ -142,8 +124,6 @@ namespace IncidentResponseAPI.Controllers
         {
             return Ok(new { IsRunning = _sensorsOrchestrator.IsRunning });
         }
-        
-        
 
         // PUT: api/Sensors/{id}
         [HttpPut("{id}")]
@@ -151,12 +131,6 @@ namespace IncidentResponseAPI.Controllers
         public async Task<IActionResult> PutSensor(int id, SensorDto sensorDto)
         {
             _logger.LogInformation("Updating sensor with ID {Id}", id);
-
-            // if (id != sensorDto.SensorId)
-            // {
-            //     _logger.LogWarning("Mismatched sensor ID in request body and URL: {Id}", id);
-            //     return BadRequest("Sensor ID mismatch.");
-            // }
 
             try
             {

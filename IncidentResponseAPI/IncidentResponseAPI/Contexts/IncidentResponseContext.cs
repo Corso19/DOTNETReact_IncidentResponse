@@ -8,7 +8,6 @@ namespace IncidentResponseAPI.Models
             : base(options)
         {
         }
-
         
         public DbSet<IncidentsModel> Incidents { get; set; }
         public DbSet<EventsModel> Events { get; set; }
