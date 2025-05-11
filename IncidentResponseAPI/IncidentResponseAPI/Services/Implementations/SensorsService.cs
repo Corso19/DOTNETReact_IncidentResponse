@@ -14,25 +14,28 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly ISensorsRepository _sensorsRepository;
         private readonly ILogger<SensorsService> _logger;
         private readonly IConfigurationValidator _configurationValidator;
-        private readonly IEventsService _eventsService;
+        //private readonly IEventsService _eventsService;
         private readonly IEventsProcessingService _eventsProcessingService;
         private readonly SensorsOrchestrator _sensorsOrchestrator;
+        private readonly ISensorHandler _sensorHandler;
         private readonly ConcurrentDictionary<int, CancellationTokenSource> _cancellationTokenSources = new ();
 
         public SensorsService(
             ISensorsRepository sensorsRepository, 
             ILogger<SensorsService> logger, 
             IConfigurationValidator configurationValidator, 
-            IEventsService eventsService, 
+            // IEventsService eventsService, 
             IEventsProcessingService eventsProcessingService,
-            SensorsOrchestrator sensorsOrchestrator)
+            SensorsOrchestrator sensorsOrchestrator,
+            ISensorHandler sensorHandler)
         {
             _sensorsRepository = sensorsRepository;
             _logger = logger;
             _configurationValidator = configurationValidator;
-            _eventsService = eventsService;
+            //_eventsService = eventsService;
             _eventsProcessingService = eventsProcessingService;
             _sensorsOrchestrator = sensorsOrchestrator;
+            _sensorHandler = sensorHandler;
         }
 
 
@@ -54,7 +57,9 @@ namespace IncidentResponseAPI.Services.Implementations
                     await _sensorsRepository.UpdateAsync(sensor);
 
                     // Process events
-                    await _eventsService.SyncEventsAsync(sensor.SensorId, linkedCts.Token);
+                    //await _eventsService.SyncEventsAsync(sensor.SensorId, linkedCts.Token);
+                    var events = await _sensorHandler.SyncEventsAsync(sensor, linkedCts.Token);
+                    _logger.LogInformation("Retrieved {Count} events for sensor {SensorId}", events.Count(), sensor.SensorId);
                     await _eventsProcessingService.ProcessEventsAsync(linkedCts.Token);
 
                     _logger.LogInformation("Updated sensor {SensorId} LastRunAt to {LastRun}, NextRunAfter to {NextRun}", sensor.SensorId, sensor.LastRunAt, sensor.NextRunAfter);
@@ -268,18 +273,5 @@ namespace IncidentResponseAPI.Services.Implementations
                 throw;
             }
         }
-
-        // public void CancelAllSensors()
-        // {
-        //     _sensorsOrchestrator.CancelAllSensors();
-        //
-        //     foreach (var cts in _cancellationTokenSources.Values)
-        //     {
-        //         cts.Cancel();
-        //     }
-        //
-        //     _cancellationTokenSources.Clear();
-        //     _logger.LogInformation("All running sensors have been cancelled.");
-        // }
     }
 }

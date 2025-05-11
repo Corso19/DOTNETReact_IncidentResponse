@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using WebApplication = Microsoft.AspNetCore.Builder.WebApplication;
 using Prometheus;
+using IncidentResponseAPI.Services.Implementations.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +28,7 @@ builder.Logging.AddConsole();
 builder.Services.AddControllers();
 //builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 builder.Services.AddScoped<IEventsRepository, EventsRepository>();
-builder.Services.AddScoped<IEventsService, EventsService>();
+//builder.Services.AddScoped<IEventsService, EventsService>();
 builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<ISensorsRepository, SensorsRepository>();
 builder.Services.AddScoped<ISensorsService, SensorsService>();
@@ -41,6 +42,7 @@ builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
 builder.Services.AddSingleton<SecurityMetricsService>();
+builder.Services.AddScoped<ISensorHandler, EmailSensorHandler>();
 builder.Services.AddMetricServer(options => {
     options.Port = 9091;
 });

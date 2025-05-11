@@ -13,7 +13,7 @@ namespace IncidentResponseAPI.Services.Interfaces
         Task DeleteEventAsync(int id);
         
         //Email/Event-related operations
-        Task SyncEventsAsync(int sensorId, CancellationToken cancellationToken);
+        //Task SyncEventsAsync(int sensorId, CancellationToken cancellationToken);
 
         Task<Message> FetchMessageContentAsync(string clientSecret, string applicationId, string tenantId,
             string messageId);
