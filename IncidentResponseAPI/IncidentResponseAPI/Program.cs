@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using WebApplication = Microsoft.AspNetCore.Builder.WebApplication;
 using Prometheus;
 using IncidentResponseAPI.Services.Implementations.Handlers;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +43,10 @@ builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
 builder.Services.AddSingleton<SecurityMetricsService>();
-builder.Services.AddScoped<ISensorHandler, EmailSensorHandler>();
+//builder.Services.AddScoped<ISensorHandler, EmailSensorHandler>();
+builder.Services.AddScoped<EmailSensorHandler>();
+builder.Services.AddScoped<TeamsSensorHandler>();
+builder.Services.AddScoped<ISensorHandlerFactory, SensorHandlerFactory>();
 builder.Services.AddMetricServer(options => {
     options.Port = 9091;
 });

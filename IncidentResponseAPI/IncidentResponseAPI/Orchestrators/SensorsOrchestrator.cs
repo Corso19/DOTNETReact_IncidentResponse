@@ -126,7 +126,7 @@ public class SensorsOrchestrator : BackgroundService
             }
         }
     }
-
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try

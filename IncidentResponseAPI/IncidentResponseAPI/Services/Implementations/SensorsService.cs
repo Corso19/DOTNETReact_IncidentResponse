@@ -17,7 +17,8 @@ namespace IncidentResponseAPI.Services.Implementations
         //private readonly IEventsService _eventsService;
         private readonly IEventsProcessingService _eventsProcessingService;
         private readonly SensorsOrchestrator _sensorsOrchestrator;
-        private readonly ISensorHandler _sensorHandler;
+        //private readonly ISensorHandler _sensorHandler;
+        private readonly ISensorHandlerFactory _sensorHandlerFactory;
         private readonly ConcurrentDictionary<int, CancellationTokenSource> _cancellationTokenSources = new ();
 
         public SensorsService(
@@ -27,7 +28,7 @@ namespace IncidentResponseAPI.Services.Implementations
             // IEventsService eventsService, 
             IEventsProcessingService eventsProcessingService,
             SensorsOrchestrator sensorsOrchestrator,
-            ISensorHandler sensorHandler)
+            ISensorHandlerFactory sensorHandlerFactory)
         {
             _sensorsRepository = sensorsRepository;
             _logger = logger;
@@ -35,7 +36,7 @@ namespace IncidentResponseAPI.Services.Implementations
             //_eventsService = eventsService;
             _eventsProcessingService = eventsProcessingService;
             _sensorsOrchestrator = sensorsOrchestrator;
-            _sensorHandler = sensorHandler;
+            _sensorHandlerFactory = sensorHandlerFactory;
         }
 
 
@@ -58,7 +59,8 @@ namespace IncidentResponseAPI.Services.Implementations
 
                     // Process events
                     //await _eventsService.SyncEventsAsync(sensor.SensorId, linkedCts.Token);
-                    var events = await _sensorHandler.SyncEventsAsync(sensor, linkedCts.Token);
+                    var handler = _sensorHandlerFactory.GetHandlerForSensorType(sensor.Type);
+                    var events = await handler.SyncEventsAsync(sensor, linkedCts.Token);
                     _logger.LogInformation("Retrieved {Count} events for sensor {SensorId}", events.Count(), sensor.SensorId);
                     await _eventsProcessingService.ProcessEventsAsync(linkedCts.Token);
 

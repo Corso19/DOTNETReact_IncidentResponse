@@ -26,5 +26,21 @@ namespace IncidentResponseAPI.Services.Interfaces
             string clientSecret, 
             string applicationId, 
             string tenantId);
+        
+        //methods for Teams
+        Task<List<ChatMessage>> FetchTeamsMessagesAsync(
+            string clientSecret, 
+            string applicationId, 
+            string tenantId, 
+            DateTime? since, 
+            CancellationToken cancellationToken);
+        
+        Task<byte[]> FetchTeamsAttachmentAsync(
+            string clientSecret, 
+            string applicationId, 
+            string tenantId,
+            string messageId,
+            string attachmentId, 
+            CancellationToken cancellationToken);
     }
 }
