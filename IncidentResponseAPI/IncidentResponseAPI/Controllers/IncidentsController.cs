@@ -25,8 +25,19 @@ namespace IncidentResponseAPI.Controllers
         }
 
         // GET: api/Incidents/5
+        // [HttpGet("{id}")]
+        // [SwaggerOperation(Summary = "Gets an incident by ID")]
+        
+        /// <summary>
+        /// Gets an incident by its unique identifier
+        /// </summary>
+        /// <param name="id">The incident ID</param>
+        /// <returns>The incident details</returns>
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Gets an incident by ID")]
+        [SwaggerOperation(Summary = "Gets an incident by ID", 
+            Description = "Retrieves detailed information about a specific incident")]
+        [SwaggerResponse(StatusCodes.Status200OK, "The incident was found", typeof(IncidentDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "The incident was not found")]
         public async Task<ActionResult<IncidentDto>> GetIncident(int id)
         {
             var incidentDto = await _incidentsService.GetByIdAsync(id);

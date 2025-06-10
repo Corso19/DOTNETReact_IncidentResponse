@@ -2,8 +2,8 @@
 using Microsoft.Graph.Models;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.Graph;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using System.Net.Http.Headers;
 
 namespace IncidentResponseAPI.Services.Implementations
 {
@@ -103,6 +103,59 @@ namespace IncidentResponseAPI.Services.Implementations
 
         //Teams related operations
 
+        // public async Task<List<ChatMessage>> FetchTeamsMessagesAsync(string clientSecret, string applicationId,
+        //     string tenantId, DateTime? since,
+        //     CancellationToken cancellationToken)
+        // {
+        //     try
+        //     {
+        //         var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
+        //
+        //         //Creating filter for fetching messages since specified time
+        //         var filter = since.HasValue
+        //             ? $"createdDateTime gt {since.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}"
+        //             : null;
+        //
+        //         _logger.LogInformation("Fetching Teams messages with filter: {Filter}", filter);
+        //
+        //         //Getting all chats from Teams
+        //         var chats = await graphClient.Chats.GetAsync(cancellationToken: cancellationToken);
+        //
+        //         var allMessages = new List<ChatMessage>();
+        //         //For each chat, get its messages
+        //         if (chats?.Value != null)
+        //         {
+        //             foreach (var chat in chats.Value)
+        //             {
+        //                 var chatMessages = await graphClient.Chats[chat.Id].Messages
+        //                     .GetAsync(requestConfiguration =>
+        //                         {
+        //                             if (!string.IsNullOrEmpty(filter))
+        //                             {
+        //                                 requestConfiguration.QueryParameters.Filter = filter;
+        //                                 requestConfiguration.QueryParameters.Orderby = new[] { "createdDateTime" };
+        //                             }
+        //                         }
+        //                         , cancellationToken);
+        //
+        //                 if (chatMessages?.Value != null)
+        //                 {
+        //                     allMessages.AddRange(chatMessages.Value);
+        //                 }
+        //             }
+        //         }
+        //
+        //         return allMessages
+        //             .OrderBy(m => m.CreatedDateTime)
+        //             .ToList();
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error occurred while fetching Teams messages.");
+        //         throw;
+        //     }
+        // }
+
         public async Task<List<ChatMessage>> FetchTeamsMessagesAsync(string clientSecret, string applicationId,
             string tenantId, DateTime? since,
             CancellationToken cancellationToken)
@@ -111,47 +164,77 @@ namespace IncidentResponseAPI.Services.Implementations
             {
                 var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
 
-                //Creating filter for fetching messages since specified time
+                // Creating filter for fetching messages since specified time
                 var filter = since.HasValue
                     ? $"createdDateTime gt {since.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}"
                     : null;
 
                 _logger.LogInformation("Fetching Teams messages with filter: {Filter}", filter);
 
-                //Getting all chats from Teams
-                var chats = await graphClient.Chats.GetAsync(cancellationToken: cancellationToken);
+                // Get all users first
+                var users = await graphClient.Users.GetAsync(cancellationToken: cancellationToken);
+
+                if (users?.Value == null)
+                {
+                    _logger.LogWarning("No users found");
+                    return new List<ChatMessage>();
+                }
 
                 var allMessages = new List<ChatMessage>();
-                //For each chat, get its messages
-                if (chats?.Value != null)
+
+                // For each user, get their chats
+                foreach (var user in users.Value)
                 {
-                    foreach (var chat in chats.Value)
+                    try
                     {
-                        var chatMessages = await graphClient.Chats[chat.Id].Messages
-                            .GetAsync(requestConfiguration =>
+                        // This is the key change - getting chats per user instead of top-level
+                        var chats = await graphClient.Users[user.Id].Chats
+                            .GetAsync(cancellationToken: cancellationToken);
+
+                        // For each chat, get its messages
+                        if (chats?.Value != null)
+                        {
+                            foreach (var chat in chats.Value)
+                            {
+                                try
                                 {
-                                    if (!string.IsNullOrEmpty(filter))
+                                    var chatMessages = await graphClient.Chats[chat.Id].Messages.GetAsync(
+                                        requestConfiguration =>
+                                        {
+                                            if (!string.IsNullOrEmpty(filter))
+                                            {
+                                                requestConfiguration.QueryParameters.Filter = filter;
+                                                requestConfiguration.QueryParameters.Orderby =
+                                                    new[] { "createdDateTime" };
+                                            }
+                                        },
+                                        cancellationToken);
+
+                                    if (chatMessages?.Value != null)
                                     {
-                                        requestConfiguration.QueryParameters.Filter = filter;
-                                        requestConfiguration.QueryParameters.Orderby = new[] { "createdDateTime" };
+                                        allMessages.AddRange(chatMessages.Value);
                                     }
                                 }
-                                , cancellationToken);
-
-                        if (chatMessages?.Value != null)
-                        {
-                            allMessages.AddRange(chatMessages.Value);
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Error fetching messages for chat {ChatId} of user {UserId}",
+                                        chat.Id, user.Id);
+                                }
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error fetching chats for user {UserId}", user.Id);
                     }
                 }
 
-                return allMessages
-                    .OrderBy(m => m.CreatedDateTime)
-                    .ToList();
+                // Order all messages by creation time
+                return allMessages.OrderBy(m => m.CreatedDateTime).ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching Teams messages.");
+                _logger.LogError(ex, "Error occurred while fetching Teams messages");
                 throw;
             }
         }
