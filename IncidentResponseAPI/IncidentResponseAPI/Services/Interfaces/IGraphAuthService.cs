@@ -42,5 +42,21 @@ namespace IncidentResponseAPI.Services.Interfaces
             string messageId,
             string attachmentId, 
             CancellationToken cancellationToken);
+        
+        //methods for SharePoint
+
+        Task<List<DriveItem>> FetchSharePointActivitiesAsync(
+            string clientSecret, 
+            string applicationId, 
+            string tenantId, 
+            DateTime? since, 
+            CancellationToken cancellationToken);
+
+        Task<byte[]> FetchSharePointFileContentAsync(
+            string clientSecret,
+            string applicationId, 
+            string tenantId, 
+            string fileId, 
+            CancellationToken cancellationToken);
     }
 }

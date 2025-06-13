@@ -18,6 +18,7 @@ public class SensorHandlerFactory : ISensorHandlerFactory
         {
             "MicrosoftEmail" => _serviceProvider.GetRequiredService<EmailSensorHandler>(),
             "MicrosoftTeams" => _serviceProvider.GetRequiredService<TeamsSensorHandler>(),
+            "MicrosoftSharePoint" => _serviceProvider.GetRequiredService<SharePointSensorHandler>(),
             _ => throw new NotSupportedException($"Sensor type '{sensorTypeKey}' is not supported.")
         };
     }

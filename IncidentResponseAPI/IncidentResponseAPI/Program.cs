@@ -46,6 +46,7 @@ builder.Services.AddSingleton<SecurityMetricsService>();
 //builder.Services.AddScoped<ISensorHandler, EmailSensorHandler>();
 builder.Services.AddScoped<EmailSensorHandler>();
 builder.Services.AddScoped<TeamsSensorHandler>();
+builder.Services.AddScoped<SharePointSensorHandler>();
 builder.Services.AddScoped<ISensorHandlerFactory, SensorHandlerFactory>();
 builder.Services.AddMetricServer(options => {
     options.Port = 9091;

@@ -1,5 +1,6 @@
 ﻿using Azure.Identity;
 using Microsoft.Graph.Models;
+using Microsoft.Graph.Drives.Item;
 using IncidentResponseAPI.Services.Interfaces;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
@@ -102,59 +103,6 @@ namespace IncidentResponseAPI.Services.Implementations
         }
 
         //Teams related operations
-
-        // public async Task<List<ChatMessage>> FetchTeamsMessagesAsync(string clientSecret, string applicationId,
-        //     string tenantId, DateTime? since,
-        //     CancellationToken cancellationToken)
-        // {
-        //     try
-        //     {
-        //         var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
-        //
-        //         //Creating filter for fetching messages since specified time
-        //         var filter = since.HasValue
-        //             ? $"createdDateTime gt {since.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}"
-        //             : null;
-        //
-        //         _logger.LogInformation("Fetching Teams messages with filter: {Filter}", filter);
-        //
-        //         //Getting all chats from Teams
-        //         var chats = await graphClient.Chats.GetAsync(cancellationToken: cancellationToken);
-        //
-        //         var allMessages = new List<ChatMessage>();
-        //         //For each chat, get its messages
-        //         if (chats?.Value != null)
-        //         {
-        //             foreach (var chat in chats.Value)
-        //             {
-        //                 var chatMessages = await graphClient.Chats[chat.Id].Messages
-        //                     .GetAsync(requestConfiguration =>
-        //                         {
-        //                             if (!string.IsNullOrEmpty(filter))
-        //                             {
-        //                                 requestConfiguration.QueryParameters.Filter = filter;
-        //                                 requestConfiguration.QueryParameters.Orderby = new[] { "createdDateTime" };
-        //                             }
-        //                         }
-        //                         , cancellationToken);
-        //
-        //                 if (chatMessages?.Value != null)
-        //                 {
-        //                     allMessages.AddRange(chatMessages.Value);
-        //                 }
-        //             }
-        //         }
-        //
-        //         return allMessages
-        //             .OrderBy(m => m.CreatedDateTime)
-        //             .ToList();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "Error occurred while fetching Teams messages.");
-        //         throw;
-        //     }
-        // }
 
         public async Task<List<ChatMessage>> FetchTeamsMessagesAsync(string clientSecret, string applicationId,
             string tenantId, DateTime? since,
@@ -288,6 +236,116 @@ namespace IncidentResponseAPI.Services.Implementations
             {
                 _logger.LogError(ex, "Error occurred while fetching Teams attachment for message ID: {MessageId}",
                     messageId);
+                throw;
+            }
+        }
+
+        //SharePoint related operations
+
+        public async Task<List<DriveItem>> FetchSharePointActivitiesAsync(
+            string clientSecret,
+            string applicationId,
+            string tenantId,
+            DateTime? since,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
+                var allItems = new List<DriveItem>();
+        
+                // Get all users first
+                var users = await graphClient.Users.GetAsync(cancellationToken: cancellationToken);
+        
+                if (users?.Value == null)
+                {
+                    _logger.LogWarning("No users found");
+                    return new List<DriveItem>();
+                }
+        
+                // For each user, get their OneDrive/SharePoint activities
+                foreach (var user in users.Value)
+                {
+                    try
+                    {
+                        // Create the filter for retrieving items since specified time
+                        var filter = since.HasValue
+                            ? $"lastModifiedDateTime gt {since.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}"
+                            : null;
+        
+                        // Get the user's OneDrive items ordered by last modified date
+                        var driveItems = await graphClient.Users[user.Id].Drive.Items
+                            .GetAsync(requestConfig =>
+                            {
+                                if (!string.IsNullOrEmpty(filter))
+                                {
+                                    requestConfig.QueryParameters.Filter = filter;
+                                }
+                            }, cancellationToken);
+        
+                        if (driveItems?.Value != null)
+                        {
+                            allItems.AddRange(driveItems.Value);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error fetching SharePoint activities for user {UserId}", user.Id);
+                        // Continue with other users
+                    }
+                }
+        
+                return allItems.OrderBy(i => i.LastModifiedDateTime).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching SharePoint activities");
+                throw;
+            }
+        }
+        
+        public async Task<byte[]> FetchSharePointFileContentAsync(
+            string clientSecret,
+            string applicationId,
+            string tenantId,
+            string itemId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var graphClient = await GetAuthenticatedGraphClient(clientSecret, applicationId, tenantId);
+        
+                // Find the item across all user drives
+                var users = await graphClient.Users.GetAsync(cancellationToken: cancellationToken);
+        
+                foreach (var user in users.Value)
+                {
+                    try
+                    {
+                        // Try to get item content through user's drive
+                        var stream = await graphClient.Users[user.Id].Drive.Items[itemId].Content
+                            .GetAsync(cancellationToken);
+        
+                        if (stream != null)
+                        {
+                            using var memoryStream = new MemoryStream();
+                            await stream.CopyToAsync(memoryStream, cancellationToken);
+                            return memoryStream.ToArray();
+                        }
+                    }
+                    catch
+                    {
+                        // Item not found in this user's drive, continue to next user
+                        continue;
+                    }
+                }
+        
+                _logger.LogWarning("File with ID {ItemId} not found in any user drives", itemId);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching SharePoint file content");
                 throw;
             }
         }
