@@ -17,6 +17,7 @@ namespace IncidentResponseAPI.Services.Implementations
         //private readonly IEventsService _eventsService;
         private readonly IEventsProcessingService _eventsProcessingService;
         private readonly SensorsOrchestrator _sensorsOrchestrator;
+        private readonly SecurityMetricsService _metrics;
         //private readonly ISensorHandler _sensorHandler;
         private readonly ISensorHandlerFactory _sensorHandlerFactory;
         private readonly ConcurrentDictionary<int, CancellationTokenSource> _cancellationTokenSources = new ();
@@ -28,12 +29,14 @@ namespace IncidentResponseAPI.Services.Implementations
             // IEventsService eventsService, 
             IEventsProcessingService eventsProcessingService,
             SensorsOrchestrator sensorsOrchestrator,
-            ISensorHandlerFactory sensorHandlerFactory)
+            ISensorHandlerFactory sensorHandlerFactory,
+            SecurityMetricsService metrics)
         {
             _sensorsRepository = sensorsRepository;
             _logger = logger;
             _configurationValidator = configurationValidator;
             //_eventsService = eventsService;
+            _metrics = metrics;
             _eventsProcessingService = eventsProcessingService;
             _sensorsOrchestrator = sensorsOrchestrator;
             _sensorHandlerFactory = sensorHandlerFactory;
@@ -187,6 +190,12 @@ namespace IncidentResponseAPI.Services.Implementations
                 _logger.LogInformation("Successfully added a new sensor.");
 
                 sensorDto.SensorId = sensorsModel.SensorId;
+                if (sensorsModel.isEnabled)
+                {
+                    _metrics.ActiveSensors.WithLabels(sensorsModel.Type).Inc();
+                }
+
+                sensorDto.SensorId = sensorsModel.SensorId;
                 return sensorDto;
             }
             catch (ValidationException ex)
@@ -242,6 +251,16 @@ namespace IncidentResponseAPI.Services.Implementations
             _logger.LogInformation("Deleting sensor with ID {SensorId}.", id);
             try
             {
+                // Get the sensor before deleting
+                var sensor = await _sensorsRepository.GetByIdAsync(id);
+                if (sensor != null && sensor.isEnabled)
+                {
+                    // If the sensor was enabled, decrement the active sensors count
+                    _metrics.ActiveSensors.WithLabels(sensor.Type).Dec();
+                    _logger.LogInformation("Sensor {SensorId} deleted, decremented active sensors for type {Type}", 
+                        sensor.SensorId, sensor.Type);
+                }
+                
                 await _sensorsRepository.DeleteAsync(id);
                 _logger.LogInformation("Successfully deleted sensor with ID {SensorId}.", id);
             }
@@ -261,6 +280,16 @@ namespace IncidentResponseAPI.Services.Implementations
                 if (sensor != null)
                 {
                     sensor.isEnabled = !sensor.isEnabled;
+                    //if the sensor is enabled, add to metrics.
+                    if (sensor.isEnabled)
+                    {
+                        _metrics.ActiveSensors.WithLabels(sensor.Type).Inc();
+                    }
+                    else
+                    {
+                        _metrics.ActiveSensors.WithLabels(sensor.Type).Dec();
+                    }
+                    
                     await _sensorsRepository.UpdateAsync(sensor);
                     _logger.LogInformation("Successfully toggled enabled status for sensor with ID {SensorId} to {IsEnabled}.", id, sensor.isEnabled);
                 }

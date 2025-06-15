@@ -8,11 +8,12 @@ const AddUpdateSensorModal = ({sensor, setSensors, showModal, setShowModal}) => 
     const SENSOR_TYPES = [
         "MicrosoftEmail",
         "MicrosoftTeams",
-        "MicrosoftSharepoint",
+        "MicrosoftSharePoint",
     ];
 
     const initialSensorObject = {
         name: "",
+        type:"",
         isEnabled: false,
         clientSecret: "",
         tenantId: "",
