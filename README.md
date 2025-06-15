@@ -17,21 +17,4 @@ DOTNETReact_IncidentResponse is an Incident Response application built with ASP.
 - **Styling**: CSS, Bootstrap
 - **APIs**: RESTful APIs for frontend-backend communication
 
-## Setup
-
-- **Clone Repository**:
-
-  ```
-  git clone https://github.com/Corso19/DOTNETReact_IncidentResponse.git
-  ```
-
-## Experience gained with this project:
-
-- **Full-Stack Development**: Experience in developing and integrating both frontend and backend components.
-- **API Development**: Designing and consuming REST APIs
-- **Database Management**: Working with SSMS 20 and Entity Framework Core
-- **React Development**: Building dynamic user interfaces with React and TypeScript
-- **DevOps**: Setting up development environments and managing dependencies
-
-  
 
