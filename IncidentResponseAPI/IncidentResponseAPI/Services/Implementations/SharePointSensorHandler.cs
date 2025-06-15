@@ -14,7 +14,7 @@ namespace IncidentResponseAPI.Services.Implementations.Handlers
         private readonly IEventsRepository _eventsRepository;
         private readonly IAttachmentRepository _attachmentRepository;
 
-        public string SensorTypeKey => "SharePoint";
+        public string SensorTypeKey => "MicrosoftSharePoint";
 
         public SharePointSensorHandler(
             IGraphAuthService graphAuth,
