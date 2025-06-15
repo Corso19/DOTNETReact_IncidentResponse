@@ -16,16 +16,19 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly ILogger<IncidentDetectionService> _logger;
         private readonly IRecommendationsRepository _recommendationsRepository;
         private readonly IHubContext<IncidentHub> _hubContext;
+        private readonly SecurityMetricsService _metrics;
 
         public IncidentDetectionService(IHubContext<IncidentHub> hubContext, IIncidentsRepository incidentsRepository,
             IRecommendationsRepository recommendationsRepository, IEventsRepository eventsRepository,
-            ILogger<IncidentDetectionService> logger)
+            ILogger<IncidentDetectionService> logger,
+            SecurityMetricsService metrics)
         {
             _incidentsRepository = incidentsRepository;
             _eventsRepository = eventsRepository;
             _logger = logger;
             _recommendationsRepository = recommendationsRepository;
             _hubContext = hubContext;
+            _metrics = metrics;
         }
 
         public async Task<bool> Detect(EventsModel @event, CancellationToken cancellationToken)
@@ -152,6 +155,12 @@ namespace IncidentResponseAPI.Services.Implementations
 
             try
             {
+                // For IncidentsDetected
+                _metrics.IncidentsDetected.WithLabels("high", "malware").Inc();
+
+                // For IncidentsByType 
+                _metrics.IncidentsByType.WithLabels("malware", "MicrosoftEmail").Inc();
+
                 await _incidentsRepository.AddAsync(incident, cancellationToken);
                 _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
 
