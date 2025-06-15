@@ -44,7 +44,11 @@ namespace IncidentResponseAPI.Services.Interfaces
             CancellationToken cancellationToken);
         
         //methods for SharePoint
-
+        
+        /// <summary>
+        /// Lists DriveItems (files/folders) in all SharePoint site document libraries
+        /// modified since the given timestamp.
+        /// </summary>
         Task<List<DriveItem>> FetchSharePointActivitiesAsync(
             string clientSecret, 
             string applicationId, 
@@ -52,6 +56,9 @@ namespace IncidentResponseAPI.Services.Interfaces
             DateTime? since, 
             CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Downloads the binary content of a specific DriveItem in SharePoint.
+        /// </summary>
         Task<byte[]> FetchSharePointFileContentAsync(
             string clientSecret,
             string applicationId, 

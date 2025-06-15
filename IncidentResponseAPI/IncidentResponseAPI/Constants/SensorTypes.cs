@@ -4,6 +4,6 @@ public enum SensorTypes
 {
     MicrosoftEmail,
     MicrosoftTeams,
-    SharePoint
+    MicrosoftSharePoint
     //TODO: Add more sensor types as needed
 }
