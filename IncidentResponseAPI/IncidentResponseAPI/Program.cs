@@ -104,6 +104,10 @@ app.UseCors("AllowReactApp");
 
 app.MapHub<IncidentHub>("/incidentHub");
 
+// Add prometheus metrics endpoint
+app.UseMetricServer();
+app.UseHttpMetrics();
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

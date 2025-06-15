@@ -155,11 +155,17 @@ namespace IncidentResponseAPI.Services.Implementations
 
             try
             {
-                // For IncidentsDetected
-                _metrics.IncidentsDetected.WithLabels("high", "malware").Inc();
-
-                // For IncidentsByType 
-                _metrics.IncidentsByType.WithLabels("malware", "MicrosoftEmail").Inc();
+                // When detecting an incident
+                // Convert severity to string and increment the incidents counter
+                _metrics.IncidentsDetected.WithLabels(
+                    severity.ToString(), // Convert int severity to string
+                    incidentType.ToString() // Use the event's type name
+                ).Inc();
+                
+                _metrics.IncidentsByType.WithLabels(
+                    incidentType.ToString(),
+                    "SensorType"// Use the incident type name)
+                ).Inc();
 
                 await _incidentsRepository.AddAsync(incident, cancellationToken);
                 _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
