@@ -13,19 +13,23 @@ namespace IncidentResponseAPI.Services.Implementations
     {
         private readonly ISensorsRepository _sensorsRepository;
         private readonly ILogger<SensorsService> _logger;
+
         private readonly IConfigurationValidator _configurationValidator;
+
         //private readonly IEventsService _eventsService;
         private readonly IEventsProcessingService _eventsProcessingService;
         private readonly SensorsOrchestrator _sensorsOrchestrator;
+
         private readonly SecurityMetricsService _metrics;
+
         //private readonly ISensorHandler _sensorHandler;
         private readonly ISensorHandlerFactory _sensorHandlerFactory;
-        private readonly ConcurrentDictionary<int, CancellationTokenSource> _cancellationTokenSources = new ();
+        private readonly ConcurrentDictionary<int, CancellationTokenSource> _cancellationTokenSources = new();
 
         public SensorsService(
-            ISensorsRepository sensorsRepository, 
-            ILogger<SensorsService> logger, 
-            IConfigurationValidator configurationValidator, 
+            ISensorsRepository sensorsRepository,
+            ILogger<SensorsService> logger,
+            IConfigurationValidator configurationValidator,
             // IEventsService eventsService, 
             IEventsProcessingService eventsProcessingService,
             SensorsOrchestrator sensorsOrchestrator,
@@ -64,14 +68,18 @@ namespace IncidentResponseAPI.Services.Implementations
                     //await _eventsService.SyncEventsAsync(sensor.SensorId, linkedCts.Token);
                     var handler = _sensorHandlerFactory.GetHandlerForSensorType(sensor.Type);
                     var events = await handler.SyncEventsAsync(sensor, linkedCts.Token);
-                    _logger.LogInformation("Retrieved {Count} events for sensor {SensorId}", events.Count(), sensor.SensorId);
+                    _logger.LogInformation("Retrieved {Count} events for sensor {SensorId}", events.Count(),
+                        sensor.SensorId);
                     await _eventsProcessingService.ProcessEventsAsync(linkedCts.Token);
 
-                    _logger.LogInformation("Updated sensor {SensorId} LastRunAt to {LastRun}, NextRunAfter to {NextRun}", sensor.SensorId, sensor.LastRunAt, sensor.NextRunAfter);
+                    _logger.LogInformation(
+                        "Updated sensor {SensorId} LastRunAt to {LastRun}, NextRunAfter to {NextRun}", sensor.SensorId,
+                        sensor.LastRunAt, sensor.NextRunAfter);
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogWarning("Sensor with ID {SensorId} was canceled after {RetrievalInterval} minutes.", sensor.SensorId, sensor.RetrievalInterval);
+                    _logger.LogWarning("Sensor with ID {SensorId} was canceled after {RetrievalInterval} minutes.",
+                        sensor.SensorId, sensor.RetrievalInterval);
                 }
                 catch (Exception ex)
                 {
@@ -195,7 +203,6 @@ namespace IncidentResponseAPI.Services.Implementations
                     _metrics.ActiveSensors.WithLabels(sensorsModel.Type).Inc();
                 }
 
-                sensorDto.SensorId = sensorsModel.SensorId;
                 return sensorDto;
             }
             catch (ValidationException ex)
@@ -257,10 +264,10 @@ namespace IncidentResponseAPI.Services.Implementations
                 {
                     // If the sensor was enabled, decrement the active sensors count
                     _metrics.ActiveSensors.WithLabels(sensor.Type).Dec();
-                    _logger.LogInformation("Sensor {SensorId} deleted, decremented active sensors for type {Type}", 
+                    _logger.LogInformation("Sensor {SensorId} deleted, decremented active sensors for type {Type}",
                         sensor.SensorId, sensor.Type);
                 }
-                
+
                 await _sensorsRepository.DeleteAsync(id);
                 _logger.LogInformation("Successfully deleted sensor with ID {SensorId}.", id);
             }
@@ -289,9 +296,11 @@ namespace IncidentResponseAPI.Services.Implementations
                     {
                         _metrics.ActiveSensors.WithLabels(sensor.Type).Dec();
                     }
-                    
+
                     await _sensorsRepository.UpdateAsync(sensor);
-                    _logger.LogInformation("Successfully toggled enabled status for sensor with ID {SensorId} to {IsEnabled}.", id, sensor.isEnabled);
+                    _logger.LogInformation(
+                        "Successfully toggled enabled status for sensor with ID {SensorId} to {IsEnabled}.", id,
+                        sensor.isEnabled);
                 }
                 else
                 {

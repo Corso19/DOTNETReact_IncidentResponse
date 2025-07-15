@@ -14,18 +14,15 @@ namespace IncidentResponseAPI.Controllers
         private readonly IEventsService _eventsService;
         private readonly ISensorsService _sensorService;
         private readonly ILogger<EventsController> _logger;
-        private readonly ISensorHandler _sensorHandler;
 
         public EventsController(
             IEventsService eventsService, 
             ISensorsService sensorsService, 
-            ILogger<EventsController> logger,
-            ISensorHandler sensorHandler)
+            ILogger<EventsController> logger)
         {
             _eventsService = eventsService;
             _sensorService = sensorsService;
             _logger = logger;
-            _sensorHandler = sensorHandler;
         }
 
         // GET: api/Events
