@@ -5,8 +5,15 @@ import { CrudService } from '../services/CrudService';
 import ToggleButtonCustom from '../components/buttons/ToggleButtonCustom';
 
 const AddUpdateSensorModal = ({sensor, setSensors, showModal, setShowModal}) => {
+    const SENSOR_TYPES = [
+        "MicrosoftEmail",
+        "MicrosoftTeams",
+        "MicrosoftSharePoint",
+    ];
+
     const initialSensorObject = {
         name: "",
+        type:"",
         isEnabled: false,
         clientSecret: "",
         tenantId: "",
@@ -24,6 +31,7 @@ const AddUpdateSensorModal = ({sensor, setSensors, showModal, setShowModal}) => 
             const configuration = JSON.parse(sensor.configuration);
             setSensorObject({
                 name: sensor.sensorName,
+                type: sensor.type,
                 isEnabled: sensor.isEnabled,
                 clientSecret: configuration.clientSecret,
                 tenantId: configuration.tenantId,
@@ -51,7 +59,7 @@ const AddUpdateSensorModal = ({sensor, setSensors, showModal, setShowModal}) => 
         };
         const data = {
             sensorName: sensorObject.name,
-            type: "MicrosoftEmail",
+            type: sensorObject.type,
             isEnabled: sensorObject.isEnabled,
             configuration: JSON.stringify(newConfiguration)
         };
@@ -121,7 +129,7 @@ const AddUpdateSensorModal = ({sensor, setSensors, showModal, setShowModal}) => 
             </Form.Group>
 
             {/* Type field */}
-            <Form.Group
+            {/*<Form.Group
                 as={Row}
                 controlId="sensorTypeInput"
                 className="mt-3"
@@ -134,6 +142,26 @@ const AddUpdateSensorModal = ({sensor, setSensors, showModal, setShowModal}) => 
                         disabled
                         readOnly
                     />
+                </Col>
+            </Form.Group>*/}
+
+            <Form.Group
+                as={Row}
+                controlId="sensorTypeInput"
+                className="mt-3"
+            >
+                <Form.Label column sm="4" className="ms-3" >Type:</Form.Label>
+                <Col>
+                    <Form.Select
+                        value={sensorObject["type"]} 
+                        onChange={(event) => handleInputChange("type", event.target.value)}
+                    >
+                        {SENSOR_TYPES.map((type) => (
+                            <option key={type} value={type}>
+                                {type}
+                            </option>
+                        ))}
+                    </Form.Select>
                 </Col>
             </Form.Group>
 

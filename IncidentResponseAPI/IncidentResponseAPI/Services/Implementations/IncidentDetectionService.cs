@@ -16,16 +16,19 @@ namespace IncidentResponseAPI.Services.Implementations
         private readonly ILogger<IncidentDetectionService> _logger;
         private readonly IRecommendationsRepository _recommendationsRepository;
         private readonly IHubContext<IncidentHub> _hubContext;
+        private readonly SecurityMetricsService _metrics;
 
         public IncidentDetectionService(IHubContext<IncidentHub> hubContext, IIncidentsRepository incidentsRepository,
             IRecommendationsRepository recommendationsRepository, IEventsRepository eventsRepository,
-            ILogger<IncidentDetectionService> logger)
+            ILogger<IncidentDetectionService> logger,
+            SecurityMetricsService metrics)
         {
             _incidentsRepository = incidentsRepository;
             _eventsRepository = eventsRepository;
             _logger = logger;
             _recommendationsRepository = recommendationsRepository;
             _hubContext = hubContext;
+            _metrics = metrics;
         }
 
         public async Task<bool> Detect(EventsModel @event, CancellationToken cancellationToken)
@@ -152,6 +155,18 @@ namespace IncidentResponseAPI.Services.Implementations
 
             try
             {
+                // When detecting an incident
+                // Convert severity to string and increment the incidents counter
+                _metrics.IncidentsDetected.WithLabels(
+                    severity.ToString(), // Convert int severity to string
+                    incidentType.ToString() // Use the event's type name
+                ).Inc();
+                
+                _metrics.IncidentsByType.WithLabels(
+                    incidentType.ToString(),
+                    "SensorType"// Use the incident type name)
+                ).Inc();
+
                 await _incidentsRepository.AddAsync(incident, cancellationToken);
                 _logger.LogInformation("Incident created for event with ID {EventId}", @event.EventId);
 

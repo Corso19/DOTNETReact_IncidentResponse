@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using IncidentResponseAPI.Models;
+using IncidentResponseAPI.Repositories.Interfaces;
 using IncidentResponseAPI.Services.Implementations;
 using IncidentResponseAPI.Services.Interfaces;
 using Prometheus;
@@ -20,7 +21,7 @@ public class SensorsOrchestrator : BackgroundService
     public bool IsRunning { get; set; }
 
     public SensorsOrchestrator(IServiceScopeFactory scopeFactory, ILogger<SensorsOrchestrator> logger
-    , SecurityMetricsService metricsService)
+        , SecurityMetricsService metricsService)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
@@ -35,6 +36,34 @@ public class SensorsOrchestrator : BackgroundService
     {
         _sensorsQueue.Enqueue(sensor);
         ProcessQueue();
+    }
+
+    public override async Task StartAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("SensorsOrchestrator initializing metrics at startup...");
+
+        // Reset all sensor metrics to ensure we start from a clean state
+        var sensorTypes = new[] { "MicrosoftEmail", "MicrosoftTeams", "MicrosoftSharePoint" };
+        foreach (var sensorType in sensorTypes)
+        {
+            _metricsService.ActiveSensors.WithLabels(sensorType).Set(0);
+        }
+
+        // Initialize metrics with currently enabled sensors
+        using (var scope = _scopeFactory.CreateScope())
+        {
+            var sensorsRepository = scope.ServiceProvider.GetRequiredService<ISensorsRepository>();
+            var enabledSensors = await sensorsRepository.GetAllEnabledAsync();
+
+            foreach (var sensor in enabledSensors)
+            {
+                _metricsService.ActiveSensors.WithLabels(sensor.Type).Inc();
+                _logger.LogInformation("Initialized metric for active {SensorType} sensor", sensor.Type);
+            }
+        }
+
+        // Call the base implementation to start the background service
+        await base.StartAsync(cancellationToken);
     }
 
     private async void ProcessQueue()
@@ -67,7 +96,7 @@ public class SensorsOrchestrator : BackgroundService
                                     _logger.LogInformation("Sensor {SensorId} is disabled", sensor.SensorId);
                                     break;
                                 }
-                                
+
                                 //update activity sensors gauge when starting a sensor
                                 _metricsService.ActiveSensors.WithLabels(sensor.Type).Inc();
 
@@ -93,10 +122,10 @@ public class SensorsOrchestrator : BackgroundService
                                     {
                                         await sensorsService.RunSensorAsync(freshSensor, _orchestratorCts.Token);
                                     }
-                                    
+
                                     //increment successful sensor runs counter
                                     _metricsService.SensorRuns.WithLabels(sensor.Type, sensor.SensorName).Inc();
-                                    
+
                                     _logger.LogInformation("Sensor {SensorId} run completed", sensor.SensorId);
                                 }
                                 catch (Exception ex)
@@ -137,19 +166,20 @@ public class SensorsOrchestrator : BackgroundService
                 {
                     using var scope = _scopeFactory.CreateScope();
                     var sensorsService = scope.ServiceProvider.GetRequiredService<ISensorsService>();
-                
+
                     var enabledSensors = await sensorsService.GetAllEnabledAsync();
                     foreach (var sensor in enabledSensors)
                     {
                         _sensorsQueue.Enqueue(sensor);
                     }
-                
+
                     if (_sensorsQueue.Any())
                     {
                         IsRunning = true;
                         ProcessQueue();
                     }
                 }
+
                 await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
         }

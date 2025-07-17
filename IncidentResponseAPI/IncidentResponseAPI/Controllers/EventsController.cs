@@ -15,7 +15,10 @@ namespace IncidentResponseAPI.Controllers
         private readonly ISensorsService _sensorService;
         private readonly ILogger<EventsController> _logger;
 
-        public EventsController(IEventsService eventsService, ISensorsService sensorsService, ILogger<EventsController> logger)
+        public EventsController(
+            IEventsService eventsService, 
+            ISensorsService sensorsService, 
+            ILogger<EventsController> logger)
         {
             _eventsService = eventsService;
             _sensorService = sensorsService;
@@ -141,24 +144,24 @@ namespace IncidentResponseAPI.Controllers
         }
         
         // POST: api/Events/sync/{sensorId}
-        [HttpPost("sync/{sensorId}")]
-        [SwaggerOperation(Summary = "Syncs events (emails) for a specific sensor")]
-        public async Task<IActionResult> SyncEvents(int sensorId, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Syncing events for sensor {SensorId}", sensorId);
+        // [HttpPost("sync/{sensorId}")]
+        // [SwaggerOperation(Summary = "Syncs events (emails) for a specific sensor")]
+        // public async Task<IActionResult> SyncEvents(int sensorId, CancellationToken cancellationToken)
+        // {
+        //     _logger.LogInformation("Syncing events for sensor {SensorId}", sensorId);
 
-            try
-            {
-                await _eventsService.SyncEventsAsync(sensorId, cancellationToken);
-                _logger.LogInformation("Events synced successfully for sensor {SensorId}", sensorId);
-                return Ok("Events synced successfully.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while syncing events for sensor {SensorId}", sensorId);
-                return StatusCode(500, "An error occurred while syncing events.");
-            }
-        }
+        //     try
+        //     {
+        //         await _eventsService.SyncEventsAsync(sensorId, cancellationToken);
+        //         _logger.LogInformation("Events synced successfully for sensor {SensorId}", sensorId);
+        //         return Ok("Events synced successfully.");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error occurred while syncing events for sensor {SensorId}", sensorId);
+        //         return StatusCode(500, "An error occurred while syncing events.");
+        //     }
+        // }
 
         
         // GET: api/Events/{eventId}/attachments

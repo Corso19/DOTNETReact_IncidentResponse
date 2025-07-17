@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using WebApplication = Microsoft.AspNetCore.Builder.WebApplication;
 using Prometheus;
+using IncidentResponseAPI.Services.Implementations.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,8 @@ Env.Load();
 
 // Debug logging to verify environment variable loading
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
-    ?? throw new InvalidOperationException("The ConnectionString property has not been initialized.");
+                       ?? throw new InvalidOperationException(
+                           "The ConnectionString property has not been initialized.");
 
 // Add services to the container.
 builder.Logging.ClearProviders();
@@ -27,7 +29,7 @@ builder.Logging.AddConsole();
 builder.Services.AddControllers();
 //builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 builder.Services.AddScoped<IEventsRepository, EventsRepository>();
-builder.Services.AddScoped<IEventsService, EventsService>();
+//builder.Services.AddScoped<IEventsService, EventsService>();
 builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<ISensorsRepository, SensorsRepository>();
 builder.Services.AddScoped<ISensorsService, SensorsService>();
@@ -41,21 +43,19 @@ builder.Services.AddSingleton<GraphAuthProvider>();
 builder.Services.AddScoped<IGraphAuthService, GraphAuthService>();
 builder.Services.AddScoped<IIncidentDetectionService, IncidentDetectionService>();
 builder.Services.AddSingleton<SecurityMetricsService>();
-builder.Services.AddMetricServer(options => {
-    options.Port = 9091;
-});
+//builder.Services.AddScoped<ISensorHandler, EmailSensorHandler>();
+builder.Services.AddScoped<EmailSensorHandler>();
+builder.Services.AddScoped<TeamsSensorHandler>();
+builder.Services.AddScoped<SharePointSensorHandler>();
+builder.Services.AddScoped<ISensorHandlerFactory, SensorHandlerFactory>();
+builder.Services.AddMetricServer(options => { options.Port = 9091; });
 //builder.Services.AddSignalR();
-builder.Services.AddSignalR(options =>
-{
-    options.EnableDetailedErrors = true;
-});
+builder.Services.AddSignalR(options => { options.EnableDetailedErrors = true; });
 
 // Add the DbContext and SensorOrchestrator
 builder.Services.AddDbContext<IncidentResponseContext>(options =>
-    options.UseSqlServer(connectionString, sqlOptions =>
-    {
-        sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-    }),
+        options.UseSqlServer(connectionString,
+            sqlOptions => { sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null); }),
     ServiceLifetime.Scoped
 );
 builder.Services.AddSingleton<SensorsOrchestrator>();
@@ -66,9 +66,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
         policyBuilder => policyBuilder.WithOrigins("http://localhost:3001")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials());
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 
 // Add Swagger services
@@ -96,6 +96,10 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowReactApp");
 
 app.MapHub<IncidentHub>("/incidentHub");
+
+// Add prometheus metrics endpoint
+app.UseMetricServer();
+app.UseHttpMetrics();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
