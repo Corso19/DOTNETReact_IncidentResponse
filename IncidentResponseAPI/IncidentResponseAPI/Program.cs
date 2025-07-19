@@ -19,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Debug logging to verify environment variable loading
-var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
+var connectionString = Environment.GetEnvironmentVariable("DEFAULT_CONNECTION")
                        ?? throw new InvalidOperationException(
                            "The ConnectionString property has not been initialized.");
 
